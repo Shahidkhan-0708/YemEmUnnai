@@ -1,0 +1,124 @@
+// ============================================================
+// Database row shapes (snake_case — mirrors supabase/schema.sql)
+// ============================================================
+
+export type FoodCategory = 'cooked' | 'packed';
+export type ActionType = 'walkin' | 'order';
+export type OrderStatus = 'pending' | 'accepted' | 'declined' | 'completed';
+export type ReactionValue = 'like' | 'dislike';
+
+export interface VendorRow {
+  id: string;
+  name: string;
+  image_url: string | null;
+  is_active: boolean;
+  is_online: boolean;
+  owner_id: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  location_landmark?: string | null;
+  is_on_campus?: boolean | null;
+  created_at: string;
+}
+
+export interface FoodItemRow {
+  id: string;
+  vendor_id: string;
+  name: string;
+  price: number;
+  category: FoodCategory;
+  action_type: ActionType;
+  image_url: string | null;
+  in_stock: boolean;
+  likes_count: number;
+  dislikes_count: number;
+  reviews_count: number;
+  created_at: string;
+  vendors: {
+    name: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    location_landmark?: string | null;
+    is_on_campus?: boolean | null;
+  } | null;
+  reviews?: { rating: number }[] | null;
+}
+
+export interface OrderRow {
+  id: string;
+  vendor_id: string;
+  food_item_id: string | null;
+  item_name: string;
+  unit_price: number;
+  customer_mobile: string;
+  delivery_address: string;
+  status: OrderStatus;
+  created_at: string;
+  food_items: { image_url: string | null } | null;
+}
+
+// ============================================================
+// UI shapes (camelCase — consumed by components)
+// ============================================================
+
+export interface FoodItem {
+  id: string;
+  vendorId: string;
+  name: string;
+  vendor: string;
+  price: number;
+  originalPrice?: number;
+  category: FoodCategory;
+  image: string;
+  likes: number;
+  dislikes: number;
+  reviews: number;
+  rating: number;
+  freshnessTag?: string;
+  stockLeft?: number;
+  walkTime: string;
+  actionType: ActionType;
+  inStock: boolean;
+  latitude?: number;
+  longitude?: number;
+  locationLandmark?: string;
+  isOnCampus?: boolean;
+}
+
+export interface ShopEntry {
+  id: string;
+  name: string;
+  image: string;
+  isActive: boolean;
+  tag?: string;
+  latitude?: number;
+  longitude?: number;
+  locationLandmark?: string;
+  isOnCampus?: boolean;
+}
+
+export interface DashboardOrder {
+  id: string;
+  item: string;
+  price: number;
+  vendor: string;
+  phone: string;
+  location: string;
+  image: string;
+  status: OrderStatus;
+}
+
+export interface VendorStats {
+  ordersToday: number;
+  totalLikes: number;
+  avgRating: number | null;
+}
+
+export interface NewFoodItemInput {
+  name: string;
+  price: number;
+  category: FoodCategory;
+  actionType: ActionType;
+  inStock: boolean;
+  imageUrl: string | null;
+}

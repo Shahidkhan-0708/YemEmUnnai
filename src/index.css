@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Neumorphism surface system — canvas == surface == wells */
+    --neu-surface: #E8ECEF;
+    --neu-surface-deep: #DDE2E8;
+    --neu-shadow-dark: #A3AEBB;
+    --neu-shadow-light: #FFFFFF;
+    --neu-well-dark: #9AA6B3;
+    --neu-border: #D6DCE2;
+
+    /* Brand accents (kept) */
+    --brand-primary: #09431B;
+    --brand-primary-dark: #063214;
+    --brand-header: #0A461E;
+    --brand-accent: #F26A00;
+    --brand-accent-hover: #E05D00;
+    --brand-text-main: #0A2E20;
+    --brand-text-muted: #5C7A6D;
+    --brand-live-green: #10B981;
+    --brand-star-gold: #EAA02B;
+
+    /* Legacy aliases remapped to neumorphic surfaces */
+    --brand-canvas: #E8ECEF;
+    --brand-card-bg: #E8ECEF;
+    --brand-card-border: #D6DCE2;
+    --brand-inset-bg: #E8ECEF;
+    --brand-inset-border: #D6DCE2;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--brand-canvas);
+    color: var(--brand-text-main);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Neumorphic Raised Surface: same color as canvas, dual soft shadow */
+.tactile-card {
+  background-color: var(--neu-surface);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    -6px -6px 12px rgba(255, 255, 255, 0.85),
+    6px 6px 12px rgba(163, 174, 187, 0.45);
+}
+
+.tactile-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    -8px -8px 16px rgba(255, 255, 255, 0.9),
+    8px 8px 16px rgba(163, 174, 187, 0.55);
+}
+
+/* Neumorphic Inset Well for inputs and segmented controls */
+.tactile-inset {
+  background-color: var(--neu-surface);
+  border: 1px solid var(--neu-border);
+  box-shadow:
+    inset 3px 3px 6px rgba(154, 166, 179, 0.5),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.85);
+}
+
+.tactile-inset:focus-within {
+  border-color: var(--brand-primary);
+  box-shadow:
+    inset 3px 3px 6px rgba(154, 166, 179, 0.5),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.85),
+    0 0 0 2px rgba(9, 67, 27, 0.15);
+}
+
+/* Modal Surface — raised neumorphic panel */
+.tactile-modal {
+  background-color: var(--neu-surface);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    -10px -10px 20px rgba(255, 255, 255, 0.9),
+    12px 12px 24px rgba(122, 134, 148, 0.4);
+}
+
+/* Button Elevation Shadows (neumorphic dual) */
+.btn-orange-shadow {
+  box-shadow:
+    -3px -3px 7px rgba(255, 255, 255, 0.8),
+    4px 4px 10px rgba(199, 123, 58, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-orange-shadow:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    -4px -4px 8px rgba(255, 255, 255, 0.85),
+    6px 6px 14px rgba(199, 123, 58, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.btn-orange-shadow:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    inset 2px 2px 5px rgba(160, 80, 20, 0.5),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-green-shadow {
+  box-shadow:
+    -3px -3px 7px rgba(255, 255, 255, 0.8),
+    4px 4px 10px rgba(9, 67, 27, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-green-shadow:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    -4px -4px 8px rgba(255, 255, 255, 0.85),
+    6px 6px 14px rgba(9, 67, 27, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-green-shadow:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    inset 2px 2px 5px rgba(6, 40, 15, 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Tactile press physics */
+.tactile-press {
+  transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.12s ease;
+}
+.tactile-press:active {
+  transform: scale(0.96);
+}
+
+/* Walking Map Animated Dash Route */
+@keyframes route-dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+.animate-route-dash {
+  stroke-dasharray: 6 4;
+  animation: route-dash 1.2s linear infinite;
+}
+
+/* Scarcity Pulse */
+@keyframes scarcity-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1.03);
+  }
+}
+.animate-scarcity {
+  animation: scarcity-pulse 2s ease-in-out infinite;
+}
+
+/* Live Radar Pulse */
+@keyframes radar-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+.animate-radar-ring {
+  animation: radar-ring 2.2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Mobile Device Frame Mockup */
+.device-chassis {
+  background: linear-gradient(145deg, #1A2820, #0F1914);
+  border: 10px solid #23352B;
+  box-shadow:
+    0 30px 80px -10px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(52, 211, 153, 0.25),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+/* Hide scrollbar for carousel */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Accessibility & motion (ui-ux-pro-max: reduced-motion, focus, touch) */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus ring on every interactive control (incl. inside modals) */
+:focus-visible {
+  outline: 2px solid #0A461E;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Faster taps on mobile, no double-tap zoom delay */
+button,
+a,
+input,
+textarea,
+select,
+[role='button'] {
+  touch-action: manipulation;
+}
+
+/* Prices, stats and timers use tabular figures so digits don't shift layout */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

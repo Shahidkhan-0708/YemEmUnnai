@@ -1,0 +1,245 @@
+import React, { useState } from 'react';
+import { X, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { submitReview } from '../lib/api';
+import { useModalA11y } from '../lib/useModalA11y';
+import type { FoodItem } from './HomeDiscoveryScreen';
+
+interface FeedbackModalProps {
+  isOpen: boolean;
+  item: FoodItem | null;
+  onClose: () => void;
+  onSubmitSuccess?: () => void;
+}
+
+const STAR_OUTER_R = 13.75;
+const STAR_INNER_R = 5.5;
+const STAR_POINTS = 5;
+const STAR_ROTATION = -90; // points up
+const STAR_PATHS = Array.from({ length: 5 }, (_, i) => {
+  const cx = 61 + i * 59;
+  const cy = 376.2;
+  const pts: string[] = [];
+  for (let p = 0; p < STAR_POINTS * 2; p++) {
+    const r = p % 2 === 0 ? STAR_OUTER_R : STAR_INNER_R;
+    const a = (Math.PI * 2 * p) / (STAR_POINTS * 2) + (STAR_ROTATION * Math.PI) / 180;
+    pts.push(`${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`);
+  }
+  return `M${pts.join(' L')} Z`;
+});
+
+/**
+ * Screen 03 — "Rating & Feedback" bottom sheet, 1:1 from
+ * figma_svgs/03_feedback_popup.svg (375 × 812):
+ *   - Sheet ......... x=13 y=270 w=349 h=440 rx=27 #E5EDE9, white stroke .85, soft shadow
+ *   - Handle ........ 45×4 rx=2 #BAC8C0, 9px from top
+ *   - Title ......... "Rating & Feedback" 17px w800 (baseline y=310)
+ *   - Subtitle ...... "Help {vendor} improve live batch quality" 11px w600 #5C7A6D
+ *   - Divider ....... y=336 #CAD8D0
+ *   - "Rate your stars" 13px w700 (x=32, baseline y=343)
+ *   - 5 stars ....... centers (61 + 59·i, 376.2), outer R≈13.75 / inner R≈5.5, fill #EAA02B
+ *   - Like row ...... thumb icon @36 (scaled .875, stroke #5C7A6D) + "Like" 13px w700 (x=65)
+ *                     toggle 43×24 rx=12 #ABB8B0, knob d=18 at LEFT (cx=158)
+ *   - Dislike ....... same icon rotated 180° @x=235 + "Dislike" (x=264), no toggle
+ *   - Comment box ... x=29 y=438 w=317 h=175 rx=16 inset #DCE5E0, "Write your review…" 13px w500 #6B8075
+ *   - CTA ........... x=29 y=636 w=317 h=46 rx=12 #09431B "Submit Review" 14px w700
+ */
+export const FeedbackModal: React.FC<FeedbackModalProps> = ({
+  isOpen,
+  item,
+  onClose,
+  onSubmitSuccess
+}) => {
+  const [rating, setRating] = useState(5);
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [isLiked, setIsLiked] = useState(true);
+  const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const sheetRef = useModalA11y<HTMLDivElement>(isOpen && !!item, onClose);
+
+  if (!isOpen || !item) return null;
+
+  const activeCount = hovered ?? rating;
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setSubmitError(null);
+
+    const ok = await submitReview({
+      foodItemId: item.id,
+      rating,
+      isLiked,
+      comment
+    });
+
+    setSubmitting(false);
+
+    if (!ok) {
+      setSubmitError('Could not submit review. Please try again.');
+      return;
+    }
+    setSubmitted(true);
+    setTimeout(() => {
+      setSubmitted(false);
+      setRating(5);
+      setComment('');
+      onSubmitSuccess?.();
+      onClose();
+    }, 1100);
+  };
+
+  return (
+    <div
+      className="absolute inset-0 z-50"
+      style={{ background: 'rgba(3, 42, 21, 0.43)' }}
+      onClick={onClose}
+    >
+      {/* Sheet x=13 y=270 w=349 h=440 rx=27 */}
+      <div
+        ref={sheetRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Rate and review ${item.name}`}
+        className="absolute left-[13px] right-[13px] top-[270px] h-[440px] rounded-[27px] bg-[#E8ECEF] border border-white/60 overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
+        style={{ boxShadow: '-6px -6px 12px rgba(255,255,255,0.85), 6px 6px 12px rgba(163,174,187,0.45)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {submitted ? (
+          <div className="h-full flex flex-col items-center justify-center text-center px-[18px]">
+            <ThumbsUp className="w-14 h-14 text-[#09431B]" />
+            <h3 className="text-[17px] font-extrabold text-[#0A2E20] mt-3">Review Published!</h3>
+            <p className="text-[11px] font-semibold text-[#5C7A6D] mt-1">
+              Thanks for helping {item.vendor} improve.
+            </p>
+          </div>
+        ) : (
+          <div>
+            {/* Handle — 45×4, 9px from top */}
+            <div className="mx-auto mt-[9px] w-[45px] h-[4px] rounded-[2px] bg-[#BAC8C0]" />
+
+            {/* Close X — 18px icon, center (337.5, 304) — 24px hit area */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute top-[21px] right-[10px] w-[24px] h-[24px] flex items-center justify-center cursor-pointer"
+            >
+              <X className="w-[19px] h-[19px] text-[#6A8174]" strokeWidth={1.9} />
+            </button>
+
+            <div className="px-[18px]">
+              {/* Title — baseline y=310 */}
+              <h2 className="mt-[14px] text-[17px] font-extrabold leading-[22px] text-[#0A2E20]">
+                Rating &amp; Feedback
+              </h2>
+              {/* Subtitle — baseline y=327 */}
+              <p className="mt-[1px] text-[11px] font-semibold leading-[14px] text-[#5C7A6D]">
+                Help {item.vendor} improve live batch quality
+              </p>
+
+              {/* Divider — y=336 */}
+              <div className="mt-[7px] h-px bg-[#CAD8D0]" />
+
+              {/* Rate your stars — baseline y=343 */}
+              <div className="mt-[5px] text-[13px] font-bold text-[#0A2E20]">Rate your stars</div>
+
+              {/* 5 stars — 59px pitch, centers y=376.2, R_out 13.75 / R_in 5.5 */}
+              <div className="mt-[3px] flex items-center gap-[31px]">
+                {[0, 1, 2, 3, 4].map((i) => {
+                  const idx = i + 1;
+                  const active = idx <= activeCount;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={`Rate ${idx} star${idx > 1 ? 's' : ''}`}
+                      onMouseEnter={() => setHovered(idx)}
+                      onMouseLeave={() => setHovered(null)}
+                      onClick={() => setRating(idx)}
+                      className="cursor-pointer"
+                    >
+                      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+                        <path
+                          d={STAR_PATHS[i]}
+                          transform={`translate(${14 - (61 + i * 59)} ${14 - 376.2})`}
+                          fill={active ? '#EAA02B' : '#D6DCE2'}
+                          style={{ transition: 'fill 120ms ease' }}
+                        />
+                      </svg>
+                      <span className="sr-only">{active ? 'filled' : 'empty'}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Like / Dislike row — like group at x≈36, toggle at x=146 (43×24), dislike at x≈235 */}
+              <div className="mt-[26px] flex items-center">
+                <div className="flex items-center gap-[9px]">
+                  <ThumbsUp className="w-[21px] h-[21px] text-[#5C7A6D]" strokeWidth={1.9} />
+                  <span className="text-[13px] font-bold text-[#0A2E20]">Like</span>
+                </div>
+
+                {/* Toggle — 43×24 rx=12; knob d=18 left (#ABB8B0 track) / right (#09431B) */}
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isLiked}
+                  aria-label="Toggle like"
+                  onClick={() => setIsLiked(v => !v)}
+                  className="relative ml-[48px] w-[43px] h-[24px] rounded-[12px] cursor-pointer transition-colors"
+                  style={{
+                    background: isLiked ? '#09431B' : '#AEB8C2',
+                    boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)'
+                  }}
+                >
+                  <span
+                    className="absolute top-[3px] w-[18px] h-[18px] rounded-full bg-[#F3F8F5] transition-all"
+                    style={{ left: isLiked ? 22 : 3 }}
+                  />
+                </button>
+
+                {/* Dislike — icon rotated 180°, at x≈235 from sheet */}
+                <div className="ml-[42px] flex items-center gap-[9px]">
+                  <ThumbsDown className="w-[21px] h-[21px] text-[#5C7A6D]" strokeWidth={1.9} />
+                  <span className="text-[13px] font-bold text-[#0A2E20]">Dislike</span
+                  >
+                </div>
+              </div>
+
+              {/* Comment box — 317×175 rx=16 inset */}
+              <div
+                className="mt-[24px] h-[175px] rounded-[16px] bg-[#E8ECEF] border border-[#D6DCE2]"
+                style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
+              >
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Write your review…"
+                  maxLength={500}
+                  className="w-full h-full resize-none bg-transparent rounded-[16px] px-[15px] py-[13px] text-[13px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
+                />
+              </div>
+
+              {submitError && (
+                <p role="alert" className="mt-[6px] text-[10px] font-bold text-red-600">{submitError}</p>
+              )}
+
+              {/* CTA — 317×46 rx=12 #09431B */}
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="mt-[16px] w-full h-[46px] rounded-[12px] bg-[#09431B] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 hover:bg-[#073515] active:scale-[0.98] transition-all"
+                style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
+              >
+                {submitting ? 'Publishing…' : 'Submit Review'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
