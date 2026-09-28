@@ -1,38 +1,23 @@
-import React, { useState } from 'react';
-import { X, Phone, MapPin, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Phone, MapPin, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
 import { placeOrder } from '../lib/api';
 import { useModalA11y } from '../lib/useModalA11y';
+import { playTapSound, playSuccessChime, fireOrderConfetti } from '../lib/celebration';
 import type { FoodItem } from '../lib/types';
+
+export interface OrderSuccessData {
+  token: string;
+  vendor: string;
+  status: string;
+}
 
 interface QuickOrderModalProps {
   isOpen: boolean;
   item: FoodItem | null;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (data: OrderSuccessData) => void;
 }
 
-/**
- * Screen 02 — "Quick Order / Delivery Details" bottom sheet.
- *
- * Rebuilt 1:1 from figma_svgs/02_quick_order_modal.svg (375 × 812):
- *   - Dim overlay ........ rect #032A15 @ 0.43 opacity over the home feed
- *   - Sheet .............. x=13 y=272 w=349 h=414 rx=27 fill #E5EDE9,
- *                          stroke #FFF @ .85, "soft" shadow (blur 6 / dy 5 / #093B1E @ .12)
- *   - Grab handle ........ 45 × 4 rx=2 #BAC8C0 centered, 9px from sheet top
- *   - Title .............. "Delivery Details" 17px w800 #0A2E20 (baseline y=310)
- *   - Subtitle ........... "Instant Campus Checkout • No Account Needed" 11px w600 #5C7A6D
- *   - Divider ............ y=336 #CAD8D0, 18px side insets
- *   - Close .............. lucide X 24px @ .75 (18px) stroke #6A8174, center (337.5, 306)
- *   - Order rows ......... "Order Details"/"Order" 13px w800 + 12px w700 (baseline y=352)
- *                          "{item} × {qty} · {vendor}" 11px w500 / "₹40" 15px w800 (baseline y=376)
- *   - Divider ............ y=392 #C4D2CB
- *   - Inputs ............. x=29 w=317 h=43 rx=21 fill #DCE5E0 stroke #C4D2CB,
- *                          "inset" shadow (#648273 @ .18), lucide icons 24px @ .79 (#466957),
- *                          placeholder 12px w500 #6B8075
- *   - CTA ................ x=29 y=605 w=317 h=47 rx=12 #09431B, 14px w700 white,
- *                          "buttonShadow" (blur 2 / dy 2 / #093B1E @ .16)
- *   - Sheet bottom padding 34px (686 − 652)
- */
 export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
   isOpen,
   item,
@@ -44,8 +29,34 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
   const [mobileNumber, setMobileNumber] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [confirmedToken, setConfirmedToken] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Swipe/drag down to dismiss handle
+  const [dragY, setDragY] = useState(0);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return;
+    const diff = e.touches[0].clientY - touchStartY.current;
+    if (diff > 0) {
+      setDragY(diff);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (dragY > 80) {
+      playTapSound();
+      onClose();
+    }
+    setDragY(0);
+    touchStartY.current = null;
+  };
 
   const sheetRef = useModalA11y<HTMLDivElement>(isOpen && !!item, onClose);
 
@@ -55,10 +66,11 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
 
   const handleConfirm = async (e: React.FormEvent) => {
     e.preventDefault();
+    playTapSound();
     setSubmitting(true);
     setSubmitError(null);
 
-    const ok = await placeOrder({
+    const res = await placeOrder({
       foodItem: item,
       mobile: mobileNumber,
       address: deliveryAddress
@@ -66,25 +78,37 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
 
     setSubmitting(false);
 
-    if (!ok) {
+    if (!res.success) {
       setSubmitError('Could not reach the shop. Please try again.');
       return;
     }
 
+    const token = res.token || Math.floor(100 + Math.random() * 900).toString();
+    setConfirmedToken(token);
+    playSuccessChime();
+    fireOrderConfetti();
     setSubmitted(true);
+
     setTimeout(() => {
       setSubmitted(false);
       setQty(2);
-      onSuccess?.();
+      onSuccess?.({
+        token,
+        vendor: item.vendor,
+        status: 'Preparing (~5m)'
+      });
       onClose();
-    }, 1200);
+    }, 1600);
   };
 
   return (
     <div
-      className="absolute inset-0 z-50"
+      className="absolute inset-0 z-50 backdrop-blur-[1px] transition-opacity"
       style={{ background: 'rgba(3, 42, 21, 0.43)' }}
-      onClick={onClose}
+      onClick={() => {
+        playTapSound();
+        onClose();
+      }}
     >
       {/* Bottom sheet — x=13 y=272 w=349 h=414 rx=27 */}
       <div
@@ -92,23 +116,44 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label={`Quick order — ${item.name}`}
-        className="absolute left-[13px] right-[13px] top-[272px] h-[414px] rounded-[27px] bg-[#E8ECEF] border border-white/60 overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
-        style={{ boxShadow: '-6px -6px 12px rgba(255,255,255,0.85), 6px 6px 12px rgba(163,174,187,0.45)' }}
+        className="absolute left-[13px] right-[13px] top-[260px] h-[426px] rounded-[27px] bg-[#E8ECEF] border border-white/60 overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
+        style={{
+          boxShadow: '-6px -6px 12px rgba(255,255,255,0.85), 6px 6px 12px rgba(163,174,187,0.45)',
+          transform: dragY > 0 ? `translateY(${dragY}px)` : undefined,
+          transition: dragY === 0 ? 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)' : 'none'
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {submitted ? (
-          /* Success state (not in the static design; keeps the same sheet) */
-          <div className="h-full flex flex-col items-center justify-center text-center px-[18px]">
-            <CheckCircle className="w-14 h-14 text-[#09431B]" />
-            <h3 className="text-[17px] font-extrabold text-[#0A2E20] mt-3">Order Confirmed!</h3>
-            <p className="text-[11px] font-semibold text-[#5C7A6D] mt-1">
-              {item.vendor} received your order · ₹{total}
+          /* Celebratory token confirmation */
+          <div className="h-full flex flex-col items-center justify-center text-center px-[18px] animate-in zoom-in-95 duration-200">
+            <div className="relative">
+              <CheckCircle className="w-16 h-16 text-[#09431B] animate-bounce" />
+              <Sparkles className="w-6 h-6 text-amber-500 absolute -top-1 -right-2 animate-spin" />
+            </div>
+            <div className="mt-3 inline-block px-3 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-[11px] font-bold font-mono tracking-wider shadow-sm">
+              PICKUP TOKEN #{confirmedToken}
+            </div>
+            <h3 className="text-[18px] font-extrabold text-[#0A2E20] mt-2">Order Confirmed!</h3>
+            <p className="text-[11px] font-semibold text-[#5C7A6D] mt-1 max-w-[240px]">
+              {item.vendor} received your order for {qty}× {item.name} · ₹{total}
+            </p>
+            <p className="text-[10px] font-medium text-emerald-700 mt-2 bg-white/70 px-3 py-0.5 rounded-full">
+              Live status pinned to Dynamic Island ⬆
             </p>
           </div>
         ) : (
           <form onSubmit={handleConfirm} className="h-full">
-            {/* Grab handle — 45×4 rx=2 #BAC8C0, 9px from sheet top */}
-            <div className="mx-auto mt-[9px] w-[45px] h-[4px] rounded-[2px] bg-[#BAC8C0]" />
+            {/* Grab handle with touch-drag dismiss */}
+            <div
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              className="pt-[9px] pb-1 cursor-grab active:cursor-grabbing"
+              title="Swipe down to dismiss"
+            >
+              <div className="mx-auto w-[45px] h-[4px] rounded-[2px] bg-[#BAC8C0] hover:bg-[#8EA699] transition-colors" />
+            </div>
 
             {/* Close X — 18px icon, center 24.5px from right edge, 34px from sheet top */}
             <button
@@ -135,14 +180,45 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
               <div className="mt-[7px] h-px bg-[#CAD8D0]" />
 
               {/* Order Details row — baselines y=352 / y=376 */}
-              <div className="mt-[9px] flex items-baseline justify-between">
+              <div className="mt-[8px] flex items-baseline justify-between">
                 <span className="text-[13px] font-extrabold text-[#0A2E20]">Order Details</span>
-                <span className="text-[12px] font-bold text-[#0A2E20]">Order</span>
+                <span className="text-[12px] font-bold text-[#0A2E20]">Total</span>
               </div>
-              <div className="mt-[9px] flex items-baseline justify-between">
-                <span className="text-[11px] font-medium text-[#5C7A6D]">
-                  {item.name} × {qty} · {item.vendor}
-                </span>
+              <div className="mt-[6px] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {/* Quantity Stepper */}
+                  <div
+                    className="flex items-center bg-[#DDE6E1] rounded-full p-0.5 border border-[#CAD8D0]"
+                    style={{ boxShadow: 'inset 1px 1px 3px rgba(154,166,179,0.4), inset -1px -1px 3px rgba(255,255,255,0.7)' }}
+                  >
+                    <button
+                      type="button"
+                      aria-label="Decrease quantity"
+                      onClick={() => {
+                        playTapSound();
+                        setQty(q => Math.max(1, q - 1));
+                      }}
+                      className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[12px] font-bold text-[#0A2E20] shadow-sm active:scale-90 transition-transform cursor-pointer"
+                    >
+                      -
+                    </button>
+                    <span className="px-2 text-[12px] font-extrabold text-[#0A2E20] tabular-nums">{qty}</span>
+                    <button
+                      type="button"
+                      aria-label="Increase quantity"
+                      onClick={() => {
+                        playTapSound();
+                        setQty(q => Math.min(10, q + 1));
+                      }}
+                      className="w-5 h-5 rounded-full bg-[#09431B] flex items-center justify-center text-[12px] font-bold text-white shadow-sm active:scale-90 transition-transform cursor-pointer"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <span className="text-[11px] font-semibold text-[#5C7A6D] truncate max-w-[170px]">
+                    {item.name} · {item.vendor}
+                  </span>
+                </div>
                 <span className="text-[15px] font-extrabold text-[#0A2E20] tabular-nums">₹{total}</span>
               </div>
 

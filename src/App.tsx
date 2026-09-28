@@ -10,7 +10,8 @@ import { SplashOnboardingScreen } from './components/SplashOnboardingScreen';
 import { LocationPermissionScreen } from './components/LocationPermissionScreen';
 import { FoodItemDetailScreen } from './components/FoodItemDetailScreen';
 import { MenuStockManagementScreen } from './components/MenuStockManagementScreen';
-import { MobileDeviceShell } from './components/MobileDeviceShell';
+import { MobileDeviceShell, type ActiveOrderInfo } from './components/MobileDeviceShell';
+import { playTapSound } from './lib/celebration';
 import { Utensils, Store, Image as ImageIcon, Sparkles, Download, ExternalLink, Eye, LayoutGrid } from 'lucide-react';
 
 /** Stand-in item used by the Screen Gallery to open modals/screens without the grid. */
@@ -44,6 +45,7 @@ export function App() {
   const [showLocation, setShowLocation] = useState(false);
   const [showMenuStock, setShowMenuStock] = useState(false);
   const [cartCount, setCartCount] = useState(2);
+  const [activeOrder, setActiveOrder] = useState<ActiveOrderInfo | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -138,16 +140,40 @@ export function App() {
 
         {/* 1. CONSUMER APP SCREEN */}
         {activePortal === 'consumer' && (
-          <MobileDeviceShell>
+          <MobileDeviceShell
+            activeOrder={activeOrder}
+            onClearActiveOrder={() => {
+              playTapSound();
+              setActiveOrder(null);
+            }}
+          >
             <div className="relative">
               <HomeDiscoveryScreen
                 cartCount={cartCount}
-                onOrderNow={(item) => setSelectedOrderFood(item)}
-                onWalkIn={(item) => setSelectedWalkInFood(item)}
-                onReview={(item) => setSelectedReviewFood(item)}
-                onCartClick={() => showToast(`Cart has ${cartCount} items ready for checkout`)}
-                onSelectShop={(name) => showToast(`Filtered by ${name}`)}
-                onSelectItem={(item) => setSelectedDetailFood(item)}
+                onOrderNow={(item) => {
+                  playTapSound();
+                  setSelectedOrderFood(item);
+                }}
+                onWalkIn={(item) => {
+                  playTapSound();
+                  setSelectedWalkInFood(item);
+                }}
+                onReview={(item) => {
+                  playTapSound();
+                  setSelectedReviewFood(item);
+                }}
+                onCartClick={() => {
+                  playTapSound();
+                  showToast(`Cart has ${cartCount} items ready for checkout`);
+                }}
+                onSelectShop={(name) => {
+                  playTapSound();
+                  showToast(`Filtered by ${name}`);
+                }}
+                onSelectItem={(item) => {
+                  playTapSound();
+                  setSelectedDetailFood(item);
+                }}
               />
 
               {/* Quick Order Modal */}
@@ -155,9 +181,10 @@ export function App() {
                 isOpen={!!selectedOrderFood}
                 item={selectedOrderFood}
                 onClose={() => setSelectedOrderFood(null)}
-                onSuccess={() => {
+                onSuccess={(orderData) => {
                   setCartCount(c => c + 1);
-                  showToast(`Order confirmed for ${selectedOrderFood?.name}!`);
+                  setActiveOrder(orderData);
+                  showToast(`Token #${orderData.token} pinned to Dynamic Island!`);
                 }}
               />
 

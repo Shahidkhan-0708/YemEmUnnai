@@ -216,22 +216,35 @@ export async function placeOrder(input: {
   foodItem: FoodItem;
   mobile: string;
   address: string;
-}): Promise<boolean> {
-  if (!supabase) return true; // demo mode
+}): Promise<{ success: boolean; token?: string }> {
+  const clientOrderId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : undefined;
+  const numPart = (clientOrderId || `${Date.now()}`).replace(/\D/g, '');
+  const token = numPart.length >= 3 ? numPart.slice(-3) : Math.floor(100 + Math.random() * 900).toString();
 
-  const { error } = await supabase.from('orders').insert({
+  if (!supabase) {
+    return { success: true, token };
+  }
+
+  const payload: Record<string, unknown> = {
     vendor_id: input.foodItem.vendorId,
     food_item_id: input.foodItem.id,
     item_name: input.foodItem.name,
     unit_price: input.foodItem.price,
     customer_mobile: input.mobile,
     delivery_address: input.address
-  });
+  };
+  if (clientOrderId) {
+    payload.id = clientOrderId;
+  }
+
+  const { error } = await supabase.from('orders').insert(payload);
+
   if (error) {
     console.error('[api] placeOrder:', error.message);
-    return false;
+    return { success: false };
   }
-  return true;
+
+  return { success: true, token };
 }
 
 /**
