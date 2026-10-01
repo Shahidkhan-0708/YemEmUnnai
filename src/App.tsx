@@ -20,7 +20,7 @@ const MenuStockManagementScreen = lazy(() => import('./components/MenuStockManag
 
 function ScreenFallback() {
   return (
-    <div className="w-full min-h-[460px] flex flex-col items-center justify-center gap-3 bg-[#0F1A15] text-[#5C7A6D]">
+    <div className="w-full min-h-115 flex flex-col items-center justify-center gap-3 bg-[#0F1A15] text-[#5C7A6D]">
       <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
       <span className="text-xs font-bold text-emerald-400/90 tracking-wide">Loading Screen...</span>
     </div>

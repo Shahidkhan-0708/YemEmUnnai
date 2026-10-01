@@ -245,20 +245,29 @@ export function useVendorSession(): {
 
   const signIn = useCallback(async (email: string, password: string) => {
     const res = await signInVendor(email, password);
-    if (res.ok) publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
-    return res.ok ? { ok: true } : { ok: false, error: res.error };
+    if (res.ok) {
+      publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
+      return { ok: true };
+    }
+    return { ok: false, error: res.error };
   }, []);
 
   const signInWithPin = useCallback(async (pin: string) => {
     const res = await signInVendorByPin(pin);
-    if (res.ok) publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
-    return res.ok ? { ok: true } : { ok: false, error: res.error };
+    if (res.ok) {
+      publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
+      return { ok: true };
+    }
+    return { ok: false, error: res.error };
   }, []);
 
   const signInDemo = useCallback(async () => {
     const res = await signInDemoVendor();
-    if (res.ok) publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
-    return res.ok ? { ok: true } : { ok: false, error: res.error };
+    if (res.ok) {
+      publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
+      return { ok: true };
+    }
+    return { ok: false, error: res.error };
   }, []);
 
   const signOut = useCallback(async () => {
