@@ -40,6 +40,7 @@ export interface FoodItemRow {
     longitude?: number | null;
     location_landmark?: string | null;
     is_on_campus?: boolean | null;
+    is_online?: boolean | null;
   } | null;
   reviews?: { rating: number }[] | null;
 }
@@ -73,16 +74,18 @@ export interface FoodItem {
   likes: number;
   dislikes: number;
   reviews: number;
-  rating: number;
+  rating: number | null;
   freshnessTag?: string;
   stockLeft?: number;
   walkTime: string;
   actionType: ActionType;
   inStock: boolean;
+  isVeg?: boolean;
   latitude?: number;
   longitude?: number;
   locationLandmark?: string;
   isOnCampus?: boolean;
+  isShopOnline?: boolean;
 }
 
 export interface ShopEntry {
@@ -90,6 +93,7 @@ export interface ShopEntry {
   name: string;
   image: string;
   isActive: boolean;
+  isOnline: boolean;
   tag?: string;
   latitude?: number;
   longitude?: number;
@@ -101,6 +105,7 @@ export interface DashboardOrder {
   id: string;
   item: string;
   price: number;
+  quantity?: number;
   vendor: string;
   phone: string;
   location: string;
@@ -121,4 +126,6 @@ export interface NewFoodItemInput {
   actionType: ActionType;
   inStock: boolean;
   imageUrl: string | null;
+  isVeg?: boolean;
 }
+

@@ -5,7 +5,7 @@ export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('tactile-card rounded-[20px] p-2.5 flex flex-col justify-between transition-all duration-200 hover:translate-y-[-2px]', className)}
+      className={cn('tactile-card rounded-[20px] p-2.5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5', className)}
       {...props}
     />
   )

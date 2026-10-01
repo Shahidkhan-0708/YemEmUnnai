@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { X, AlertCircle, Delete } from 'lucide-react';
+import { X, AlertCircle, Delete, Zap } from 'lucide-react';
 import { useVendorSession } from '../lib/hooks';
 import { useModalA11y } from '../lib/useModalA11y';
-import { isBackendConfigured } from '../lib/supabase';
+import { isBackendConfigured, CAMPUS_ACCESS_PINS } from '../lib/api';
 
 interface VendorLoginModalProps {
   isOpen: boolean;
@@ -27,9 +27,8 @@ interface VendorLoginModalProps {
  *                      column gap 17px, row gap 8px
  */
 export const VendorLoginModal: React.FC<VendorLoginModalProps> = ({ isOpen, onClose }) => {
-  const { signIn } = useVendorSession();
-  const [role, setRole] = useState<'student' | 'vendor'>('vendor');
-  const [rollNumber, setRollNumber] = useState('');
+  const { signInWithPin, signInDemo } = useVendorSession();
+  const [selectedOutlet, setSelectedOutlet] = useState('MITS Canteen');
   const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -38,33 +37,53 @@ export const VendorLoginModal: React.FC<VendorLoginModalProps> = ({ isOpen, onCl
 
   if (!isOpen) return null;
 
-  const appendDigit = (d: string) => {
-    if (role === 'student') {
-      setRollNumber(prev => (prev.length >= 10 ? prev : prev + d));
-    } else {
-      setPin(prev => (prev.length >= 4 ? prev : prev + d));
-    }
-  };
-
-  const backspace = () => {
-    if (role === 'student') setRollNumber(prev => prev.slice(0, -1));
-    else setPin(prev => prev.slice(0, -1));
-  };
-
-  const handleSignIn = async () => {
-    if (role !== 'vendor') {
-      setError('Student sign-in needs Supabase configured. Vendors can sign in now.');
+  /** Vendor path: 4-digit campus PIN → auto sign-in, no keyboard needed. */
+  const attemptPin = async (candidate: string) => {
+    if (busy) return;
+    if (!CAMPUS_ACCESS_PINS.includes(candidate)) {
+      setError('Invalid campus PIN — try 0708 or 1234');
+      setPin('');
       return;
     }
     setBusy(true);
     setError(null);
-    const res = await signIn(rollNumber, pin);
+    const res = await signInWithPin(candidate);
     setBusy(false);
     if (!res.ok) {
       setError(res.error ?? 'Sign-in failed');
+      setPin('');
       return;
     }
     onClose();
+  };
+
+  const appendDigit = (d: string) => {
+    setPin(prev => {
+      if (prev.length >= 4) return prev;
+      const next = prev + d;
+      if (next.length === 4) void attemptPin(next);
+      return next;
+    });
+  };
+
+  const handleDemoAccess = async () => {
+    setBusy(true);
+    setError(null);
+    const res = await signInDemo();
+    setBusy(false);
+    if (!res.ok) {
+      setError(res.error ?? 'Demo sign-in failed');
+      return;
+    }
+    onClose();
+  };
+
+  const backspace = () => {
+    setPin(prev => prev.slice(0, -1));
+  };
+
+  const handleSignIn = async () => {
+    await attemptPin(pin);
   };
 
   const numpadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'] as const;
@@ -78,108 +97,81 @@ export const VendorLoginModal: React.FC<VendorLoginModalProps> = ({ isOpen, onCl
       className="absolute inset-0 z-50 bg-[#E8ECEF] overflow-hidden animate-in fade-in duration-200"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="relative w-full h-full max-w-[390px] mx-auto min-h-[820px]">
+      <div className="relative w-full h-full max-w-97.5 mx-auto min-h-205">
         {/* Header — back circle at (20,36) r18, title baseline y=59 */}
-        <div className="absolute left-[20px] top-[36px] flex items-center">
+        <div className="absolute left-5 top-9 flex items-center">
           <button
             type="button"
             onClick={onClose}
             aria-label="Back"
-            className="w-[36px] h-[36px] rounded-full bg-[#E8ECEF] border border-white flex items-center justify-center cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[#E8ECEF] border border-white flex items-center justify-center cursor-pointer"
             style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
           >
-            <X className="w-[18px] h-[18px] text-[#0A2E20]" strokeWidth={2.2} />
+            <X className="w-4.5 h-4.5 text-[#0A2E20]" strokeWidth={2.2} />
           </button>
-          <span className="absolute left-[167px] w-full text-[14px] font-extrabold text-[#0A2E20]">
+          <span className="absolute left-41.75 w-full text-[14px] font-extrabold text-[#0A2E20]">
             Campus Access
           </span>
         </div>
 
-        {/* Mascot — 76px ring, center (187.5,120) */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-[82px] w-[76px] h-[76px] rounded-full bg-[#0A461E] flex items-center justify-center"
+        {/* Mascot — 76px ring, center (187.5,100) */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-18 w-18 h-18 rounded-full bg-[#0A461E] flex items-center justify-center"
           style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
         >
-          <div className="w-[70px] h-[70px] rounded-full bg-[#E8ECEF] overflow-hidden flex items-center justify-center">
-            <img src="/images/mascot.png" alt="YEMEMUNNAI mascot" className="w-[66px] h-[66px] object-contain" />
+          <div className="w-16.5 h-16.5 rounded-full bg-[#062814] overflow-hidden flex items-center justify-center p-0.5">
+            <img src="/images/logo.png" alt="YEMUNNAI logo" className="w-full h-full object-contain" />
           </div>
         </div>
 
-        {/* Welcome — baselines y=180 / y=198 */}
-        <h2 className="absolute top-[164px] w-full text-center text-[18px] font-extrabold text-[#0A2E20]">
-          Welcome to YEMEMUNNAI!
+        {/* Welcome Header */}
+        <h2 className="absolute top-38 w-full text-center text-[18px] font-extrabold text-[#0A2E20]">
+          Canteen Vendor Login
         </h2>
-        <p className="absolute top-[188px] w-full text-center text-[11px] font-semibold text-[#5C7A6D]">
-          Instant food discovery for MITS students &amp; faculty
+        <p className="absolute top-44 w-full text-center text-[11px] font-semibold text-[#5C7A6D]">
+          Enter your 4-digit campus security PIN
         </p>
 
-        {/* Role tabs — 335×42 rx=12 at (20,215) */}
-        <div className="absolute left-[20px] right-[20px] top-[215px] h-[42px] rounded-[12px] bg-[#E8ECEF] border border-[#D6DCE2] p-[3px] flex">
-          <button
-            type="button"
-            onClick={() => setRole('student')}
-            aria-pressed={role === 'student'}
-            className={`relative h-[36px] rounded-[10px] text-[12px] cursor-pointer transition-all ${
-              role === 'student' ? 'w-[164px] font-extrabold text-white' : 'flex-1 font-bold text-[#5C7A6D]'
-            }`}
-            style={role === 'student' ? { background: '#09431B', boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' } : undefined}
-          >
-            Student / Faculty
-          </button>
-          <button
-            type="button"
-            onClick={() => setRole('vendor')}
-            aria-pressed={role === 'vendor'}
-            className={`relative h-[36px] rounded-[10px] text-[12px] cursor-pointer transition-all ${
-              role === 'vendor' ? 'w-[164px] font-extrabold text-white' : 'flex-1 font-bold text-[#5C7A6D]'
-            }`}
-            style={role === 'vendor' ? { background: '#09431B', boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' } : undefined}
-          >
-            Canteen Vendor
-          </button>
-        </div>
-
-        {/* ID field — label baseline y=275, box y=287 335×50 rx=12 */}
-        <span className="absolute left-[24px] top-[266px] text-[10px] font-extrabold tracking-[0.8px] text-[#0A2E20]">
-          {role === 'student' ? 'CAMPUS ROLL NUMBER / MOBILE' : 'VENDOR EMAIL'}
+        {/* Canteen Name / Account Info Field */}
+        <span className="absolute left-6 top-51.5 text-[10px] font-extrabold tracking-[0.8px] text-[#0A2E20]">
+          CANTEEN OUTLET
         </span>
         <div
-          className="absolute left-[20px] right-[20px] top-[287px] h-[50px] rounded-[12px] bg-[#E8ECEF] flex items-center px-[18px]"
+          className="absolute left-5 right-5 top-56.25 h-11.5 rounded-xl bg-[#E8ECEF] flex items-center px-3"
           style={{
             border: '1.8px solid #09431B',
             boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)'
           }}
         >
-          <input
-            type="text"
-            value={role === 'student' ? rollNumber : rollNumber}
-            onChange={(e) => setRollNumber(e.target.value)}
-            placeholder={role === 'student' ? '22691A0589' : 'vendor@yememunnai.app'}
-            className="flex-1 bg-transparent text-[15px] font-extrabold tracking-[1px] text-[#0A2E20] placeholder:text-[#6B8075]/60 placeholder:font-medium focus:outline-none"
-          />
-          {/* Caret */}
-          <span className="w-[2px] h-[18px] bg-[#09431B] mr-[12px] animate-pulse" />
-          {/* Verified badge — 22px circle #10B981 + check */}
-          {rollNumber.length >= 4 && (
-            <span className="w-[22px] h-[22px] rounded-full bg-[#10B981] flex items-center justify-center shrink-0">
-              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
-                <path d="M3.5 7 L6 9.5 L10.5 4" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </span>
-          )}
+          <select
+            value={selectedOutlet}
+            onChange={(e) => setSelectedOutlet(e.target.value)}
+            className="flex-1 bg-transparent text-[13px] font-extrabold tracking-[0.5px] text-[#0A2E20] focus:outline-none cursor-pointer"
+          >
+            <option value="MITS Canteen">MITS Canteen (Food Court)</option>
+            <option value="MITS Cafe">MITS Cafe (Near Main Block)</option>
+            <option value="Ekdant's Cafe">Ekdant's Cafe (Beside Library)</option>
+            <option value="Lickies">Lickies (Opposite GATE 1)</option>
+            <option value="New Cafe">New Cafe (Near Boys Hostel)</option>
+          </select>
+          <span className="w-5 h-5 rounded-full bg-[#10B981] flex items-center justify-center shrink-0">
+            <svg width="12" height="12" viewBox="0 0 14 14" aria-hidden>
+              <path d="M3.5 7 L6 9.5 L10.5 4" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </span>
         </div>
 
-        {/* PIN — label baseline y=360, boxes y=372: 74×50 rx=12, gaps 13px */}
-        <span className="absolute left-[24px] top-[351px] text-[10px] font-extrabold tracking-[0.8px] text-[#0A2E20]">
-          CAMPUS SECURITY PIN
+        {/* PIN field — 4-digit boxes */}
+        <span className="absolute left-6 top-70.5 text-[10px] font-extrabold tracking-[0.8px] text-[#0A2E20]">
+          SECURITY PIN (4 DIGITS)
         </span>
-        <div className="absolute left-[20px] right-[20px] top-[372px] flex gap-[13px]">
+        <div className="absolute left-5 right-5 top-75.25 flex gap-3">
           {[0, 1, 2, 3].map((i) => {
             const digit = pin[i] ?? '';
             const isActive = i === pin.length;
             return (
               <div
                 key={i}
-                className="flex-1 h-[50px] rounded-[12px] bg-[#E8ECEF] flex items-center justify-center"
+                className="flex-1 h-11.5 rounded-xl bg-[#E8ECEF] flex items-center justify-center"
                 style={{
                   border: isActive ? '1.8px solid #09431B' : '1px solid #CAD8D0',
                   boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)'
@@ -188,32 +180,26 @@ export const VendorLoginModal: React.FC<VendorLoginModalProps> = ({ isOpen, onCl
                 {digit ? (
                   <span className="text-[20px] font-extrabold text-[#0A2E20]">{digit}</span>
                 ) : isActive ? (
-                  <span className="w-[8px] h-[8px] rounded-full bg-[#09431B]" />
+                  <span className="w-2 h-2 rounded-full bg-[#09431B]" />
                 ) : null}
               </div>
             );
           })}
         </div>
 
-        {/* Error line */}
+        {/* Error notification line */}
         {error && (
           <div
             role="alert"
-            className="absolute left-[24px] right-[24px] top-[430px] flex items-center gap-1.5 text-[10px] font-bold text-red-600"
+            className="absolute left-6 right-6 top-89.25 flex items-center gap-1.5 text-[10px] font-bold text-red-600"
           >
             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        {!isBackendConfigured && role === 'student' && (
-          <p className="absolute left-[24px] right-[24px] top-[430px] text-[9px] text-amber-700 font-bold">
-            Demo mode — student sign-in requires Supabase keys.
-          </p>
-        )}
-
-        {/* Numpad — at (35,445): keys 90×52 rx=12, col gap 17, row gap 8 */}
-        <div className="absolute left-[35px] top-[445px] grid grid-cols-3 gap-x-[17px] gap-y-[8px]">
+        {/* Numpad — shifted up to avoid any overlap or clipping */}
+        <div className="absolute left-8.75 top-95 grid grid-cols-3 gap-x-4.25 gap-y-2">
           {numpadKeys.map((k, i) => {
             if (k === '') return <span key={i} />;
             if (k === '⌫') {
@@ -223,9 +209,9 @@ export const VendorLoginModal: React.FC<VendorLoginModalProps> = ({ isOpen, onCl
                   type="button"
                   onClick={backspace}
                   aria-label="Backspace"
-                  className="w-[90px] h-[52px] rounded-[12px] bg-[#DDE2E8] border border-[#D6DCE2] flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
+                  className="w-22.5 h-12 rounded-xl bg-[#DDE2E8] border border-[#D6DCE2] flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
                 >
-                  <Delete className="w-[20px] h-[20px] text-[#0A2E20]" strokeWidth={1.9} />
+                  <Delete className="w-5 h-5 text-[#0A2E20]" strokeWidth={1.9} />
                 </button>
               );
             }
@@ -234,7 +220,7 @@ export const VendorLoginModal: React.FC<VendorLoginModalProps> = ({ isOpen, onCl
                 key={i}
                 type="button"
                 onClick={() => appendDigit(k)}
-                className="w-[90px] h-[52px] rounded-[12px] bg-[#E8ECEF] border border-white/90 text-[18px] font-extrabold text-[#0A2E20] cursor-pointer active:scale-95 transition-transform"
+                className="w-22.5 h-12 rounded-xl bg-[#E8ECEF] border border-white/90 text-[18px] font-extrabold text-[#0A2E20] cursor-pointer active:scale-95 transition-transform"
                 style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
               >
                 {k}
@@ -243,21 +229,35 @@ export const VendorLoginModal: React.FC<VendorLoginModalProps> = ({ isOpen, onCl
           })}
         </div>
 
-        {/* Sign In CTA — styled to the pack (below numpad, 12px radius) */}
+        {/* ⚡ Instant Demo Access CTA */}
+        <button
+          type="button"
+          onClick={() => void handleDemoAccess()}
+          disabled={busy}
+          className="absolute left-5 right-5 top-153.75 h-11 rounded-xl bg-[#E8ECEF] border-[1.5px] border-[#09431B] text-[#09431B] text-[13px] font-extrabold cursor-pointer disabled:opacity-60 hover:bg-white active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
+        >
+          <Zap className="w-4 h-4 fill-amber-400 text-amber-500" strokeWidth={2.2} />
+          <span>⚡ Instant Demo Access</span>
+        </button>
+
+        {/* Sign In CTA */}
         <button
           type="button"
           onClick={() => void handleSignIn()}
           disabled={busy}
-          className="absolute left-[20px] right-[20px] top-[718px] h-[47px] rounded-[12px] bg-[#09431B] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 hover:bg-[#073515] active:scale-[0.98] transition-all"
+          className="absolute left-5 right-5 top-167 h-11 rounded-xl bg-[#09431B] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 hover:bg-[#073515] active:scale-[0.98] transition-all"
           style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
         >
           {busy ? 'Signing in…' : 'Sign In'}
         </button>
 
-        {/* Demo hint */}
-        <p className="absolute top-[770px] w-full text-center text-[9px] font-medium text-[#5C7A6D]">
-          Demo vendor: vendor@yememunnai.app / yememunnai123
-        </p>
+        {/* PIN hint ONLY in demo mode — never written on the door in live mode */}
+        {(!isBackendConfigured || (typeof window !== 'undefined' && window.location.search.includes('dev=1'))) && (
+          <p className="absolute top-180.5 w-full text-center text-[10px] font-medium text-[#5C7A6D]">
+            Demo PIN: 0708 or 1234
+          </p>
+        )}
       </div>
     </div>
   );

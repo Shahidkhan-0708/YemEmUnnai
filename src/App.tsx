@@ -1,50 +1,95 @@
-import { useState } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { HomeDiscoveryScreen } from './components/HomeDiscoveryScreen';
 import type { FoodItem } from './lib/types';
 import { QuickOrderModal } from './components/QuickOrderModal';
-import { FeedbackModal } from './components/FeedbackModal';
-import { WalkInMapModal } from './components/WalkInMapModal';
-import { BusinessDashboardScreen } from './components/BusinessDashboardScreen';
-import { AddEditFoodItemScreen } from './components/AddEditFoodItemScreen';
-import { SplashOnboardingScreen } from './components/SplashOnboardingScreen';
-import { LocationPermissionScreen } from './components/LocationPermissionScreen';
-import { FoodItemDetailScreen } from './components/FoodItemDetailScreen';
-import { MenuStockManagementScreen } from './components/MenuStockManagementScreen';
+import { BrandIntroSplash } from './components/BrandIntroSplash';
 import { MobileDeviceShell, type ActiveOrderInfo } from './components/MobileDeviceShell';
-import { playTapSound } from './lib/celebration';
+import { playTapSound, playSuccessChime, fireOrderConfetti } from './lib/celebration';
+import { subscribeOrderStatus } from './lib/api';
 import { Utensils, Store, Image as ImageIcon, Sparkles, Download, ExternalLink, Eye, LayoutGrid } from 'lucide-react';
 
-/** Stand-in item used by the Screen Gallery to open modals/screens without the grid. */
+// Lazy-loaded modal & non-critical routes for fast initial bundle & 300+ user scalability
+const FeedbackModal = lazy(() => import('./components/FeedbackModal').then(m => ({ default: m.FeedbackModal })));
+const WalkInMapModal = lazy(() => import('./components/WalkInMapModal').then(m => ({ default: m.WalkInMapModal })));
+const BusinessDashboardScreen = lazy(() => import('./components/BusinessDashboardScreen').then(m => ({ default: m.BusinessDashboardScreen })));
+const AddEditFoodItemScreen = lazy(() => import('./components/AddEditFoodItemScreen').then(m => ({ default: m.AddEditFoodItemScreen })));
+const SplashOnboardingScreen = lazy(() => import('./components/SplashOnboardingScreen').then(m => ({ default: m.SplashOnboardingScreen })));
+const LocationPermissionScreen = lazy(() => import('./components/LocationPermissionScreen').then(m => ({ default: m.LocationPermissionScreen })));
+const FoodItemDetailScreen = lazy(() => import('./components/FoodItemDetailScreen').then(m => ({ default: m.FoodItemDetailScreen })));
+const MenuStockManagementScreen = lazy(() => import('./components/MenuStockManagementScreen').then(m => ({ default: m.MenuStockManagementScreen })));
+
+function ScreenFallback() {
+  return (
+    <div className="w-full min-h-[460px] flex flex-col items-center justify-center gap-3 bg-[#0F1A15] text-[#5C7A6D]">
+      <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+      <span className="text-xs font-bold text-emerald-400/90 tracking-wide">Loading Screen...</span>
+    </div>
+  );
+}
+
+import { safeStorage } from './lib/storage';
+
+/** Stand-in item used by the Screen Gallery to open modals/screens without the grid.
+ *  Mirrors the real MITS Canteen Samosa (see src/lib/mockData.ts) so demo
+ *  screens never show a name/price/photo that contradicts the live menu. */
 const DEFAULT_ORDER_ITEM: FoodItem = {
   id: 'gallery-demo',
-  vendorId: 'demo',
+  vendorId: 'a0000000-0000-4000-8000-000000000001',
   name: 'Samosa',
   vendor: 'MITS Canteen',
-  price: 20,
+  price: 15,
   category: 'cooked',
-  image: '/images/samosa.jpg',
-  likes: 45,
+  image: '/images/item_samosa_chicken.jpg',
+  likes: 88,
   dislikes: 2,
-  reviews: 3,
-  rating: 4.5,
-  walkTime: '5 min walk',
+  reviews: 34,
+  rating: 4.8,
+  walkTime: '2 min walk',
   actionType: 'order',
-  inStock: true
+  inStock: true,
+  isShopOnline: true
 };
 
 export function App() {
-  const [activePortal, setActivePortal] = useState<'consumer' | 'business' | 'artifacts' | 'gallery'>('consumer');
+  const [activePortal, setActivePortal] = useState<'consumer' | 'business' | 'artifacts' | 'gallery'>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('portal');
+      if (p === 'business' || p === 'gallery' || p === 'artifacts') return p;
+    }
+    return 'consumer';
+  });
+  
+  // Gate dev scaffolding behind ?dev=1 query parameter or localStorage flag
+  const isDevMode = typeof window !== 'undefined' && (
+    new URLSearchParams(window.location.search).get('dev') === '1' ||
+    safeStorage.getItem('yememunnai_dev') === '1'
+  );
+
+  // Full-lifecycle consumer flow state machine: intro splash -> onboarding -> location radar -> discovery
+  const [consumerFlow, setConsumerFlow] = useState<'intro' | 'onboarding' | 'location' | 'discovery'>(() => {
+    if (typeof window !== 'undefined') {
+      const f = new URLSearchParams(window.location.search).get('flow');
+      if (f === 'discovery') return 'discovery';
+      if (f === 'onboarding') return 'onboarding';
+      if (f === 'intro') return 'intro';
+    }
+    return 'intro';
+  });
   
   // Modals state
   const [selectedOrderFood, setSelectedOrderFood] = useState<FoodItem | null>(null);
+  const [selectedOrderQty, setSelectedOrderQty] = useState(1);
   const [selectedWalkInFood, setSelectedWalkInFood] = useState<FoodItem | null>(null);
   const [selectedReviewFood, setSelectedReviewFood] = useState<FoodItem | null>(null);
   const [selectedDetailFood, setSelectedDetailFood] = useState<FoodItem | null>(null);
-  const [isAddEditOpen, setIsAddEditOpen] = useState(false);
-  const [showSplash, setShowSplash] = useState(false);
-  const [showLocation, setShowLocation] = useState(false);
+  const [isAddEditOpen, setIsAddEditOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('add') === '1';
+    }
+    return false;
+  });
   const [showMenuStock, setShowMenuStock] = useState(false);
-  const [cartCount, setCartCount] = useState(2);
+  const [cartCount, setCartCount] = useState(0);
   const [activeOrder, setActiveOrder] = useState<ActiveOrderInfo | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -53,31 +98,95 @@ export function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  // Real-time synchronization: listen for vendor status updates on student's active order
+  useEffect(() => {
+    if (!activeOrder?.orderId) return;
+
+    const unsubscribe = subscribeOrderStatus(activeOrder.orderId, (newStatus) => {
+      if (newStatus === 'accepted') {
+        playTapSound();
+        setActiveOrder((prev) =>
+          prev ? { ...prev, status: 'Preparing (~4m)', stage: 'preparing' } : null
+        );
+        showToast(`🍳 ${activeOrder.vendor} accepted your order! Preparing now.`);
+      } else if (newStatus === 'completed') {
+        playSuccessChime();
+        fireOrderConfetti();
+        setActiveOrder((prev) =>
+          prev ? { ...prev, status: 'READY FOR PICKUP!', stage: 'ready' } : null
+        );
+        showToast(`🔥 Order #${activeOrder.token} is READY for pickup at ${activeOrder.vendor}!`);
+      } else if (newStatus === 'declined') {
+        setActiveOrder((prev) =>
+          prev ? { ...prev, status: 'Declined by shop', stage: 'declined' } : null
+        );
+        showToast(`❌ ${activeOrder.vendor} was unable to accept your order.`);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [activeOrder?.orderId, activeOrder?.vendor, activeOrder?.token]);
+
   return (
     <div className="min-h-screen bg-[#111A15] text-slate-100 flex flex-col items-center py-6 px-3">
       {/* Top Header / Brand Bar */}
       <header className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-emerald-950/60 mb-6">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-[#09431B] border border-emerald-600/40 p-1 flex items-center justify-center shadow-lg overflow-hidden">
-            <img src="/images/logo.png" alt="YemEmUnnai Logo" className="w-full h-full object-contain" />
+        <div 
+          onClick={() => {
+            playTapSound();
+            setActivePortal('consumer');
+            setConsumerFlow('intro');
+          }}
+          className="flex items-center gap-3.5 cursor-pointer group"
+          title="Click to replay Brand Intro Splash"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-[#09431B] border border-emerald-600/40 p-1 flex items-center justify-center shadow-lg overflow-hidden group-hover:scale-105 transition-transform">
+            <img src="/images/logo.png" alt="YEM UNNAI Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black text-white tracking-tight">YEMEMUNNAI</h1>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                Live UI
-              </span>
+              <h1 className="text-xl font-black text-white tracking-tight group-hover:text-amber-400 transition-colors">YEMUNNAI</h1>
+              {isDevMode ? (
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  DEV MODE
+                </span>
+              ) : (
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  MITS CAMPUS
+                </span>
+              )}
             </div>
-            <p className="text-xs text-[#5C7A6D]">Hyperlocal Real-time Food Discovery • Tactile Mint UI</p>
+            <p className="text-xs text-[#5C7A6D]">A Food Discovery Platform • Tactile Mint UI</p>
           </div>
         </div>
 
-        {/* Portal Switcher Tabs */}
+        {/* Portal Switcher Tabs — Dev tabs gated behind ?dev=1 */}
         <div className="flex items-center p-1 rounded-full bg-[#18261F] border border-emerald-900/50 shadow-inner">
           <button
-            onClick={() => setActivePortal('consumer')}
+            onClick={() => {
+              playTapSound();
+              setActivePortal('consumer');
+              setConsumerFlow('intro');
+            }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              activePortal === 'consumer' && consumerFlow === 'intro'
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <span>🎬 Intro</span>
+          </button>
+
+          <button
+            onClick={() => {
+              playTapSound();
+              setActivePortal('consumer');
+              if (consumerFlow === 'intro') setConsumerFlow('discovery');
+            }}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activePortal === 'consumer'
+              activePortal === 'consumer' && consumerFlow !== 'intro'
                 ? 'bg-[#09431B] text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
@@ -87,7 +196,10 @@ export function App() {
           </button>
 
           <button
-            onClick={() => setActivePortal('business')}
+            onClick={() => {
+              playTapSound();
+              setActivePortal('business');
+            }}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
               activePortal === 'business'
                 ? 'bg-[#09431B] text-white shadow-md'
@@ -98,29 +210,33 @@ export function App() {
             <span>Business Portal</span>
           </button>
 
-          <button
-            onClick={() => setActivePortal('artifacts')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activePortal === 'artifacts'
-                ? 'bg-[#09431B] text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <ImageIcon className="w-3.5 h-3.5" />
-            <span>Figma SVGs &amp; Ref</span>
-          </button>
+          {isDevMode && (
+            <>
+              <button
+                onClick={() => setActivePortal('artifacts')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  activePortal === 'artifacts'
+                    ? 'bg-[#09431B] text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Figma SVGs &amp; Ref</span>
+              </button>
 
-          <button
-            onClick={() => setActivePortal('gallery')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activePortal === 'gallery'
-                ? 'bg-[#09431B] text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" />
-            <span>Screen Gallery</span>
-          </button>
+              <button
+                onClick={() => setActivePortal('gallery')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  activePortal === 'gallery'
+                    ? 'bg-[#09431B] text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>Screen Gallery</span>
+              </button>
+            </>
+          )}
         </div>
       </header>
 
@@ -147,67 +263,70 @@ export function App() {
               setActiveOrder(null);
             }}
           >
-            <div className="relative">
-              <HomeDiscoveryScreen
-                cartCount={cartCount}
-                onOrderNow={(item) => {
-                  playTapSound();
-                  setSelectedOrderFood(item);
-                }}
-                onWalkIn={(item) => {
-                  playTapSound();
-                  setSelectedWalkInFood(item);
-                }}
-                onReview={(item) => {
-                  playTapSound();
-                  setSelectedReviewFood(item);
-                }}
-                onCartClick={() => {
-                  playTapSound();
-                  showToast(`Cart has ${cartCount} items ready for checkout`);
-                }}
-                onSelectShop={(name) => {
-                  playTapSound();
-                  showToast(`Filtered by ${name}`);
-                }}
-                onSelectItem={(item) => {
-                  playTapSound();
-                  setSelectedDetailFood(item);
-                }}
-              />
-
-              {/* Quick Order Modal */}
-              <QuickOrderModal
-                isOpen={!!selectedOrderFood}
-                item={selectedOrderFood}
-                onClose={() => setSelectedOrderFood(null)}
-                onSuccess={(orderData) => {
-                  setCartCount(c => c + 1);
-                  setActiveOrder(orderData);
-                  showToast(`Token #${orderData.token} pinned to Dynamic Island!`);
-                }}
-              />
-
-              {/* Walk-in Map Modal */}
-              <WalkInMapModal
-                isOpen={!!selectedWalkInFood}
-                item={selectedWalkInFood}
-                onClose={() => setSelectedWalkInFood(null)}
-              />
-
-              {/* Feedback Modal */}
-              <FeedbackModal
-                isOpen={!!selectedReviewFood}
-                item={selectedReviewFood}
-                onClose={() => setSelectedReviewFood(null)}
-                onSubmitSuccess={() => {
-                  showToast(`Review published for ${selectedReviewFood?.name}!`);
-                }}
-              />
-
-              {/* Food Item Detail (full screen, screen 10) */}
-              {selectedDetailFood && (
-                <div className="absolute inset-0 z-40">
+            <Suspense fallback={<ScreenFallback />}>
+              <div className="relative">
+                {consumerFlow === 'intro' ? (
+                  <BrandIntroSplash
+                    onStart={() => {
+                      playTapSound();
+                      setConsumerFlow('discovery');
+                    }}
+                    onSkip={() => {
+                      playTapSound();
+                      setConsumerFlow('discovery');
+                    }}
+                    onVendorPortal={() => {
+                      playTapSound();
+                      setActivePortal('business');
+                    }}
+                  />
+                ) : consumerFlow === 'onboarding' ? (
+                  <div className="relative">
+                    <SplashOnboardingScreen
+                      onExplore={() => {
+                        playTapSound();
+                        setConsumerFlow('location');
+                      }}
+                      onBusinessPortal={() => {
+                        playTapSound();
+                        setActivePortal('business');
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        playTapSound();
+                        setConsumerFlow('intro');
+                      }}
+                      className="absolute top-4 left-4 z-40 px-3 py-1 rounded-full bg-black/40 text-white text-[11px] font-bold backdrop-blur-md cursor-pointer hover:bg-black/60 border border-white/20 transition-all flex items-center gap-1 active:scale-95"
+                    >
+                      <span>← Intro Splash</span>
+                    </button>
+                  </div>
+                ) : consumerFlow === 'location' ? (
+                  <div className="relative">
+                    <LocationPermissionScreen
+                      onAllow={() => {
+                        playSuccessChime();
+                        setConsumerFlow('discovery');
+                        showToast('📍 Campus Radar Enabled • Live MITS Canteen Updates');
+                      }}
+                      onManual={() => {
+                        playTapSound();
+                        setConsumerFlow('discovery');
+                        showToast('📍 Campus Center Selected');
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        playTapSound();
+                        setConsumerFlow('onboarding');
+                      }}
+                      className="absolute top-4 left-4 z-40 px-3 py-1 rounded-full bg-black/40 text-white text-[11px] font-bold backdrop-blur-md cursor-pointer hover:bg-black/60 border border-white/20 transition-all flex items-center gap-1 active:scale-95"
+                    >
+                      <span>← Campus Info</span>
+                    </button>
+                  </div>
+                ) : selectedDetailFood ? (
                   <FoodItemDetailScreen
                     item={selectedDetailFood}
                     onBack={() => setSelectedDetailFood(null)}
@@ -216,41 +335,135 @@ export function App() {
                       setSelectedDetailFood(null);
                     }}
                     onOrder={(qty) => {
-                      setCartCount(c => c + qty);
+                      setSelectedOrderQty(qty);
                       setSelectedOrderFood(selectedDetailFood);
                       setSelectedDetailFood(null);
                     }}
                   />
-                </div>
-              )}
-            </div>
+                ) : (
+                  <HomeDiscoveryScreen
+                    cartCount={cartCount}
+                    onReplayIntro={() => setConsumerFlow('intro')}
+                    onOpenRadar={() => setConsumerFlow('location')}
+                    onOrderNow={(item) => {
+                      playTapSound();
+                      setSelectedOrderQty(1);
+                      setSelectedOrderFood(item);
+                    }}
+                    onWalkIn={(item) => {
+                      playTapSound();
+                      setSelectedWalkInFood(item);
+                    }}
+                    onReview={(item) => {
+                      playTapSound();
+                      setSelectedReviewFood(item);
+                    }}
+                    onCartClick={() => {
+                      playTapSound();
+                      if (selectedOrderFood) {
+                        // Already has order modal open
+                      } else if (cartCount > 0) {
+                        setSelectedOrderQty(cartCount);
+                        setSelectedOrderFood(DEFAULT_ORDER_ITEM);
+                      } else {
+                        showToast('Your cart is empty — tap + ORDER on any canteen item!');
+                      }
+                    }}
+                    onSelectShop={(name) => {
+                      playTapSound();
+                      showToast(`Filtered by ${name}`);
+                    }}
+                    onSelectItem={(item) => {
+                      playTapSound();
+                      setSelectedDetailFood(item);
+                    }}
+                  />
+                )}
+
+                {/* Quick Order Modal — sits stably on top of screen with synced quantity */}
+                <QuickOrderModal
+                  isOpen={!!selectedOrderFood}
+                  item={selectedOrderFood}
+                  initialQty={selectedOrderQty}
+                  onClose={() => setSelectedOrderFood(null)}
+                  onSuccess={(orderData) => {
+                    setCartCount(c => c + selectedOrderQty);
+                    setActiveOrder({
+                      token: orderData.token,
+                      orderId: orderData.orderId,
+                      vendor: orderData.vendor,
+                      status: 'Sent to shop',
+                      stage: 'sent'
+                    });
+                    showToast(`Token #${orderData.token} pinned to Dynamic Island!`);
+                  }}
+                />
+
+                {/* Walk-in Map Modal */}
+                <WalkInMapModal
+                  isOpen={!!selectedWalkInFood}
+                  item={selectedWalkInFood}
+                  onClose={() => setSelectedWalkInFood(null)}
+                />
+
+                {/* Feedback Modal */}
+                <FeedbackModal
+                  isOpen={!!selectedReviewFood}
+                  item={selectedReviewFood}
+                  onClose={() => setSelectedReviewFood(null)}
+                  onSubmitSuccess={() => {
+                    showToast(`Review published for ${selectedReviewFood?.name}!`);
+                  }}
+                />
+              </div>
+            </Suspense>
           </MobileDeviceShell>
         )}
 
         {/* 2. BUSINESS PORTAL SCREEN */}
         {activePortal === 'business' && (
           <MobileDeviceShell>
-            <div className="relative">
-              <BusinessDashboardScreen
-                onAddNewItem={() => setIsAddEditOpen(true)}
-              />
+            <Suspense fallback={<ScreenFallback />}>
+              <div className="relative">
+                {showMenuStock ? (
+                  <div className="relative">
+                    <MenuStockManagementScreen
+                      onAddNewItem={() => setIsAddEditOpen(true)}
+                      onToggleStock={(id, inStock) => {
+                        showToast(`Item #${id} stock ${inStock ? 'marked LIVE' : 'marked SOLD OUT'}`);
+                      }}
+                    />
+                    <button
+                      onClick={() => setShowMenuStock(false)}
+                      className="absolute top-4 left-4 z-40 px-3 py-1.5 rounded-full bg-[#09431B] text-white text-xs font-extrabold shadow-md border border-white/20 flex items-center gap-1 cursor-pointer hover:bg-[#073515] active:scale-95"
+                    >
+                      <span>← Back to Dashboard</span>
+                    </button>
+                  </div>
+                ) : (
+                  <BusinessDashboardScreen
+                    onAddNewItem={() => setIsAddEditOpen(true)}
+                    onManageStock={() => setShowMenuStock(true)}
+                  />
+                )}
 
-              {/* Add/Edit Food Item Modal */}
-              <AddEditFoodItemScreen
-                isOpen={isAddEditOpen}
-                onClose={() => setIsAddEditOpen(false)}
-                onPublished={(item) => {
-                  showToast(`Successfully published ${item.name} (₹${item.price}) to YEMEMUNNAI!`);
-                }}
-              />
-            </div>
+                {/* Add/Edit Food Item Modal */}
+                <AddEditFoodItemScreen
+                  isOpen={isAddEditOpen}
+                  onClose={() => setIsAddEditOpen(false)}
+                  onPublished={(item) => {
+                    showToast(`Successfully published ${item.name} (₹${item.price}) to YEMEMUNNAI!`);
+                  }}
+                />
+              </div>
+            </Suspense>
           </MobileDeviceShell>
         )}
 
         {/* 3. DESIGN ARTIFACTS & DELIVERABLES */}
         {/* 4. SCREEN GALLERY — all 12 SVG screens built as live React components */}
         {activePortal === 'gallery' && (
-          <div className="w-full max-w-4xl bg-[#1A2620] rounded-[24px] p-6 border border-emerald-900/50 shadow-2xl space-y-6">
+          <div className="w-full max-w-4xl bg-[#1A2620] rounded-3xl p-6 border border-emerald-900/50 shadow-2xl space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-emerald-900/60">
               <div>
                 <h2 className="text-base font-black text-white">Live Screen Gallery</h2>
@@ -306,27 +519,33 @@ export function App() {
                   cta: 'View asset'
                 },
                 {
+                  n: '00 · Brand Intro Splash',
+                  d: 'Animated steaming mascot, YEM UNNAI wordmark & tagline.',
+                  action: () => { setActivePortal('consumer'); setConsumerFlow('intro'); },
+                  cta: 'Play animation'
+                },
+                {
                   n: '08 · Splash & Onboarding',
                   d: 'Mascot hero card, campus address, hours, explore CTA.',
-                  action: () => setShowSplash(true),
+                  action: () => { setActivePortal('consumer'); setConsumerFlow('onboarding'); },
                   cta: 'Open screen'
                 },
                 {
                   n: '09 · Location Permission',
                   d: 'Radar illustration, walk-time + alerts fields, allow CTA.',
-                  action: () => setShowLocation(true),
+                  action: () => { setActivePortal('consumer'); setConsumerFlow('location'); },
                   cta: 'Open screen'
                 },
                 {
                   n: '10 · Food Item Detail',
                   d: 'Hero photo, vendor bar, portion selector, sticky order bar.',
-                  action: () => { setActivePortal('consumer'); setTimeout(() => setSelectedDetailFood(DEFAULT_ORDER_ITEM), 60); },
+                  action: () => { setActivePortal('consumer'); setConsumerFlow('discovery'); setTimeout(() => setSelectedDetailFood(DEFAULT_ORDER_ITEM), 60); },
                   cta: 'Open screen'
                 },
                 {
                   n: '11 · Menu & Stock Management',
                   d: 'Vendor console: stat strip, category pills, stock toggles, FAB.',
-                  action: () => setShowMenuStock(true),
+                  action: () => { setActivePortal('business'); setShowMenuStock(true); },
                   cta: 'Open screen'
                 },
                 {
@@ -336,7 +555,7 @@ export function App() {
                   cta: 'Open screen'
                 }
               ] as Array<{ n: string; d: string; action: () => void; cta: string }>).map(card => (
-                <div key={card.n} className="p-4 bg-[#131D17] border border-emerald-900/40 rounded-[16px] flex flex-col justify-between hover:border-emerald-700/60 transition-colors">
+                <div key={card.n} className="p-4 bg-[#131D17] border border-emerald-900/40 rounded-2xl flex flex-col justify-between hover:border-emerald-700/60 transition-colors">
                   <div>
                     <span className="text-xs font-bold text-[#A7F3D0] block">{card.n}</span>
                     <p className="text-[10px] text-slate-400 mt-1 line-clamp-2">{card.d}</p>
@@ -354,7 +573,7 @@ export function App() {
         )}
 
         {activePortal === 'artifacts' && (
-          <div className="w-full max-w-4xl bg-[#1A2620] rounded-[24px] p-6 border border-emerald-900/50 shadow-2xl space-y-6">
+          <div className="w-full max-w-4xl bg-[#1A2620] rounded-3xl p-6 border border-emerald-900/50 shadow-2xl space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-emerald-900/60">
               <div>
                 <h2 className="text-base font-black text-white">Official Design Deliverables (SVG Pack)</h2>
@@ -382,7 +601,7 @@ export function App() {
               <img 
                 src="/svgs/preview.png" 
                 alt="YEMEMUNNAI SVG Pack Preview" 
-                className="rounded-[12px] shadow-lg max-w-full border border-emerald-950/80"
+                className="rounded-xl shadow-lg max-w-full border border-emerald-950/80"
               />
             </div>
 
@@ -408,7 +627,7 @@ export function App() {
                   { name: '11_menu_stock_management.svg', preview: '11_menu_stock_management.png', label: '11. Live Menu & Stock', desc: 'Stock toggles, sold out badges, metric strip' },
                   { name: '12_access_login.svg', preview: '12_access_login.png', label: '12. Access Login & Keypad', desc: 'Role switcher, roll number OTP & tactile numpad' },
                 ].map((file) => (
-                  <div key={file.name} className="p-3.5 bg-[#131D17] border border-emerald-900/40 rounded-[16px] flex flex-col justify-between hover:border-emerald-700/60 transition-colors">
+                  <div key={file.name} className="p-3.5 bg-[#131D17] border border-emerald-900/40 rounded-2xl flex flex-col justify-between hover:border-emerald-700/60 transition-colors">
                     <div>
                       <div className="w-full h-40 bg-[#0B120E] rounded-xl overflow-hidden mb-3 border border-emerald-950/60 flex items-center justify-center p-1.5">
                         <img 
@@ -449,60 +668,6 @@ export function App() {
         )}
       </main>
 
-      {/* Full-screen gallery overlays (screens 08 / 09 / 11) */}
-      {showSplash && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-start justify-center overflow-auto py-6 px-3">
-          <div className="relative">
-            <button
-              onClick={() => setShowSplash(false)}
-              className="absolute -top-2 -right-2 z-10 w-8 h-8 rounded-full bg-white text-[#0A2E20] text-sm font-black shadow-lg cursor-pointer hover:bg-slate-100"
-              aria-label="Close preview"
-            >
-              ✕
-            </button>
-            <SplashOnboardingScreen
-              onExplore={() => { setShowSplash(false); setActivePortal('consumer'); }}
-              onBusinessPortal={() => { setShowSplash(false); setActivePortal('business'); }}
-            />
-          </div>
-        </div>
-      )}
-
-      {showLocation && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-start justify-center overflow-auto py-6 px-3">
-          <div className="relative">
-            <button
-              onClick={() => setShowLocation(false)}
-              className="absolute -top-2 -right-2 z-10 w-8 h-8 rounded-full bg-white text-[#0A2E20] text-sm font-black shadow-lg cursor-pointer hover:bg-slate-100"
-              aria-label="Close preview"
-            >
-              ✕
-            </button>
-            <LocationPermissionScreen
-              onAllow={() => { setShowLocation(false); showToast('Campus Radar enabled — walking times are now live'); }}
-              onManual={() => { setShowLocation(false); setActivePortal('consumer'); }}
-            />
-          </div>
-        </div>
-      )}
-
-      {showMenuStock && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-start justify-center overflow-auto py-6 px-3">
-          <div className="relative">
-            <button
-              onClick={() => setShowMenuStock(false)}
-              className="absolute -top-2 -right-2 z-10 w-8 h-8 rounded-full bg-white text-[#0A2E20] text-sm font-black shadow-lg cursor-pointer hover:bg-slate-100"
-              aria-label="Close preview"
-            >
-              ✕
-            </button>
-            <MenuStockManagementScreen
-              onAddNewItem={() => { setShowMenuStock(false); setActivePortal('business'); setIsAddEditOpen(true); }}
-              onToggleStock={(id, inStock) => showToast(`${id} marked ${inStock ? 'IN STOCK' : 'SOLD OUT'}`)}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

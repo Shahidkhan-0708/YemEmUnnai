@@ -1,7 +1,9 @@
 export interface ActiveOrderInfo {
   token: string;
+  orderId?: string;
   vendor: string;
   status: string;
+  stage?: 'sent' | 'preparing' | 'ready' | 'declined';
 }
 
 interface MobileDeviceShellProps {
@@ -15,16 +17,21 @@ export const MobileDeviceShell: React.FC<MobileDeviceShellProps> = ({
   activeOrder,
   onClearActiveOrder,
 }) => {
+  const isReady = activeOrder?.stage === 'ready' || activeOrder?.status.toLowerCase().includes('ready');
+  const isPrepping = activeOrder?.stage === 'preparing' || activeOrder?.status.toLowerCase().includes('prep');
+
   return (
-    <div className="relative mx-auto w-full max-w-[400px] flex justify-center">
+    <div className="relative mx-auto w-full max-w-100 flex justify-center">
       {/* Device Frame — Realistic phone chassis */}
-      <div className="w-full rounded-[48px] p-2.5 bg-gradient-to-b from-[#25392E] via-[#192720] to-[#121E18] shadow-[0_30px_70px_-10px_rgba(0,0,0,0.85),0_0_0_1px_rgba(52,211,153,0.3)] border border-[#2D4537] relative">
+      <div className="w-full rounded-[48px] p-2.5 bg-linear-to-b from-[#25392E] via-[#192720] to-[#121E18] shadow-[0_30px_70px_-10px_rgba(0,0,0,0.85),0_0_0_1px_rgba(52,211,153,0.3)] border border-[#2D4537] relative">
         {/* Dynamic Island / Speaker Pill */}
         <div
-          className={`absolute top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-out bg-[#080D0A] rounded-full flex items-center shadow-lg border border-white/15 ${
+          className={`absolute top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-out rounded-full flex items-center shadow-lg ${
             activeOrder
-              ? 'w-[270px] h-7 px-3 justify-between cursor-pointer ring-1 ring-emerald-500/40'
-              : 'w-28 h-5 px-2.5 justify-between pointer-events-none'
+              ? isReady
+                ? 'w-71.25 h-8 px-3.5 justify-between cursor-pointer bg-linear-to-r from-[#0C381E] via-[#105C2E] to-[#0A3D1C] ring-2 ring-amber-400 border border-emerald-400 shadow-[0_0_22px_rgba(52,211,153,0.6)] animate-pulse'
+                : 'w-67.5 h-7 px-3 justify-between cursor-pointer bg-[#080D0A] ring-1 ring-emerald-500/40 border border-white/15'
+              : 'w-28 h-5 px-2.5 justify-between pointer-events-none bg-[#080D0A] border border-white/10'
           }`}
           onClick={activeOrder && onClearActiveOrder ? onClearActiveOrder : undefined}
           title={activeOrder ? 'Active order tracking — Click to dismiss' : undefined}
@@ -32,14 +39,30 @@ export const MobileDeviceShell: React.FC<MobileDeviceShellProps> = ({
           {activeOrder ? (
             <>
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-[10px] font-bold text-emerald-400 font-mono tracking-wider">
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    isReady
+                      ? 'bg-amber-400 animate-ping'
+                      : isPrepping
+                      ? 'bg-emerald-400 animate-ping'
+                      : 'bg-amber-300 animate-pulse'
+                  }`}
+                />
+                <span
+                  className={`text-[10px] font-bold font-mono tracking-wider ${
+                    isReady ? 'text-amber-300' : 'text-emerald-400'
+                  }`}
+                >
                   TOKEN #{activeOrder.token}
                 </span>
               </div>
-              <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-100/90">
+              <div
+                className={`flex items-center gap-1 text-[10px] ${
+                  isReady ? 'font-extrabold text-amber-200' : 'font-medium text-emerald-100/90'
+                }`}
+              >
                 <span>{activeOrder.status}</span>
-                <span className="text-white/40 text-[9px]">✕</span>
+                <span className="text-white/50 text-[9px] hover:text-white">✕</span>
               </div>
             </>
           ) : (

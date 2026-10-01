@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Search, ShoppingCart, ThumbsUp, ThumbsDown, MessageSquare, MapPin, ChevronRight, Sparkles, Flame, Clock, X, WifiOff } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, ShoppingCart, ThumbsUp, MessageSquare, MapPin, ChevronRight, Sparkles, Flame, X, WifiOff } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Card, CardContent } from './ui/card';
 import { Input } from './ui/input';
 import { useFoodItems, useShops, useReactions } from '../lib/hooks';
 import { isBackendConfigured } from '../lib/supabase';
+import { cleanShopTag } from '../lib/api';
 import type { FoodCategory, FoodItem } from '../lib/types';
 
 export type { FoodItem } from '../lib/types';
@@ -19,6 +20,8 @@ interface HomeDiscoveryScreenProps {
   onSelectShop?: (shopName: string) => void;
   onVendorLogin?: () => void;
   onSelectItem?: (item: FoodItem) => void;
+  onReplayIntro?: () => void;
+  onOpenRadar?: () => void;
 }
 
 export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
@@ -28,43 +31,290 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
   onReview,
   onCartClick,
   onSelectShop,
-  onSelectItem
+  onSelectItem,
+  onReplayIntro,
+  onOpenRadar
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory>('cooked');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedShop, setSelectedShop] = useState<string>('All');
 
   const shops = useShops();
-  const { items, loading } = useFoodItems(selectedCategory);
-  const { myReactions, counts, toggleLike, toggleDislike } = useReactions(items);
+  const { items, loading, totalByCategory } = useFoodItems(selectedCategory);
+  const { myReactions, counts, toggleLike } = useReactions(items);
 
-  // Filter by query + shop, overlaying live reaction counts
+  // Filter by query + shop, hiding offline shop items when browsing all shops
   const displayedItems = items
     .filter(item => {
       const q = searchQuery.toLowerCase();
       const matchesQuery = item.name.toLowerCase().includes(q) ||
                            item.vendor.toLowerCase().includes(q);
       const matchesShop = selectedShop === 'All' || item.vendor.toLowerCase().includes(selectedShop.toLowerCase());
+
+      // Check if this item's shop is offline
+      const shopMeta = shops.find(s => s.name.toLowerCase() === item.vendor.toLowerCase());
+      const isShopOffline = shopMeta ? shopMeta.isOnline === false : item.isShopOnline === false;
+
+      // When browsing 'All' canteens, do not display products from offline canteens
+      if (selectedShop === 'All' && isShopOffline) {
+        return false;
+      }
+
       return matchesQuery && matchesShop;
     })
     .map(item => {
       const c = counts[item.id];
-      return c ? { ...item, likes: c.likes, dislikes: c.dislikes } : item;
+      const shopMeta = shops.find(s => s.name.toLowerCase() === item.vendor.toLowerCase());
+      const isShopOffline = shopMeta ? shopMeta.isOnline === false : item.isShopOnline === false;
+      return {
+        ...item,
+        likes: c ? c.likes : item.likes,
+        dislikes: c ? c.dislikes : item.dislikes,
+        isShopOnline: !isShopOffline
+      };
     });
 
+  // Group items by shop when browsing "All" shops and no search query is typed
+  const shopGroups = useMemo(() => {
+    if (selectedShop !== 'All' || searchQuery.trim()) return null;
+    const map: Record<string, FoodItem[]> = {};
+    for (const item of displayedItems) {
+      if (!map[item.vendor]) map[item.vendor] = [];
+      map[item.vendor].push(item);
+    }
+    return Object.entries(map).map(([vendorName, groupItems]) => {
+      const shopMeta = shops.find(s => s.name.toLowerCase() === vendorName.toLowerCase());
+      return { vendorName, shopMeta, items: groupItems };
+    });
+  }, [displayedItems, selectedShop, searchQuery, shops]);
+
+  const renderFoodCard = (item: FoodItem) => {
+    const isLiked = myReactions[item.id] === 'like';
+
+    return (
+      <Card
+        key={item.id}
+        className="tactile-card rounded-[20px] p-2.5 flex flex-col justify-between"
+      >
+        {/* Real Food Photograph with Live Badges */}
+        <div
+          className="w-full aspect-4/3 rounded-[14px] overflow-hidden bg-slate-100 relative shadow-xs cursor-pointer"
+          onClick={() => onSelectItem?.(item)}
+          role="button"
+          aria-label={`View ${item.name} details`}
+        >
+          <img
+            src={item.image}
+            alt={item.name}
+            className="w-full h-full object-cover object-center transition-transform hover:scale-105 duration-300"
+            loading="lazy"
+          />
+
+          {/* Bottom Scrim overlay */}
+          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
+
+          {/* Freshness or Sold Out Badge overlay */}
+          {!item.inStock ? (
+            <div className="absolute top-1.5 left-1.5 bg-red-600/95 backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 border border-red-400/40 shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              <span>SOLD OUT</span>
+            </div>
+          ) : item.freshnessTag ? (
+            <div className="absolute top-1.5 left-1.5 bg-[#062E16]/95 backdrop-blur-xs text-white text-[8px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/40 shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>{item.freshnessTag}</span>
+            </div>
+          ) : null}
+
+          {/* Landmark overlay — real campus landmark */}
+          <div className="absolute bottom-1.5 right-1.5 bg-[#062E16]/90 backdrop-blur-xs text-[#A7F3D0] text-[8.5px] font-extrabold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs border border-white/20">
+            <MapPin className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
+            <span className="max-w-20 truncate">{item.locationLandmark || item.walkTime}</span>
+          </div>
+        </div>
+
+        {/* Title & Info with Indian Veg/Non-veg indicator */}
+        <CardContent className="mt-2 px-1 p-0">
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`w-3 h-3 border ${item.isVeg !== false ? 'border-emerald-700' : 'border-amber-800'} flex items-center justify-center p-0.5 rounded-xs shrink-0 bg-white/70`}
+              title={item.isVeg !== false ? 'Vegetarian' : 'Non-Vegetarian'}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${item.isVeg !== false ? 'bg-emerald-700' : 'bg-amber-800'}`} />
+            </span>
+            <h3 className="text-[13px] font-extrabold text-[#0A2E20] leading-snug truncate">
+              {item.name}
+            </h3>
+          </div>
+
+          <p className="text-[10px] font-medium text-[#5C7A6D] mt-0.5 truncate flex items-center justify-between">
+            <span className="truncate max-w-23.75">{item.vendor}</span>
+            {item.reviews > 0 && item.rating != null ? (
+              <span className="text-amber-600 font-bold">★ {Number(item.rating).toFixed(1)}</span>
+            ) : (
+              <span className="text-emerald-700 font-bold text-[9px] bg-emerald-500/10 px-1 py-0.2 rounded">New</span>
+            )}
+          </p>
+
+          <div className="mt-1 flex items-baseline justify-between">
+            <div className="flex items-baseline gap-1.5">
+              {item.price > 0 ? (
+                <>
+                  <span className={`text-[15px] font-black ${
+                    item.actionType === 'order' ? 'text-[#F26A00]' : 'text-[#09431B]'
+                  }`}>
+                    ₹{item.price}
+                  </span>
+                  {item.originalPrice && (
+                    <span className="text-[10px] text-[#7C9588] line-through font-semibold">
+                      ₹{item.originalPrice}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-[11px] font-black text-[#D96C37] bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/25">
+                  Coming Soon
+                </span>
+              )}
+            </div>
+            {item.price > 0 && item.stockLeft != null && (
+              <span className="text-[9px] font-bold text-[#D96C37]">
+                {item.stockLeft} left
+              </span>
+            )}
+          </div>
+        </CardContent>
+
+        {/* Reactions Row: Like, Review */}
+        <div className="mt-2 pt-1 border-t border-[#D6DCE2]/60 flex items-center justify-between px-1 text-[9px] text-[#5C7A6D]">
+          <button
+            type="button"
+            onClick={() => toggleLike(item.id)}
+            className={`flex items-center gap-1 font-bold transition-all cursor-pointer ${
+              isLiked ? 'text-[#09431B] scale-105' : 'hover:text-[#09431B]'
+            }`}
+            aria-label="Like item"
+          >
+            <ThumbsUp className={`w-3 h-3 ${isLiked ? 'fill-[#09431B]' : ''}`} />
+            <span>{item.likes}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onReview?.(item)}
+            className="flex items-center gap-1 hover:text-[#09431B] font-medium transition-colors cursor-pointer"
+            aria-label="Write a review"
+          >
+            <MessageSquare className="w-3 h-3" />
+            <span>{item.reviews}</span>
+          </button>
+        </div>
+
+        {/* Action Button: Unified 10px Rounded Rectangle with Consistent Intention */}
+        <div className="mt-2.5">
+          {!item.inStock ? (
+            <Button
+              disabled
+              variant="outline"
+              size="sm"
+              className="w-full rounded-[10px] text-[11px] font-black h-9 flex items-center justify-center gap-1.5 bg-[#D5DCE2] text-slate-500 border border-[#BAC3CC] cursor-not-allowed opacity-80 shadow-none"
+            >
+              <span>SOLD OUT</span>
+            </Button>
+          ) : item.isShopOnline === false ? (
+            <Button
+              disabled
+              variant="outline"
+              size="sm"
+              className="w-full rounded-[10px] text-[10.5px] font-black h-9 flex items-center justify-center gap-1.5 bg-[#D5DCE2] text-slate-500 border border-[#BAC3CC] cursor-not-allowed opacity-80 shadow-none"
+            >
+              <span>CANTEEN OFFLINE</span>
+            </Button>
+          ) : item.actionType === 'walkin' ? (
+            <Button
+              onClick={() => onWalkIn?.(item)}
+              variant="default"
+              size="sm"
+              className="w-full rounded-[10px] text-[11px] font-extrabold h-9 flex items-center justify-center gap-1.5 tracking-wide btn-green-shadow tactile-press cursor-pointer"
+            >
+              <MapPin className="w-3.5 h-3.5 fill-white/20" />
+              <span>WALK-IN (MAPS)</span>
+            </Button>
+          ) : (
+            <Button
+              onClick={() => onOrderNow?.(item)}
+              variant="orange"
+              size="sm"
+              className="w-full rounded-[10px] text-[11px] font-black h-9 flex items-center justify-center gap-1.5 tracking-wide btn-orange-shadow tactile-press cursor-pointer"
+            >
+              <ShoppingCart className="w-3.5 h-3.5 fill-white/20" />
+              <span>+ ORDER{item.price > 0 ? ` • ₹${item.price}` : ''}</span>
+            </Button>
+          )}
+        </div>
+      </Card>
+    );
+  };
+
   return (
-    <div className="w-full max-w-[390px] mx-auto bg-[#E8ECEF] min-h-[820px] pb-10 select-none overflow-hidden relative shadow-2xl rounded-[36px] border border-[#D6DCE2] font-sans">
+    <div className="w-full max-w-97.5 mx-auto bg-[#E8ECEF] min-h-205 pb-10 select-none overflow-hidden relative shadow-2xl rounded-[36px] border border-[#D6DCE2] font-sans">
       
       {/* TOP DEEP FOREST-GREEN HEADER WITH EXTENDED TOP BREATHING ROOM */}
-      <div className="bg-gradient-to-b from-[#0A461E] via-[#09431B] to-[#063214] px-4 pt-7 pb-6 rounded-b-[30px] text-white shadow-lg">
+      <div className="bg-linear-to-b from-[#0A461E] via-[#09431B] to-[#063214] px-4 pt-6 pb-6 rounded-b-[30px] text-white shadow-lg">
         
+        {/* Animated Brand Identity Header with Logo & Tagline */}
+        <div className="flex items-center justify-between mb-3.5 px-0.5">
+          <div className="flex items-center gap-2.5">
+            <div className="relative w-10 h-10 rounded-xl bg-[#062814] border border-emerald-500/40 p-0.5 flex items-center justify-center shadow-md overflow-hidden">
+              <img
+                src="/images/brand_logo_full.png"
+                alt="YEM UNNAI Mascot"
+                className="w-full h-full object-contain animate-mascot-float"
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 leading-none">
+                <span className="text-[15px] font-black tracking-tight text-white">YEMUNNAI</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+              </div>
+              <div className="flex items-center gap-1 text-[8.5px] font-extrabold tracking-wider uppercase text-[#FF8A2A] mt-0.5">
+                <span className="animate-brand-shimmer">A FOOD DISCOVERY PLATFORM</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Access Badges for Intro & Campus Radar */}
+          <div className="flex items-center gap-1.5">
+            {onReplayIntro && (
+              <button
+                type="button"
+                onClick={onReplayIntro}
+                title="Replay Brand Intro Splash"
+                className="text-[10px] font-extrabold text-[#A7F3D0] hover:text-white bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-full transition-all cursor-pointer border border-white/15 flex items-center gap-1 active:scale-95"
+              >
+                <span>🎬 Intro</span>
+              </button>
+            )}
+            {onOpenRadar && (
+              <button
+                type="button"
+                onClick={onOpenRadar}
+                title="Campus Radar & Geofence"
+                className="text-[10px] font-extrabold text-amber-300 hover:text-white bg-amber-500/20 hover:bg-amber-500/30 px-2.5 py-1 rounded-full transition-all cursor-pointer border border-amber-500/35 flex items-center gap-1 active:scale-95"
+              >
+                <span>📡 Radar</span>
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Search Bar + Orange Circular Cart Button */}
         <div className="flex items-center gap-3">
           <div className="flex-1 relative flex items-center bg-[#E8ECEF]/95 backdrop-blur-xs border border-[#D6DCE2] rounded-full px-4 py-2 shadow-inner transition-all focus-within:ring-2 focus-within:ring-[#10B981] focus-within:bg-white">
             <Search className="w-4 h-4 text-[#527063] shrink-0 mr-2.5" />
             <Input
               type="text"
-              placeholder="Search biryani, samosa, tuck shops..."
+              placeholder="Search tea, samosa, puff, coffee..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-8 p-0 border-0 focus-visible:ring-0 text-xs"
@@ -112,10 +362,14 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             </div>
           </div>
 
-          {/* Horizontal Scrolling Shop Avatars */}
-          <div className="flex items-start gap-3 overflow-x-auto no-scrollbar pt-1 pb-1 px-0.5">
-            {shops.map((shop) => {
+          {/* Symmetrical Horizontal Scrolling Shop Avatars */}
+          <div className="-mx-4 px-4 flex items-start gap-2.5 overflow-x-auto no-scrollbar pt-1 pb-1">
+            {shops
+              .filter(shop => shop.isActive !== false && !['royal hotel', 'royal corner', 'chai corner', 'vatika', 'vatika tuck', 'lays corner'].includes(shop.name.toLowerCase()))
+              .map((shop) => {
               const isSelected = selectedShop.toLowerCase() === shop.name.toLowerCase();
+              const displayTag = shop.isOnline === false ? '🔴 Closed' : cleanShopTag(shop.tag);
+
               return (
                 <div 
                   key={shop.id} 
@@ -124,10 +378,10 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                     setSelectedShop(next);
                     onSelectShop?.(next);
                   }}
-                  className="flex flex-col items-center gap-1 shrink-0 cursor-pointer group"
+                  className="w-18 shrink-0 flex flex-col items-center cursor-pointer group select-none text-center"
                 >
-                  <div className={`relative w-[54px] h-[54px] rounded-full p-0.5 transition-all duration-200 group-hover:scale-105 ${
-                    isSelected ? 'ring-3 ring-[#F26A00] scale-105' : 'ring-2 ring-white/30'
+                  <div className={`relative w-14 h-14 rounded-full p-0.5 transition-all duration-200 group-hover:scale-105 flex items-center justify-center shrink-0 ${
+                    isSelected ? 'ring-3 ring-[#F26A00] scale-105 shadow-md' : 'ring-2 ring-white/30'
                   }`}>
                     <img
                       src={shop.image}
@@ -135,17 +389,21 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                       className="w-full h-full object-cover rounded-full"
                       loading="lazy"
                     />
-                    {shop.isActive && (
+                    {shop.isOnline === false ? (
+                      <span className="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full bg-slate-800 text-[7px] font-black text-slate-300 border border-white/20 shadow-xs">
+                        CLOSED
+                      </span>
+                    ) : shop.isActive ? (
                       <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#09431B] rounded-full animate-radar-ring" />
-                    )}
+                    ) : null}
                   </div>
-                  <span className={`text-[10px] font-bold tracking-tight text-center whitespace-nowrap max-w-[64px] truncate ${
+                  <span className={`text-[10.5px] font-bold tracking-tight text-center w-full truncate leading-tight mt-1.5 ${
                     isSelected ? 'text-[#FF8A2A]' : 'text-white'
                   }`}>
                     {shop.name}
                   </span>
-                  <span className="text-[8px] text-[#A7F3D0]/80 font-medium">
-                    {shop.tag ?? ''}
+                  <span className="text-[8.5px] text-[#A7F3D0]/85 font-medium text-center w-full truncate leading-tight mt-0.5">
+                    {displayTag}
                   </span>
                 </div>
               );
@@ -153,6 +411,17 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Offline Shop Notice when filtering by a specific shop that is closed */}
+      {selectedShop !== 'All' && shops.find(s => s.name.toLowerCase() === selectedShop.toLowerCase())?.isOnline === false && (
+        <div className="mx-4 mt-3 p-3 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-900 text-xs flex items-center gap-2.5">
+          <span className="text-lg">🔴</span>
+          <div>
+            <p className="font-extrabold text-[12px] text-[#0A2E20]">{selectedShop} is currently Offline</p>
+            <p className="text-[10px] text-[#5C7A6D] font-medium leading-tight">This canteen is not accepting orders right now. Items below are for viewing only.</p>
+          </div>
+        </div>
+      )}
 
       {/* DEMO / LIVE backend banner */}
       {!isBackendConfigured && (
@@ -174,7 +443,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             }`}
           >
             <Flame className="w-3.5 h-3.5 text-amber-400" />
-            <span>Cooked Foods ({items.filter(i => i.category === 'cooked').length})</span>
+            <span>Cooked Foods ({totalByCategory.cooked})</span>
           </button>
 
           <button
@@ -186,164 +455,70 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Packed Foods ({items.filter(i => i.category === 'packed').length})</span>
+            <span>Packed Foods ({totalByCategory.packed})</span>
           </button>
         </div>
       </div>
 
-      {/* 2-COLUMN FOOD GRID */}
-      <div className="px-4 mt-3.5 grid grid-cols-2 gap-3">
-        {loading && displayedItems.length === 0 && (
-          <>
-            {[0, 1, 2, 3].map(i => (
-              <Card key={i} className="tactile-card rounded-[20px] p-2.5 animate-pulse">
-                <div className="w-full aspect-[4/3] rounded-[14px] bg-[#DDE2E8]" />
-                <div className="mt-2 px-1 space-y-1.5">
-                  <div className="h-3 w-3/4 rounded bg-[#DDE2E8]" />
-                  <div className="h-2.5 w-1/2 rounded bg-[#DDE2E8]" />
-                  <div className="h-3 w-1/3 rounded bg-[#DDE2E8]" />
-                </div>
-              </Card>
-            ))}
-          </>
-        )}
-
-        {displayedItems.map((item) => {
-          const isLiked = myReactions[item.id] === 'like';
-          const isDisliked = myReactions[item.id] === 'dislike';
-
-          return (
-            <Card
-              key={item.id}
-              className="tactile-card rounded-[20px] p-2.5 flex flex-col justify-between"
-            >
-              {/* Real Food Photograph with Live Badges */}
-              <div
-                className="w-full aspect-[4/3] rounded-[14px] overflow-hidden bg-slate-100 relative shadow-xs cursor-pointer"
-                onClick={() => onSelectItem?.(item)}
-                role="button"
-                aria-label={`View ${item.name} details`}
-              >
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover object-center transition-transform hover:scale-105 duration-300"
-                  loading="lazy"
-                />
-
-                {/* Bottom Scrim overlay for 100% text and badge readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
-
-                {/* Freshness Badge overlay */}
-                {item.freshnessTag && (
-                  <div className="absolute top-1.5 left-1.5 bg-[#062E16]/95 backdrop-blur-xs text-white text-[8px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/40 shadow-xs animate-scarcity">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>{item.freshnessTag}</span>
-                  </div>
-                )}
-
-                {/* Walking Time Pill overlay (high contrast on dark scrim) */}
-                <div className="absolute bottom-1.5 right-1.5 bg-[#062E16]/90 backdrop-blur-xs text-[#A7F3D0] text-[8.5px] font-extrabold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs border border-white/20">
-                  <Clock className="w-2.5 h-2.5 text-emerald-400" />
-                  <span>{item.walkTime}</span>
-                </div>
-              </div>
-
-              {/* Title & Info */}
-              <CardContent className="mt-2 px-1 p-0">
-                <h3 className="text-[13px] font-extrabold text-[#0A2E20] leading-snug line-clamp-1">
-                  {item.name}
-                </h3>
-                <p className="text-[10px] font-medium text-[#5C7A6D] mt-0.5 truncate flex items-center justify-between">
-                  <span>{item.vendor}</span>
-                  <span className="text-amber-600 font-bold">★ {item.rating}</span>
-                </p>
-                <div className="mt-1 flex items-baseline justify-between">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className={`text-[15px] font-black ${
-                      item.actionType === 'order' ? 'text-[#F26A00]' : 'text-[#09431B]'
-                    }`}>
-                      ₹{item.price}
-                    </span>
-                    {item.originalPrice && (
-                      <span className="text-[10px] text-[#7C9588] line-through font-semibold">
-                        ₹{item.originalPrice}
-                      </span>
-                    )}
-                  </div>
-                  {item.stockLeft != null && (
-                    <span className="text-[9px] font-bold text-[#D96C37]">
-                      {item.stockLeft} left
-                    </span>
-                  )}
-                </div>
-              </CardContent>
-
-              {/* Reactions Row: Like, Dislike, Review */}
-              <div className="mt-2 pt-1 border-t border-[#D6DCE2]/60 flex items-center justify-between px-1 text-[9px] text-[#5C7A6D]">
-                <button
-                  type="button"
-                  onClick={() => toggleLike(item.id)}
-                  className={`flex items-center gap-1 font-bold transition-all cursor-pointer ${
-                    isLiked ? 'text-[#09431B] scale-105' : 'hover:text-[#09431B]'
-                  }`}
-                  aria-label="Like item"
-                >
-                  <ThumbsUp className={`w-3 h-3 ${isLiked ? 'fill-[#09431B]' : ''}`} />
-                  <span>{item.likes}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => toggleDislike(item.id)}
-                  className={`flex items-center gap-1 font-medium transition-all cursor-pointer ${
-                    isDisliked ? 'text-red-600 scale-105' : 'hover:text-red-500'
-                  }`}
-                  aria-label="Dislike item"
-                >
-                  <ThumbsDown className={`w-3 h-3 ${isDisliked ? 'fill-red-500' : ''}`} />
-                  <span>{item.dislikes}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => onReview?.(item)}
-                  className="flex items-center gap-1 hover:text-[#09431B] font-medium transition-colors cursor-pointer"
-                  aria-label="Write a review"
-                >
-                  <MessageSquare className="w-3 h-3" />
-                  <span>{item.reviews}</span>
-                </button>
-              </div>
-
-              {/* Action Button: Unified 10px Rounded Rectangle with Consistent Intention */}
-              <div className="mt-2.5">
-                {item.actionType === 'walkin' ? (
-                  <Button
-                    onClick={() => onWalkIn?.(item)}
-                    variant="default"
-                    size="sm"
-                    className="w-full rounded-[10px] text-[11px] font-extrabold h-9 flex items-center justify-center gap-1.5 tracking-wide btn-green-shadow tactile-press cursor-pointer"
-                  >
-                    <MapPin className="w-3.5 h-3.5 fill-white/20" />
-                    <span>WALK-IN (MAPS)</span>
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => onOrderNow?.(item)}
-                    variant="orange"
-                    size="sm"
-                    className="w-full rounded-[10px] text-[11px] font-black h-9 flex items-center justify-center gap-1.5 tracking-wide btn-orange-shadow tactile-press cursor-pointer"
-                  >
-                    <ShoppingCart className="w-3.5 h-3.5 fill-white/20" />
-                    <span>+ ORDER • ₹{item.price}</span>
-                  </Button>
-                )}
+      {/* FOOD CARDS: GROUPED BY SHOP WHEN VIEWING ALL, OR FLAT GRID WHEN FILTERED */}
+      {loading && displayedItems.length === 0 ? (
+        <div className="px-4 mt-3.5 grid grid-cols-2 gap-3">
+          {[0, 1, 2, 3].map(i => (
+            <Card key={i} className="tactile-card rounded-[20px] p-2.5 animate-pulse">
+              <div className="w-full aspect-4/3 rounded-[14px] bg-[#DDE2E8]" />
+              <div className="mt-2 px-1 space-y-1.5">
+                <div className="h-3 w-3/4 rounded bg-[#DDE2E8]" />
+                <div className="h-2.5 w-1/2 rounded bg-[#DDE2E8]" />
+                <div className="h-3 w-1/3 rounded bg-[#DDE2E8]" />
               </div>
             </Card>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      ) : shopGroups ? (
+        /* Shop-grouped view: eliminates repeating tea/coffee/samosa loop */
+        <div className="px-4 mt-4 space-y-5">
+          {shopGroups.map(group => (
+            <div key={group.vendorName} className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  {group.shopMeta && (
+                    <img
+                      src={group.shopMeta.image}
+                      alt={group.vendorName}
+                      className="w-5 h-5 rounded-full object-cover ring-1 ring-emerald-600"
+                    />
+                  )}
+                  <h3 className="text-[12.5px] font-black text-[#0A2E20] leading-none">
+                    {group.vendorName}
+                  </h3>
+                  <span className="text-[9px] font-semibold text-[#5C7A6D]">
+                    • {group.shopMeta?.tag || group.shopMeta?.locationLandmark || 'Campus'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedShop(group.vendorName);
+                    onSelectShop?.(group.vendorName);
+                  }}
+                  className="text-[9.5px] font-bold text-[#09431B] bg-emerald-100/70 hover:bg-emerald-200/80 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
+                >
+                  View menu ({group.items.length})
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {group.items.map(item => renderFoodCard(item))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Filtered/Search view */
+        <div className="px-4 mt-3.5 grid grid-cols-2 gap-3">
+          {displayedItems.map(item => renderFoodCard(item))}
+        </div>
+      )}
 
       {displayedItems.length === 0 && (
         <div className="mx-4 mt-8 p-6 text-center bg-[#E8ECEF] rounded-2xl border border-[#D6DCE2]">
@@ -362,9 +537,6 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
           </Button>
         </div>
       )}
-
-      {/* Bottom iOS Home Indicator */}
-      <div className="w-24 h-1 bg-[#09431B]/30 rounded-full mx-auto mt-6" />
     </div>
   );
 };

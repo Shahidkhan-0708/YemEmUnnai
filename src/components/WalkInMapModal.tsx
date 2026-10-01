@@ -72,24 +72,36 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
   let pinY = 464;
   let routePath = 'M88 550H140V445H210V480';
 
-  if (vLower.includes('chai') || vLower.includes('nescafe')) {
+  if (vLower.includes('ekdant') || vLower.includes('library')) {
     buildingName = 'Central Library';
-    landmarkText = item.locationLandmark || 'Opposite Central Library Lawn';
+    landmarkText = item.locationLandmark || 'Beside Central Library Lawn';
     pinX = 72;
     pinY = 355;
     routePath = 'M88 550H88V415';
-  } else if (vLower.includes('royal') || item.isOnCampus === false) {
+  } else if (vLower.includes('lickies') || item.isOnCampus === false) {
     buildingName = 'Gate 1 (Off-Campus)';
-    landmarkText = item.locationLandmark || 'Angallu Main Road, 400m from Gate 1';
+    landmarkText = item.locationLandmark || 'Opposite Campus Gate 1';
     pinX = 265;
     pinY = 425;
     routePath = 'M88 550H140V445H275';
-  } else if (vLower.includes('hostel')) {
+  } else if (vLower.includes('new') || vLower.includes('hostel')) {
     buildingName = 'Hostel Block';
-    landmarkText = item.locationLandmark || 'Near Hostel Block B Entrance';
+    landmarkText = item.locationLandmark || 'Near Boys Hostel Block B';
     pinX = 77;
     pinY = 549;
     routePath = 'M88 550H88V570';
+  } else if (vLower.includes('cafe')) {
+    buildingName = 'Main Block';
+    landmarkText = item.locationLandmark || 'Near Main Block Lawn';
+    pinX = 195;
+    pinY = 360;
+    routePath = 'M88 550H140V390H195';
+  } else {
+    buildingName = 'Canteen';
+    landmarkText = item.locationLandmark || 'Campus Food Court • Ground Floor';
+    pinX = 197;
+    pinY = 464;
+    routePath = 'M88 550H140V445H210V480';
   }
 
   // Calculate dynamic walk time based on meters (avg walking speed ~80m/min)
@@ -122,7 +134,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Drag Handle */}
-        <div className="w-[45px] h-[4px] rounded-full bg-[#BAC8C0] mx-auto mb-2 shrink-0" />
+        <div className="w-11.25 h-1 rounded-full bg-[#BAC8C0] mx-auto mb-2 shrink-0" />
 
         {/* Top Header Row with Close button */}
         <div className="flex items-start justify-between">
@@ -151,9 +163,9 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="w-[30px] h-[30px] rounded-full bg-[#E8ECEF] border border-white flex items-center justify-center cursor-pointer hover:bg-slate-200 transition-colors shadow-xs"
+            className="w-7.5 h-7.5 rounded-full bg-[#E8ECEF] border border-white flex items-center justify-center cursor-pointer hover:bg-slate-200 transition-colors shadow-xs"
           >
-            <X className="w-[18px] h-[18px] text-[#0A2E20]" strokeWidth={2.2} />
+            <X className="w-4.5 h-4.5 text-[#0A2E20]" strokeWidth={2.2} />
           </button>
         </div>
 
@@ -187,7 +199,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
         {/* Content Tab 1: Campus Vector Schematic */}
         {activeTab === 'schematic' && (
           <div
-            className="w-full h-[225px] my-3 rounded-[20px] overflow-hidden relative border border-[#C4D2CB] shrink-0"
+            className="w-full h-56.25 my-3 rounded-[20px] overflow-hidden relative border border-[#C4D2CB] shrink-0"
             style={{ background: '#D8E5D6', boxShadow: 'inset 2px 2px 5px rgba(160,175,165,0.4)' }}
           >
             <svg
@@ -224,8 +236,13 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
                   </text>
 
                   {/* Main Block */}
-                  <rect x="157" y="367" width="90" height="48" rx="6" fill="#C0D0BD" stroke="#C9D0D8" />
-                  <text x="202" y="394" fontSize="9" fontWeight="600" fill="#668064" textAnchor="middle">Main Block</text>
+                  <rect
+                    x="157" y="367" width="90" height="48" rx="6"
+                    fill={buildingName.includes('Main') ? '#93BC8F' : '#C0D0BD'}
+                    stroke={buildingName.includes('Main') ? '#09431B' : '#C9D0D8'}
+                    strokeWidth={buildingName.includes('Main') ? 2 : 1}
+                  />
+                  <text x="202" y="394" fontSize="9" fontWeight={buildingName.includes('Main') ? 700 : 600} fill={buildingName.includes('Main') ? '#0A2E20' : '#668064'} textAnchor="middle">Main Block</text>
 
                   {/* Lab */}
                   <rect x="56" y="466" width="65" height="58" rx="6" fill="#C0D0BD" stroke="#C9D0D8" />
@@ -308,7 +325,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
 
         {/* Content Tab 2: Live GPS Radar & Heading */}
         {activeTab === 'gps' && (
-          <div className="w-full h-[225px] my-3 rounded-[20px] bg-[#121F17] border border-emerald-900/60 p-4 flex flex-col items-center justify-between text-white relative overflow-hidden">
+          <div className="w-full h-56.25 my-3 rounded-[20px] bg-[#121F17] border border-emerald-900/60 p-4 flex flex-col items-center justify-between text-white relative overflow-hidden">
             {/* Ambient concentric radar rings */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
               <div className="w-44 h-44 rounded-full border border-emerald-400" />
@@ -355,7 +372,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
         <button
           type="button"
           onClick={openGoogleMaps}
-          className="w-full h-[47px] rounded-[13px] bg-[#09431B] text-white text-[13px] font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#073515] btn-green-shadow tactile-press transition-all"
+          className="w-full h-11.75 rounded-[13px] bg-[#09431B] text-white text-[13px] font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#073515] btn-green-shadow tactile-press transition-all"
         >
           <ArrowRight className="w-4 h-4" strokeWidth={2.2} />
           <span>Open in Google Maps</span>

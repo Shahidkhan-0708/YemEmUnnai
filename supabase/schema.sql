@@ -49,6 +49,7 @@ create table if not exists public.reactions (
   constraint reactions_one_per_user_key unique (food_item_id, user_key)
 );
 create index if not exists reactions_item_idx on public.reactions (food_item_id);
+create index if not exists reactions_user_key_idx on public.reactions (user_key);
 
 -- Star reviews written from the feedback popup
 create table if not exists public.reviews (
@@ -382,13 +383,21 @@ where u.email = 'vendor@yememunnai.app'
     where i.user_id = u.id and i.provider_id = 'email'
   );
 
--- Shops matching the current UI
+-- Shops matching the current UI (images ↔ names mirror src/lib/mockData.ts)
 insert into public.vendors (id, name, image_url, is_active, is_online) values
-  ('a0000000-0000-4000-8000-000000000001', 'MITS Canteen', '/images/shop_canteen.jpg', true,  true),
-  ('a0000000-0000-4000-8000-000000000002', 'Royal Hotel',  '/images/shop_royal.jpg',   false, false),
-  ('a0000000-0000-4000-8000-000000000003', 'Chai Corner',  '/images/shop_chai.jpg',    false, false),
-  ('a0000000-0000-4000-8000-000000000004', 'Vatika',       '/images/shop_yat.jpg',     false, false),
-  ('a0000000-0000-4000-8000-000000000005', 'Lays Corner',  '/images/lays_packet.jpg',  false, false)
+  ('a0000000-0000-4000-8000-000000000001', 'MITS Canteen', '/images/shop_mits_canteen.jpg', true, true),
+  ('a0000000-0000-4000-8000-000000000006', 'MITS Cafe',    '/images/shop_mits_cafe.jpg',    true, true),
+  ('a0000000-0000-4000-8000-000000000007', "Ekdant's Cafe", '/images/shop_ekdants_cafe.jpg', true, true),
+  ('a0000000-0000-4000-8000-000000000008', 'Lickies',      '/images/shop_lickies.jpg',      true, true),
+  ('a0000000-0000-4000-8000-000000000009', 'New Cafe',     '/images/shop_new_cafe.jpg',     true, true)
+on conflict (name) do nothing;
+
+-- Keep the extra legacy vendors (not shown on the home grid; is_active = false)
+insert into public.vendors (id, name, image_url, is_active, is_online) values
+  ('a0000000-0000-4000-8000-000000000002', 'Royal Hotel',  '/images/shop_royal.jpg',  false, false),
+  ('a0000000-0000-4000-8000-000000000003', 'Chai Corner',  '/images/shop_chai.jpg',   false, false),
+  ('a0000000-0000-4000-8000-000000000004', 'Vatika',       '/images/shop_yat.jpg',    false, false),
+  ('a0000000-0000-4000-8000-000000000005', 'Lays Corner',  '/images/lays_packet.jpg', false, false)
 on conflict (name) do nothing;
 
 -- Link the demo login to MITS Canteen so the business portal controls it
@@ -399,16 +408,42 @@ update public.vendors v
    and v.name = 'MITS Canteen'
    and v.owner_id is null;
 
--- Menu items matching the current mock data (counter values kept for parity)
+-- Menu items matching the current mock data + supabase/seed_menus.mjs
+-- (names ↔ prices ↔ photos must stay in sync across all three sources)
 insert into public.food_items
-  (vendor_id, name, price, category, action_type, image_url, in_stock,
+  (id, vendor_id, name, price, category, action_type, image_url, in_stock,
    likes_count, dislikes_count, reviews_count)
 values
-  ('a0000000-0000-4000-8000-000000000001', 'Samosa', 20, 'cooked', 'walkin', '/images/samosa.jpg',    true, 45, 2,  3),
-  ('a0000000-0000-4000-8000-000000000002', 'Biryani', 15, 'cooked', 'order',  '/images/biryani.jpg',   true, 89, 1, 12),
-  ('a0000000-0000-4000-8000-000000000001', 'Lays',    20, 'packed', 'walkin', '/images/chips_bowl.jpg', true, 38, 3,  5),
-  ('a0000000-0000-4000-8000-000000000005', 'Lays',    20, 'packed', 'order',  '/images/lays_packet.jpg', true, 94, 2, 18)
+  -- MITS Canteen: Tea ₹10 · Coffee ₹10 · Samosa ₹15
+  ('b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'Tea',    10, 'cooked', 'walkin', '/images/item_tea.jpg',            true, 64, 4, 21),
+  ('b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Coffee', 10, 'cooked', 'walkin', '/images/item_coffee.jpg',         true, 71, 3, 25),
+  ('b0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000001', 'Samosa', 15, 'cooked', 'order',  '/images/item_samosa_chicken.jpg', true, 88, 2, 34),
+  -- MITS Cafe: Tea ₹15 · Coffee ₹20 · Black coffee ₹30 · Sonti coffee ₹30 · Milk ₹15 · Batanees ₹20
+  ('b0000000-0000-4000-8000-000000000011', 'a0000000-0000-4000-8000-000000000006', 'Tea',          15, 'cooked', 'walkin', '/images/item_tea.jpg',          true, 52, 3, 18),
+  ('b0000000-0000-4000-8000-000000000012', 'a0000000-0000-4000-8000-000000000006', 'Coffee',       20, 'cooked', 'walkin', '/images/item_coffee.jpg',       true, 60, 2, 22),
+  ('b0000000-0000-4000-8000-000000000013', 'a0000000-0000-4000-8000-000000000006', 'Black Coffee', 30, 'cooked', 'walkin', '/images/item_black_coffee.jpg', true, 34, 1, 11),
+  ('b0000000-0000-4000-8000-000000000014', 'a0000000-0000-4000-8000-000000000006', 'Sonti Coffee', 30, 'cooked', 'walkin', '/images/item_sonti_coffee.jpg', true, 41, 1, 14),
+  ('b0000000-0000-4000-8000-000000000015', 'a0000000-0000-4000-8000-000000000006', 'Milk',         15, 'cooked', 'walkin', '/images/item_milk.jpg',         true, 29, 2,  9),
+  ('b0000000-0000-4000-8000-000000000016', 'a0000000-0000-4000-8000-000000000006', 'Batanees',     20, 'packed', 'order',  '/images/item_batanees.jpg',     true, 55, 3, 19),
+  -- Ekdant's Cafe: Tea ₹10 · Coffee ₹10 · Samosa ₹15 · Mirchi bajji 3 for ₹20
+  ('b0000000-0000-4000-8000-000000000021', 'a0000000-0000-4000-8000-000000000007', 'Tea',    10, 'cooked', 'walkin', '/images/item_tea.jpg',         true, 47, 2, 15),
+  ('b0000000-0000-4000-8000-000000000022', 'a0000000-0000-4000-8000-000000000007', 'Coffee', 10, 'cooked', 'walkin', '/images/item_coffee.jpg',      true, 51, 3, 17),
+  ('b0000000-0000-4000-8000-000000000023', 'a0000000-0000-4000-8000-000000000007', 'Samosa', 15, 'cooked', 'order',  '/images/item_samosa_corn.jpg', true, 66, 2, 23),
+  ('b0000000-0000-4000-8000-000000000024', 'a0000000-0000-4000-8000-000000000007', 'Mirchi Bajji (3 pcs)', 20, 'cooked', 'walkin', '/images/item_mirchi_bajji.jpg', true, 73, 4, 27),
+  -- Lickies: Tea ₹10 · Coffee ₹10 · Samosa ₹15 · Popsicles from ₹10
+  ('b0000000-0000-4000-8000-000000000031', 'a0000000-0000-4000-8000-000000000008', 'Tea',      10, 'cooked', 'walkin', '/images/item_tea.jpg',           true, 39, 2, 12),
+  ('b0000000-0000-4000-8000-000000000032', 'a0000000-0000-4000-8000-000000000008', 'Coffee',   10, 'cooked', 'walkin', '/images/item_coffee.jpg',        true, 44, 2, 14),
+  ('b0000000-0000-4000-8000-000000000033', 'a0000000-0000-4000-8000-000000000008', 'Samosa',   15, 'cooked', 'order',  '/images/item_samosa_chicken.jpg', true, 58, 3, 20),
+  ('b0000000-0000-4000-8000-000000000034', 'a0000000-0000-4000-8000-000000000008', 'Popsicle', 10, 'packed', 'walkin', '/images/item_popsicle.svg',      true, 82, 3, 31),
+  -- New Cafe: Tea ₹10 · Coffee ₹10 · Samosa ₹15
+  ('b0000000-0000-4000-8000-000000000041', 'a0000000-0000-4000-8000-000000000009', 'Tea',    10, 'cooked', 'walkin', '/images/item_tea.jpg',            true, 36, 2, 11),
+  ('b0000000-0000-4000-8000-000000000042', 'a0000000-0000-4000-8000-000000000009', 'Coffee', 10, 'cooked', 'walkin', '/images/item_coffee.jpg',         true, 40, 2, 13),
+  ('b0000000-0000-4000-8000-000000000043', 'a0000000-0000-4000-8000-000000000009', 'Samosa', 15, 'cooked', 'order',  '/images/item_samosa_chicken.jpg', true, 54, 3, 18)
 on conflict (vendor_id, name) do nothing;
+
+-- Retire the old demo rows (Biryani/Lays placeholders with wrong prices/photos)
+delete from public.food_items
+ where name in ('Biryani', 'Lays', 'QA Paneer Roll');
 
 -- ============================================================================
 -- Done. Next steps:

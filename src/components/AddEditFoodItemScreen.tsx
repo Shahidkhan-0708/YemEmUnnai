@@ -1,10 +1,10 @@
 import React, { useRef, useState } from 'react';
-import { X, Upload, CheckCircle, AlertCircle, ChevronDown } from 'lucide-react';
+import { X, Upload, CheckCircle, AlertCircle, ShoppingCart, MapPin } from 'lucide-react';
 import { createFoodItem, uploadFoodPhoto } from '../lib/api';
 import { useModalA11y } from '../lib/useModalA11y';
 import { isBackendConfigured } from '../lib/supabase';
 import { useVendorSession } from '../lib/hooks';
-import type { FoodCategory } from '../lib/types';
+import type { FoodCategory, ActionType } from '../lib/types';
 
 interface AddEditFoodItemScreenProps {
   isOpen: boolean;
@@ -41,6 +41,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState<FoodCategory>('cooked');
+  const [actionType, setActionType] = useState<ActionType>('order');
   const [price, setPrice] = useState('');
   const [vegetarian, setVegetarian] = useState(true);
   const [photo, setPhoto] = useState<File | null>(null);
@@ -95,21 +96,20 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
         setUploadedUrl(imageUrl);
       }
 
-      // 2. Insert the item (live mode only)
-      if (isBackendConfigured) {
-        const created = await createFoodItem(vendor.vendorId, {
-          name: name.trim(),
-          price: priceNum,
-          category,
-          actionType: category === 'cooked' ? 'walkin' : 'order',
-          inStock: true,
-          imageUrl
-        });
-        if (!created) {
-          setError('Could not publish the item. Try again.');
-          setSubmitting(false);
-          return;
-        }
+      // 2. Insert the item
+      const created = await createFoodItem(vendor.vendorId, {
+        name: name.trim(),
+        price: priceNum,
+        category,
+        actionType,
+        inStock: true,
+        imageUrl,
+        isVeg: vegetarian
+      });
+      if (!created && isBackendConfigured) {
+        setError('Could not publish the item. Try again.');
+        setSubmitting(false);
+        return;
       }
 
       setSubmitting(false);
@@ -121,6 +121,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
         // reset form
         setName('');
         setPrice('');
+        setActionType('order');
         setPhoto(null);
         setPhotoPreview(null);
         setUploadedUrl(null);
@@ -143,12 +144,12 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label="Add or edit food item"
-        className="absolute left-[13px] right-[13px] top-[174px] bottom-[27px] rounded-[27px] bg-[#E8ECEF] border border-white/60 overflow-y-auto no-scrollbar animate-in fade-in slide-in-from-bottom-6 duration-200"
+        className="absolute left-3.25 right-3.25 top-43.5 bottom-6.75 rounded-[27px] bg-[#E8ECEF] border border-white/60 overflow-y-auto no-scrollbar animate-in fade-in slide-in-from-bottom-6 duration-200"
         style={{ boxShadow: '-6px -6px 12px rgba(255,255,255,0.85), 6px 6px 12px rgba(163,174,187,0.45)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {submitted ? (
-          <div className="h-full min-h-[560px] flex flex-col items-center justify-center text-center px-[18px]">
+          <div className="h-full min-h-140 flex flex-col items-center justify-center text-center px-4.5">
             <CheckCircle className="w-14 h-14 text-[#09431B]" />
             <h3 className="text-[17px] font-extrabold text-[#0A2E20] mt-3">Item Published!</h3>
             <p className="text-[11px] font-semibold text-[#5C7A6D] mt-1">
@@ -158,32 +159,32 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
         ) : (
           <form onSubmit={handleSubmit}>
             {/* Handle — 45×4, 9px from top */}
-            <div className="mx-auto mt-[9px] w-[45px] h-[4px] rounded-[2px] bg-[#BAC8C0]" />
+            <div className="mx-auto mt-2.25 w-11.25 h-1 rounded-xs bg-[#BAC8C0]" />
 
             {/* Close — 28px circle #DDE7E1, center (334,199) → 25px from sheet top */}
             <button
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="absolute left-[307px] top-[11px] w-[28px] h-[28px] rounded-full bg-[#E8ECEF] flex items-center justify-center cursor-pointer"
+              className="absolute left-76.75 top-2.75 w-7 h-7 rounded-full bg-[#E8ECEF] flex items-center justify-center cursor-pointer"
             >
-              <X className="w-[18px] h-[18px] text-[#0A2E20]" strokeWidth={2.2} />
+              <X className="w-4.5 h-4.5 text-[#0A2E20]" strokeWidth={2.2} />
             </button>
 
-            <div className="px-[18px] pb-[27px]">
+            <div className="px-4.5 pb-6.75">
               {/* Title — baseline y=215 (41px from sheet top) */}
-              <h2 className="mt-[21px] text-[17px] font-extrabold leading-[22px] text-[#0A2E20]">
+              <h2 className="mt-5.25 text-[17px] font-extrabold leading-5.5 text-[#0A2E20]">
                 Add &amp; Edit Food Item
               </h2>
               {/* Subtitle — baseline y=231 */}
-              <p className="mt-[1px] text-[11px] font-semibold leading-[14px] text-[#5C7A6D]">
+              <p className="mt-px text-[11px] font-semibold leading-3.5 text-[#5C7A6D]">
                 Manage live canteen inventory
               </p>
 
               {/* Title field — label baseline y=254, input y=265 h=43 rx=21 */}
               <label
                 htmlFor="aef-title"
-                className="block mt-[16px] text-[13px] font-bold leading-[17px] text-[#0A2E20]"
+                className="block mt-4 text-[13px] font-bold leading-4.25 text-[#0A2E20]"
               >
                 Title
               </label>
@@ -194,15 +195,18 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Add food item"
-                className="mt-[5px] w-full h-[43px] rounded-[21px] bg-[#E8ECEF] border border-[#D6DCE2] px-[14px] text-[12px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
+                className="mt-1.25 w-full h-10.75 rounded-[21px] bg-[#E8ECEF] border border-[#D6DCE2] px-3.5 text-[12px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
                 style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
               />
 
-              {/* Category — label baseline y=336, two 154×43 rx=20 selects */}
-              <span className="block mt-[24px] text-[13px] font-bold leading-[17px] text-[#0A2E20]">
+              {/* Category — Single segmented control */}
+              <span className="block mt-6 text-[13px] font-bold leading-4.25 text-[#0A2E20]">
                 Category
               </span>
-              <div className="mt-[6px] flex gap-[9px]">
+              <div
+                className="mt-1.5 w-full h-11 rounded-[22px] bg-[#E8ECEF] border border-[#D6DCE2] p-0.75 flex"
+                style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
+              >
                 {(['cooked', 'packed'] as const).map((cat) => {
                   const selected = category === cat;
                   return (
@@ -211,40 +215,74 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                       type="button"
                       onClick={() => setCategory(cat)}
                       aria-pressed={selected}
-                      className="relative w-[154px] h-[43px] rounded-[20px] bg-[#E8ECEF] border border-[#D6DCE2] text-left pl-[14px] pr-[26px] cursor-pointer focus:outline-none"
-                      style={{
-                        boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)',
-                        borderColor: selected ? '#09431B' : '#D6DCE2'
-                      }}
+                      className={`flex-1 h-full rounded-[18px] text-[12px] font-extrabold capitalize transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        selected
+                          ? 'bg-[#09431B] text-white shadow-sm'
+                          : 'text-[#0A2E20]/70 hover:text-[#0A2E20]'
+                      }`}
                     >
-                      <span
-                        className={`text-[13px] font-semibold capitalize ${
-                          selected ? 'text-[#0A2E20]' : 'text-[#0A2E20]/70'
-                        }`}
-                      >
-                        {cat}
-                      </span>
-                      <ChevronDown
-                        className="absolute right-[9px] top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#09431B]"
-                        strokeWidth={1.9}
-                      />
+                      <span>{cat === 'cooked' ? '🍳 Cooked Food' : '📦 Packed Food'}</span>
                     </button>
                   );
                 })}
               </div>
 
+              {/* Service Mode — Walk-In or Order Toggle */}
+              <div className="mt-5">
+                <div className="flex items-center justify-between">
+                  <span className="block text-[13px] font-bold leading-4.25 text-[#0A2E20]">
+                    Service Mode
+                  </span>
+                  <span className="text-[10px] font-semibold text-[#5C7A6D]">
+                    {actionType === 'order' ? 'Students order & pay in app' : 'Students walk in with live map'}
+                  </span>
+                </div>
+                <div
+                  className="mt-1.5 w-full h-11 rounded-[22px] bg-[#E8ECEF] border border-[#D6DCE2] p-0.75 flex gap-1"
+                  style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActionType('walkin')}
+                    aria-pressed={actionType === 'walkin'}
+                    className={`flex-1 h-full rounded-[18px] text-[12px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      actionType === 'walkin'
+                        ? 'bg-[#09431B] text-white shadow-sm'
+                        : 'text-[#0A2E20]/70 hover:text-[#0A2E20]'
+                    }`}
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>Walk-In</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActionType('order')}
+                    aria-pressed={actionType === 'order'}
+                    className={`flex-1 h-full rounded-[18px] text-[12px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      actionType === 'order'
+                        ? 'bg-[#F26A00] text-white shadow-sm'
+                        : 'text-[#0A2E20]/70 hover:text-[#0A2E20]'
+                    }`}
+                  >
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    <span>Order</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Price — label baseline y=423, input 317×43 rx=21 */}
               <label
                 htmlFor="aef-price"
-                className="block mt-[24px] text-[13px] font-bold leading-[17px] text-[#0A2E20]"
+                className="block mt-6 text-[13px] font-bold leading-4.25 text-[#0A2E20]"
               >
                 Price
               </label>
               <div
-                className="mt-[5px] w-full h-[43px] rounded-[21px] bg-[#E8ECEF] border border-[#D6DCE2] flex items-center px-[14px]"
+                className="mt-1.25 w-full h-10.75 rounded-[21px] bg-[#E8ECEF] border border-[#D6DCE2] flex items-center px-3.5"
                 style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
               >
-                <span className="text-[12px] font-medium text-[#6B8075] mr-[6px]">₹</span>
+                <span className="text-[12px] font-medium text-[#6B8075] mr-1.5">₹</span>
                 <input
                   id="aef-price"
                   type="number"
@@ -258,12 +296,12 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
               </div>
 
               {/* Vegetarian Only — label y=508, sub y=523; switch 50×28 knob right */}
-              <div className="mt-[24px] flex items-center justify-between">
+              <div className="mt-6 flex items-center justify-between">
                 <div>
-                  <span className="block text-[13px] font-bold leading-[17px] text-[#0A2E20]">
+                  <span className="block text-[13px] font-bold leading-4.25 text-[#0A2E20]">
                     Vegetarian Only
                   </span>
-                  <span className="block mt-[1px] text-[10px] font-medium leading-[13px] text-[#5C7A6D]">
+                  <span className="block mt-px text-[10px] font-medium leading-3.25 text-[#5C7A6D]">
                     Pure veg preparation
                   </span>
                 </div>
@@ -273,14 +311,14 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                   aria-checked={vegetarian}
                   aria-label="Vegetarian only"
                   onClick={() => setVegetarian(v => !v)}
-                  className="relative w-[50px] h-[28px] rounded-[14px] cursor-pointer transition-colors shrink-0"
+                  className="relative w-12.5 h-7 rounded-[14px] cursor-pointer transition-colors shrink-0"
                   style={{
                     background: vegetarian ? '#09431B' : '#C9D0D8',
                     boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)'
                   }}
                 >
                   <span
-                    className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all"
+                    className="absolute top-0.75 w-5.5 h-5.5 rounded-full bg-white transition-all"
                     style={{ left: vegetarian ? 25 : 3 }}
                   />
                 </button>
@@ -297,7 +335,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-[16px] w-full h-[143px] rounded-[20px] border-[1.5px] border-dashed border-[#C2C9D1] bg-[#E8ECEF] flex flex-col items-center justify-center cursor-pointer hover:bg-[#D3DFDA] transition-colors overflow-hidden"
+                className="mt-4 w-full h-35.75 rounded-[20px] border-[1.5px] border-dashed border-[#C2C9D1] bg-[#E8ECEF] flex flex-col items-center justify-center cursor-pointer hover:bg-[#D3DFDA] transition-colors overflow-hidden"
               >
                 {photoPreview ? (
                   <img
@@ -307,11 +345,11 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                   />
                 ) : (
                   <>
-                    <Upload className="w-[30px] h-[30px] text-[#789184]" strokeWidth={1.9} />
-                    <span className="mt-[12px] text-[14px] font-semibold text-[#5C7A6D]">
+                    <Upload className="w-7.5 h-7.5 text-[#789184]" strokeWidth={1.9} />
+                    <span className="mt-3 text-[14px] font-semibold text-[#5C7A6D]">
                       Upload Photo
                     </span>
-                    <span className="mt-[4px] text-[10px] font-medium text-[#71867A]">
+                    <span className="mt-1 text-[10px] font-medium text-[#71867A]">
                       JPG or PNG
                     </span>
                   </>
@@ -319,14 +357,14 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
               </button>
 
               {error && (
-                <div role="alert" className="mt-[10px] flex items-center gap-1.5 text-[10px] font-bold text-red-600">
+                <div role="alert" className="mt-2.5 flex items-center gap-1.5 text-[10px] font-bold text-red-600">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
 
               {!isBackendConfigured && (
-                <p className="mt-[8px] text-[9px] text-amber-700 font-bold">
+                <p className="mt-2 text-[9px] text-amber-700 font-bold">
                   Demo mode — add Supabase keys to publish for real.
                 </p>
               )}
@@ -335,7 +373,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-[28px] w-full h-[47px] rounded-[12px] bg-[#09431B] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#073515] active:scale-[0.98] transition-all"
+                className="mt-7 w-full h-11.75 rounded-xl bg-[#09431B] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#073515] active:scale-[0.98] transition-all"
                 style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
               >
                 {submitting ? 'Publishing…' : 'Publish to YEMEMUNNAI'}

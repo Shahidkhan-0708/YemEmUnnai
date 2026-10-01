@@ -1,14 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   fetchFoodItems,
   fetchShops,
   fetchMyReactions,
   setReaction,
+  fetchItemReactionCounts,
   signInVendor,
+  signInVendorByPin,
+  signInDemoVendor,
   signOutVendor,
   getMyVendor,
   subscribeVendorOrders,
-  fetchVendorStats
+  fetchVendorStats,
+  subscribeCatalogUpdates
 } from './api';
 import { DEFAULT_FOOD_ITEMS, LOCAL_SHOPS } from './mockData';
 import type { FoodCategory, FoodItem, ShopEntry, DashboardOrder, VendorStats } from './types';
@@ -17,44 +21,73 @@ import type { FoodCategory, FoodItem, ShopEntry, DashboardOrder, VendorStats } f
 // Consumer discovery
 // ---------------------------------------------------------------------------
 
-/** Live food items for the discovery grid. Falls back to mock data in demo mode. */
-export function useFoodItems(category: FoodCategory): { items: FoodItem[]; loading: boolean } {
-  const [items, setItems] = useState<FoodItem[]>(() =>
-    DEFAULT_FOOD_ITEMS.filter(i => i.category === category)
-  );
+/**
+ * Live food items for the discovery grid. Fetches the full list
+ * and filters client-side, while subscribing to realtime catalog updates.
+ */
+export function useFoodItems(category: FoodCategory): {
+  items: FoodItem[];
+  loading: boolean;
+  totalByCategory: Record<FoodCategory, number>;
+} {
+  const [allItems, setAllItems] = useState<FoodItem[]>(DEFAULT_FOOD_ITEMS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
 
-    fetchFoodItems(category)
-      .then(list => {
-        if (!cancelled) setItems(list.filter(i => i.category === category));
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    const reload = () => {
+      fetchFoodItems()
+        .then(list => {
+          if (!cancelled && list.length > 0) setAllItems(list);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    };
+
+    reload();
+    const unsub = subscribeCatalogUpdates(reload);
 
     return () => {
       cancelled = true;
+      unsub();
     };
-  }, [category]);
+  }, []);
 
-  return { items, loading };
+  const items = useMemo(
+    () => allItems.filter(i => i.category === category),
+    [allItems, category]
+  );
+
+  const totalByCategory = useMemo(() => {
+    const counts = { cooked: 0, packed: 0 } as Record<FoodCategory, number>;
+    for (const item of allItems) counts[item.category] = (counts[item.category] ?? 0) + 1;
+    return counts;
+  }, [allItems]);
+
+  return { items, loading, totalByCategory };
 }
 
-/** Shop avatars for the "Local Shops" row. */
+/** Shop avatars for the "Local Shops" row. Subscribes to realtime catalog updates. */
 export function useShops(): ShopEntry[] {
   const [shops, setShops] = useState<ShopEntry[]>(LOCAL_SHOPS);
 
   useEffect(() => {
     let cancelled = false;
-    fetchShops().then(list => {
-      if (!cancelled) setShops(list);
-    });
+
+    const reload = () => {
+      fetchShops().then(list => {
+        if (!cancelled && list.length > 0) setShops(list);
+      });
+    };
+
+    reload();
+    const unsub = subscribeCatalogUpdates(reload);
+
     return () => {
       cancelled = true;
+      unsub();
     };
   }, []);
 
@@ -81,13 +114,13 @@ export function useReactions(items: FoodItem[]) {
 
   useEffect(() => {
     setCounts(prev => {
-      const next = prev;
+      const next = { ...prev };
       for (const item of items) {
         if (!(item.id in prev)) {
           next[item.id] = { likes: item.likes, dislikes: item.dislikes };
         }
       }
-      return { ...next };
+      return next;
     });
   }, [items]);
 
@@ -129,19 +162,15 @@ export function useReactions(items: FoodItem[]) {
         return next;
       });
 
-      // Persist
+      // Persist without refetching the entire catalog (Scale P0 fix)
       void setReaction(itemId, value).then(() => {
-        // Reconcile counts from server after the write settles
-        void fetchFoodItems().then(list => {
-          setCounts(prev => {
-            const next = { ...prev };
-            for (const item of list) {
-              if (next[item.id]) {
-                next[item.id] = { likes: item.likes, dislikes: item.dislikes };
-              }
-            }
-            return next;
-          });
+        void fetchItemReactionCounts(itemId).then(counts => {
+          if (counts) {
+            setCounts(prev => ({
+              ...prev,
+              [itemId]: counts
+            }));
+          }
         });
       });
     },
@@ -163,41 +192,81 @@ export interface VendorSession {
   vendorName: string;
 }
 
-/** Vendor login state; auto-restores the session on page load. */
+// ---------------------------------------------------------------------------
+// Shared vendor session store
+// ---------------------------------------------------------------------------
+// VendorLoginModal and BusinessDashboardScreen each call useVendorSession(),
+// so the session must live OUTSIDE React state — otherwise a sign-in in the
+// modal never flips the dashboard's login gate (two isolated copies).
+
+let sharedVendor: VendorSession | null = null;
+const vendorListeners = new Set<(v: VendorSession | null) => void>();
+
+function publishVendor(next: VendorSession | null) {
+  sharedVendor = next;
+  for (const listener of vendorListeners) listener(next);
+}
+
+/** Vendor login state; auto-restores the session on page load. Shared across all callers. */
 export function useVendorSession(): {
   vendor: VendorSession | null;
   checking: boolean;
   signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  signInWithPin: (pin: string) => Promise<{ ok: boolean; error?: string }>;
+  signInDemo: () => Promise<{ ok: boolean; error?: string }>;
   signOut: () => Promise<void>;
 } {
-  const [vendor, setVendor] = useState<VendorSession | null>(null);
-  const [checking, setChecking] = useState(true);
+  const [vendor, setVendor] = useState<VendorSession | null>(sharedVendor);
+  const [checking, setChecking] = useState(() => sharedVendor === null);
 
   useEffect(() => {
+    const listener = (v: VendorSession | null) => setVendor(v);
+    vendorListeners.add(listener);
+    setVendor(sharedVendor);
+
+    if (sharedVendor !== null) {
+      // Another component (e.g. the login modal) already established a session.
+      setChecking(false);
+      return () => vendorListeners.delete(listener);
+    }
+
     let cancelled = false;
     getMyVendor().then(v => {
       if (!cancelled) {
-        if (v) setVendor({ vendorId: v.id, vendorName: v.name });
+        if (v) publishVendor({ vendorId: v.id, vendorName: v.name });
         setChecking(false);
       }
     });
     return () => {
       cancelled = true;
+      vendorListeners.delete(listener);
     };
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const res = await signInVendor(email, password);
-    if (res.ok) setVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
+    if (res.ok) publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
+    return res.ok ? { ok: true } : { ok: false, error: res.error };
+  }, []);
+
+  const signInWithPin = useCallback(async (pin: string) => {
+    const res = await signInVendorByPin(pin);
+    if (res.ok) publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
+    return res.ok ? { ok: true } : { ok: false, error: res.error };
+  }, []);
+
+  const signInDemo = useCallback(async () => {
+    const res = await signInDemoVendor();
+    if (res.ok) publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
     return res.ok ? { ok: true } : { ok: false, error: res.error };
   }, []);
 
   const signOut = useCallback(async () => {
     await signOutVendor();
-    setVendor(null);
+    publishVendor(null);
   }, []);
 
-  return { vendor, checking, signIn, signOut };
+  return { vendor, checking, signIn, signInWithPin, signInDemo, signOut };
 }
 
 /** Realtime incoming-order feed for the signed-in vendor. */

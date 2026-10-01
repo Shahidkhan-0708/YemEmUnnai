@@ -102,12 +102,12 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label={`Rate and review ${item.name}`}
-        className="absolute left-[13px] right-[13px] top-[270px] h-[440px] rounded-[27px] bg-[#E8ECEF] border border-white/60 overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
+        className="absolute left-3.25 right-3.25 top-67.5 h-110 rounded-[27px] bg-[#E8ECEF] border border-white/60 overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
         style={{ boxShadow: '-6px -6px 12px rgba(255,255,255,0.85), 6px 6px 12px rgba(163,174,187,0.45)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {submitted ? (
-          <div className="h-full flex flex-col items-center justify-center text-center px-[18px]">
+          <div className="h-full flex flex-col items-center justify-center text-center px-4.5">
             <ThumbsUp className="w-14 h-14 text-[#09431B]" />
             <h3 className="text-[17px] font-extrabold text-[#0A2E20] mt-3">Review Published!</h3>
             <p className="text-[11px] font-semibold text-[#5C7A6D] mt-1">
@@ -117,36 +117,36 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         ) : (
           <div>
             {/* Handle — 45×4, 9px from top */}
-            <div className="mx-auto mt-[9px] w-[45px] h-[4px] rounded-[2px] bg-[#BAC8C0]" />
+            <div className="mx-auto mt-2.25 w-11.25 h-1 rounded-xs bg-[#BAC8C0]" />
 
             {/* Close X — 18px icon, center (337.5, 304) — 24px hit area */}
             <button
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="absolute top-[21px] right-[10px] w-[24px] h-[24px] flex items-center justify-center cursor-pointer"
+              className="absolute top-5.25 right-2.5 w-6 h-6 flex items-center justify-center cursor-pointer"
             >
-              <X className="w-[19px] h-[19px] text-[#6A8174]" strokeWidth={1.9} />
+              <X className="w-4.75 h-4.75 text-[#6A8174]" strokeWidth={1.9} />
             </button>
 
-            <div className="px-[18px]">
+            <div className="px-4.5">
               {/* Title — baseline y=310 */}
-              <h2 className="mt-[14px] text-[17px] font-extrabold leading-[22px] text-[#0A2E20]">
+              <h2 className="mt-3.5 text-[17px] font-extrabold leading-5.5 text-[#0A2E20]">
                 Rating &amp; Feedback
               </h2>
               {/* Subtitle — baseline y=327 */}
-              <p className="mt-[1px] text-[11px] font-semibold leading-[14px] text-[#5C7A6D]">
+              <p className="mt-px text-[11px] font-semibold leading-3.5 text-[#5C7A6D]">
                 Help {item.vendor} improve live batch quality
               </p>
 
               {/* Divider — y=336 */}
-              <div className="mt-[7px] h-px bg-[#CAD8D0]" />
+              <div className="mt-1.75 h-px bg-[#CAD8D0]" />
 
               {/* Rate your stars — baseline y=343 */}
-              <div className="mt-[5px] text-[13px] font-bold text-[#0A2E20]">Rate your stars</div>
+              <div className="mt-1.25 text-[13px] font-bold text-[#0A2E20]">Rate your stars</div>
 
               {/* 5 stars — 59px pitch, centers y=376.2, R_out 13.75 / R_in 5.5 */}
-              <div className="mt-[3px] flex items-center gap-[31px]">
+              <div className="mt-0.75 flex items-center gap-7.75">
                 {[0, 1, 2, 3, 4].map((i) => {
                   const idx = i + 1;
                   const active = idx <= activeCount;
@@ -174,43 +174,38 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 })}
               </div>
 
-              {/* Like / Dislike row — like group at x≈36, toggle at x=146 (43×24), dislike at x≈235 */}
-              <div className="mt-[26px] flex items-center">
-                <div className="flex items-center gap-[9px]">
-                  <ThumbsUp className="w-[21px] h-[21px] text-[#5C7A6D]" strokeWidth={1.9} />
-                  <span className="text-[13px] font-bold text-[#0A2E20]">Like</span>
-                </div>
-
-                {/* Toggle — 43×24 rx=12; knob d=18 left (#ABB8B0 track) / right (#09431B) */}
+              {/* Like / Dislike Selector — Two intuitive tactile pill buttons */}
+              <div className="mt-5.5 flex items-center gap-3">
                 <button
                   type="button"
-                  role="switch"
-                  aria-checked={isLiked}
-                  aria-label="Toggle like"
-                  onClick={() => setIsLiked(v => !v)}
-                  className="relative ml-[48px] w-[43px] h-[24px] rounded-[12px] cursor-pointer transition-colors"
-                  style={{
-                    background: isLiked ? '#09431B' : '#AEB8C2',
-                    boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)'
-                  }}
+                  onClick={() => setIsLiked(true)}
+                  className={`flex-1 h-9.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                    isLiked
+                      ? 'bg-[#09431B] text-white btn-green-shadow font-extrabold'
+                      : 'bg-[#E8ECEF] border border-[#CAD8D0] text-[#5C7A6D] hover:text-[#0A2E20]'
+                  }`}
                 >
-                  <span
-                    className="absolute top-[3px] w-[18px] h-[18px] rounded-full bg-[#F3F8F5] transition-all"
-                    style={{ left: isLiked ? 22 : 3 }}
-                  />
+                  <ThumbsUp className={`w-4.5 h-4.5 ${isLiked ? 'text-white' : 'text-[#5C7A6D]'}`} strokeWidth={2} />
+                  <span className="text-[13px]">Like</span>
                 </button>
 
-                {/* Dislike — icon rotated 180°, at x≈235 from sheet */}
-                <div className="ml-[42px] flex items-center gap-[9px]">
-                  <ThumbsDown className="w-[21px] h-[21px] text-[#5C7A6D]" strokeWidth={1.9} />
-                  <span className="text-[13px] font-bold text-[#0A2E20]">Dislike</span
-                  >
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsLiked(false)}
+                  className={`flex-1 h-9.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                    !isLiked
+                      ? 'bg-[#B4382B] text-white shadow-md font-extrabold'
+                      : 'bg-[#E8ECEF] border border-[#CAD8D0] text-[#5C7A6D] hover:text-[#0A2E20]'
+                  }`}
+                >
+                  <ThumbsDown className={`w-4.5 h-4.5 ${!isLiked ? 'text-white' : 'text-[#5C7A6D]'}`} strokeWidth={2} />
+                  <span className="text-[13px]">Dislike</span>
+                </button>
               </div>
 
               {/* Comment box — 317×175 rx=16 inset */}
               <div
-                className="mt-[24px] h-[175px] rounded-[16px] bg-[#E8ECEF] border border-[#D6DCE2]"
+                className="mt-6 h-43.75 rounded-2xl bg-[#E8ECEF] border border-[#D6DCE2]"
                 style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
               >
                 <textarea
@@ -218,12 +213,12 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Write your review…"
                   maxLength={500}
-                  className="w-full h-full resize-none bg-transparent rounded-[16px] px-[15px] py-[13px] text-[13px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
+                  className="w-full h-full resize-none bg-transparent rounded-2xl px-3.75 py-3.25 text-[13px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
                 />
               </div>
 
               {submitError && (
-                <p role="alert" className="mt-[6px] text-[10px] font-bold text-red-600">{submitError}</p>
+                <p role="alert" className="mt-1.5 text-[10px] font-bold text-red-600">{submitError}</p>
               )}
 
               {/* CTA — 317×46 rx=12 #09431B */}
@@ -231,7 +226,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="mt-[16px] w-full h-[46px] rounded-[12px] bg-[#09431B] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 hover:bg-[#073515] active:scale-[0.98] transition-all"
+                className="mt-4 w-full h-11.5 rounded-xl bg-[#09431B] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 hover:bg-[#073515] active:scale-[0.98] transition-all"
                 style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
               >
                 {submitting ? 'Publishing…' : 'Submit Review'}

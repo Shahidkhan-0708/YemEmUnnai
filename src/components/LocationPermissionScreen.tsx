@@ -34,25 +34,25 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
   onManual
 }) => {
   return (
-    <div className="relative w-full max-w-[390px] mx-auto bg-[#E8ECEF] h-[812px] select-none overflow-hidden shadow-2xl rounded-[36px] border border-[#D6DCE2] font-sans">
+    <div className="relative w-full max-w-97.5 mx-auto bg-[#E8ECEF] h-203 select-none overflow-hidden shadow-2xl rounded-[36px] border border-[#D6DCE2] font-sans">
       {/* Feed silhouette */}
-      <div className="absolute left-[20px] top-[50px] w-[335px] h-[120px] rounded-[18px] bg-[#DDE8E1]/60" />
-      <div className="absolute left-[20px] top-[190px] w-[160px] h-[200px] rounded-[18px] bg-[#DDE8E1]/60" />
-      <div className="absolute left-[195px] top-[190px] w-[160px] h-[200px] rounded-[18px] bg-[#DDE8E1]/60" />
+      <div className="absolute left-5 top-12.5 w-83.75 h-30 rounded-[18px] bg-[#DDE8E1]/60" />
+      <div className="absolute left-5 top-47.5 w-40 h-50 rounded-[18px] bg-[#DDE8E1]/60" />
+      <div className="absolute left-48.75 top-47.5 w-40 h-50 rounded-[18px] bg-[#DDE8E1]/60" />
 
       {/* Dark overlay — #032A15 @ 0.55 */}
       <div className="absolute inset-0" style={{ background: 'rgba(3, 42, 21, 0.55)' }} />
 
       {/* Floating dialog — (18,130) 339×590 rx=28 */}
       <div
-        className="absolute left-[18px] top-[130px] w-[339px] h-[590px] rounded-[28px] bg-[#E8ECEF] border border-white/60 overflow-hidden"
+        className="absolute left-4.5 top-32.5 w-84.75 h-147.5 rounded-[28px] bg-[#E8ECEF] border border-white/60 overflow-hidden"
         style={{ boxShadow: '-6px -6px 12px rgba(255,255,255,0.85), 6px 6px 12px rgba(163,174,187,0.45)' }}
       >
         {/* Handle — (147,14) 45×4 */}
-        <div className="absolute left-[147px] top-[14px] w-[45px] h-[4px] rounded-[2px] bg-[#BAC8C0]" />
+        <div className="absolute left-36.75 top-3.5 w-11.25 h-1 rounded-xs bg-[#BAC8C0]" />
 
         {/* Radar illustration — center (169.5,115) */}
-        <div className="absolute left-[169.5px] top-[115px] -translate-x-1/2 -translate-y-1/2">
+        <div className="absolute left-[169.5px] top-28.75 -translate-x-1/2 -translate-y-1/2">
           <svg width="144" height="144" viewBox="-72 -72 144 144" aria-hidden>
             <circle cx="0" cy="0" r="72" fill="#DFEBE3" stroke="#D6DCE2" strokeWidth="1.5" />
             <circle cx="0" cy="0" r="50" fill="none" stroke="#C9D0D8" strokeWidth="1.5" strokeDasharray="4 4" />
@@ -68,20 +68,20 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
               <circle cx="0" cy="0" r="5" fill="#F26A00" stroke="#FFF" strokeWidth="1.5" />
               <text x="8" y="3" fontSize="8" fontWeight="700" fill="#0A2E20">Canteen</text>
             </g>
-            {/* Chai Spot at (-34,28) */}
+            {/* MITS Cafe at (-34,28) */}
             <g transform="translate(-34 28)">
               <circle cx="0" cy="0" r="8" fill="#09431B" opacity="0.2" />
               <circle cx="0" cy="0" r="4" fill="#09431B" stroke="#FFF" strokeWidth="1.5" />
-              <text x="7" y="3" fontSize="8" fontWeight="700" fill="#0A2E20">Chai Spot</text>
+              <text x="7" y="3" fontSize="8" fontWeight="700" fill="#0A2E20">MITS Cafe</text>
             </g>
           </svg>
         </div>
 
         {/* Title & copy — baselines y=224/247/263 */}
-        <h2 className="absolute top-[208px] w-full text-center text-[19px] font-extrabold text-[#0A2E20]">
+        <h2 className="absolute top-52 w-full text-center text-[19px] font-extrabold text-[#0A2E20]">
           Enable Campus Radar
         </h2>
-        <p className="absolute top-[236px] w-full text-center text-[11.5px] font-medium leading-[16px] text-[#5C7A6D]">
+        <p className="absolute top-59 w-full text-center text-[11.5px] font-medium leading-4 text-[#5C7A6D]">
           Calculate real-time walking distance to each tuck shop
           <br />
           and receive alerts when fresh batches come out.
@@ -89,30 +89,30 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
 
         {/* Field 1 — (24,288) 291×56 rx=14 */}
         <div
-          className="absolute left-[24px] top-[288px] w-[291px] h-[56px] rounded-[14px] bg-[#E8ECEF] border border-[#D6DCE2]"
+          className="absolute left-6 top-72 w-72.75 h-14 rounded-[14px] bg-[#E8ECEF] border border-[#D6DCE2]"
         >
-          <div className="absolute left-[14px] top-[11px] w-[34px] h-[34px] rounded-full bg-[#D6DCE2] flex items-center justify-center">
+          <div className="absolute left-3.5 top-2.75 w-8.5 h-8.5 rounded-full bg-[#D6DCE2] flex items-center justify-center">
             <svg width="20" height="20" viewBox="0 0 34 34" aria-hidden>
               <circle cx="17" cy="17" r="9" fill="none" stroke="#09431B" strokeWidth="1.8" />
               <path d="M17 12 V17 H20.5" stroke="#09431B" strokeWidth="1.8" strokeLinecap="round" fill="none" />
             </svg>
           </div>
-          <p className="absolute left-[56px] top-[14px] text-[11.5px] font-extrabold text-[#0A2E20]">
+          <p className="absolute left-14 top-3.5 text-[11.5px] font-extrabold text-[#0A2E20]">
             Live Distance &amp; Walk Time
           </p>
-          <p className="absolute left-[56px] top-[32px] text-[10px] font-semibold text-[#5C7A6D]">
-            Main Canteen: 2 min walk • Nescafe: 4 min
+          <p className="absolute left-14 top-8 text-[10px] font-semibold text-[#5C7A6D]">
+            Main Canteen: 2 min walk • MITS Cafe: 4 min
           </p>
-          <div className="absolute left-[230px] top-[16px] w-[48px] h-[22px] rounded-[11px] bg-[#D6DCE2] flex items-center justify-center">
+          <div className="absolute left-57.5 top-4 w-12 h-5.5 rounded-[11px] bg-[#D6DCE2] flex items-center justify-center">
             <span className="text-[9px] font-bold text-[#09431B]">⏱ 2 min</span>
           </div>
         </div>
 
         {/* Field 2 — (24,354) 291×56 rx=14 */}
         <div
-          className="absolute left-[24px] top-[354px] w-[291px] h-[56px] rounded-[14px] bg-[#E8ECEF] border border-[#D6DCE2]"
+          className="absolute left-6 top-88.5 w-72.75 h-14 rounded-[14px] bg-[#E8ECEF] border border-[#D6DCE2]"
         >
-          <div className="absolute left-[14px] top-[11px] w-[34px] h-[34px] rounded-full bg-[#FFEAD9] flex items-center justify-center">
+          <div className="absolute left-3.5 top-2.75 w-8.5 h-8.5 rounded-full bg-[#FFEAD9] flex items-center justify-center">
             {/* Runner icon, 24px box scaled 1.7/24 */}
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
               <path
@@ -125,19 +125,19 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
               />
             </svg>
           </div>
-          <p className="absolute left-[56px] top-[14px] text-[11.5px] font-extrabold text-[#0A2E20]">
+          <p className="absolute left-14 top-3.5 text-[11.5px] font-extrabold text-[#0A2E20]">
             Fresh Batch Arrival Alerts
           </p>
-          <p className="absolute left-[56px] top-[32px] text-[10px] font-semibold text-[#5C7A6D]">
-            Hot Samosas ready in 6m • Pot #2 Biryani
+          <p className="absolute left-14 top-8 text-[10px] font-semibold text-[#5C7A6D]">
+            Hot Samosas ready in 6m • Fresh Filter Coffee
           </p>
-          <div className="absolute left-[232px] top-[16px] w-[46px] h-[22px] rounded-[11px] bg-[#FFE8D6] flex items-center justify-center">
+          <div className="absolute left-58 top-4 w-11.5 h-5.5 rounded-[11px] bg-[#FFE8D6] flex items-center justify-center">
             <span className="text-[9px] font-bold text-[#F26A00]">🔥 Hot</span>
           </div>
         </div>
 
         {/* Privacy line — y=435 */}
-        <p className="absolute top-[424px] w-full text-center text-[10px] font-semibold text-[#6A8679]">
+        <p className="absolute top-106 w-full text-center text-[10px] font-semibold text-[#6A8679]">
           🔒 Geofenced strictly to campus bounds. Battery friendly.
         </p>
 
@@ -145,7 +145,7 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
         <button
           type="button"
           onClick={onAllow}
-          className="absolute left-[24px] top-[458px] w-[291px] h-[46px] rounded-[12px] text-white text-[14px] font-extrabold cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all"
+          className="absolute left-6 top-114.5 w-72.75 h-11.5 rounded-xl text-white text-[14px] font-extrabold cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all"
           style={{
             background: 'linear-gradient(180deg, #0A461E 0%, #063214 100%)',
             boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)'
@@ -158,7 +158,7 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
         <button
           type="button"
           onClick={onManual}
-          className="absolute left-[24px] top-[514px] w-[291px] h-[42px] rounded-[12px] bg-[#E8ECEF] border border-[#D6DCE2] text-[12px] font-bold text-[#0A2E20] cursor-pointer hover:bg-white active:scale-[0.98] transition-all"
+          className="absolute left-6 top-128.5 w-72.75 h-10.5 rounded-xl bg-[#E8ECEF] border border-[#D6DCE2] text-[12px] font-bold text-[#0A2E20] cursor-pointer hover:bg-white active:scale-[0.98] transition-all"
         >
           Set Campus Manually
         </button>
