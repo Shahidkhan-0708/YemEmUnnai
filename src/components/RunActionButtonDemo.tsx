@@ -14,9 +14,5 @@ const items = [
 ];
 
 export default function RunActionButtonDemo() {
-  return (
-    <div className="p-4 flex items-center justify-center">
-      <RunActionButton steps={items} />
-    </div>
-  );
+  return <RunActionButton steps={items} />;
 }

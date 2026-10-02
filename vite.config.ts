@@ -16,8 +16,11 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      '@': path.resolve(__dirname, 'src'),
       '@hugeicons/core-free-icons': path.resolve(__dirname, 'src/lib/hugeicons-shim.tsx'),
       '@hugeicons/react': path.resolve(__dirname, 'src/lib/hugeicons-shim.tsx'),
+      'motion/react': path.resolve(__dirname, 'src/lib/motion-shim.tsx'),
+      'motion': path.resolve(__dirname, 'src/lib/motion-shim.tsx'),
     },
   },
   server: {

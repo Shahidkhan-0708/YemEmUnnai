@@ -19,6 +19,7 @@ const AddEditFoodItemScreen = lazy(() => import('./components/AddEditFoodItemScr
 const LocationPermissionScreen = lazy(() => import('./components/LocationPermissionScreen').then(m => ({ default: m.LocationPermissionScreen })));
 const FoodItemDetailScreen = lazy(() => import('./components/FoodItemDetailScreen').then(m => ({ default: m.FoodItemDetailScreen })));
 const MenuStockManagementScreen = lazy(() => import('./components/MenuStockManagementScreen').then(m => ({ default: m.MenuStockManagementScreen })));
+const ErrorPage = lazy(() => import('./components/ErrorPage'));
 
 function ScreenFallback() {
   return (
@@ -52,10 +53,10 @@ const DEFAULT_ORDER_ITEM: FoodItem = {
 
 export function App() {
   const { vendor } = useVendorSession();
-  const [activePortal, setActivePortal] = useState<'consumer' | 'business' | 'artifacts' | 'gallery'>(() => {
+  const [activePortal, setActivePortal] = useState<'consumer' | 'business' | 'artifacts' | 'gallery' | '404'>(() => {
     if (typeof window !== 'undefined') {
       const p = new URLSearchParams(window.location.search).get('portal');
-      if (p === 'business' || p === 'gallery' || p === 'artifacts') return p;
+      if (p === 'business' || p === 'gallery' || p === 'artifacts' || p === '404') return p;
     }
     return 'consumer';
   });
@@ -509,6 +510,12 @@ export function App() {
               </div>
             </div>
           </div>
+        )}
+
+        {activePortal === '404' && (
+          <Suspense fallback={<ScreenFallback />}>
+            <ErrorPage />
+          </Suspense>
         )}
       </main>
 

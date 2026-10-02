@@ -8,8 +8,11 @@
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
     "paths": {
+      "@/*": ["./src/*"],
       "@hugeicons/core-free-icons": ["./src/lib/hugeicons-shim.tsx"],
-      "@hugeicons/react": ["./src/lib/hugeicons-shim.tsx"]
+      "@hugeicons/react": ["./src/lib/hugeicons-shim.tsx"],
+      "motion/react": ["./src/lib/motion-shim.tsx"],
+      "motion": ["./src/lib/motion-shim.tsx"]
     },
 
     /* Bundler mode */

@@ -3,6 +3,8 @@ import { Phone, MapPin, Check, X, ClipboardList, ThumbsUp, LogIn, LogOut, Refres
 import { FamilyReceiveComponent } from './FamilyReceiveComponent';
 import { SaveToggle } from './SaveToggle';
 import { RunActionButton } from './RunActionButton';
+import Alert3 from './Alert3';
+import Popover6 from './Popover6';
 import { FaInbox } from 'react-icons/fa6';
 import { RiBubbleChartFill } from 'react-icons/ri';
 import { BsFileTextFill, BsSendFill, BsTagFill } from 'react-icons/bs';
@@ -187,6 +189,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
             </div>
 
             <div className="flex items-center gap-2">
+              <Popover6 />
               <SaveToggle
                 size="sm"
                 idleText="Save Shift"
@@ -291,8 +294,13 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
           </div>
         </div>
 
+        {/* Vendor Messages & Notification Alert */}
+        <div className="mx-4 mt-5">
+          <Alert3 />
+        </div>
+
         {/* INCOMING ORDERS PANEL — x=16 y=368 w=343 h=242 rx=21 */}
-        <div className="mx-4 mt-5.5 tactile-card rounded-[21px] p-3.5">
+        <div className="mx-4 mt-4 tactile-card rounded-[21px] p-3.5">
           <div className="flex items-baseline justify-between">
             <div className="flex items-center gap-2">
               <span className="text-[14px] font-extrabold tracking-wide text-[#1F140A]">
