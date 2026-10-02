@@ -3,17 +3,19 @@ import { HomeDiscoveryScreen } from './components/HomeDiscoveryScreen';
 import type { FoodItem } from './lib/types';
 import { QuickOrderModal } from './components/QuickOrderModal';
 import { BrandIntroSplash } from './components/BrandIntroSplash';
+import { InstallPrompt } from './components/InstallPrompt';
 import { MobileDeviceShell, type ActiveOrderInfo } from './components/MobileDeviceShell';
 import { playTapSound, playSuccessChime, fireOrderConfetti } from './lib/celebration';
 import { subscribeOrderStatus } from './lib/api';
-import { Utensils, Store, Image as ImageIcon, Sparkles, Download, ExternalLink, Eye, LayoutGrid } from 'lucide-react';
+import { useVendorSession } from './lib/hooks';
+import { safeStorage } from './lib/storage';
+import { Sparkles, Download, ExternalLink, Eye } from 'lucide-react';
 
 // Lazy-loaded modal & non-critical routes for fast initial bundle & 300+ user scalability
 const FeedbackModal = lazy(() => import('./components/FeedbackModal').then(m => ({ default: m.FeedbackModal })));
 const WalkInMapModal = lazy(() => import('./components/WalkInMapModal').then(m => ({ default: m.WalkInMapModal })));
 const BusinessDashboardScreen = lazy(() => import('./components/BusinessDashboardScreen').then(m => ({ default: m.BusinessDashboardScreen })));
 const AddEditFoodItemScreen = lazy(() => import('./components/AddEditFoodItemScreen').then(m => ({ default: m.AddEditFoodItemScreen })));
-const SplashOnboardingScreen = lazy(() => import('./components/SplashOnboardingScreen').then(m => ({ default: m.SplashOnboardingScreen })));
 const LocationPermissionScreen = lazy(() => import('./components/LocationPermissionScreen').then(m => ({ default: m.LocationPermissionScreen })));
 const FoodItemDetailScreen = lazy(() => import('./components/FoodItemDetailScreen').then(m => ({ default: m.FoodItemDetailScreen })));
 const MenuStockManagementScreen = lazy(() => import('./components/MenuStockManagementScreen').then(m => ({ default: m.MenuStockManagementScreen })));
@@ -26,8 +28,6 @@ function ScreenFallback() {
     </div>
   );
 }
-
-import { safeStorage } from './lib/storage';
 
 /** Stand-in item used by the Screen Gallery to open modals/screens without the grid.
  *  Mirrors the real MITS Canteen Samosa (see src/lib/mockData.ts) so demo
@@ -51,6 +51,7 @@ const DEFAULT_ORDER_ITEM: FoodItem = {
 };
 
 export function App() {
+  const { vendor } = useVendorSession();
   const [activePortal, setActivePortal] = useState<'consumer' | 'business' | 'artifacts' | 'gallery'>(() => {
     if (typeof window !== 'undefined') {
       const p = new URLSearchParams(window.location.search).get('portal');
@@ -58,24 +59,16 @@ export function App() {
     }
     return 'consumer';
   });
-  
-  // Gate dev scaffolding behind ?dev=1 query parameter or localStorage flag
-  const isDevMode = typeof window !== 'undefined' && (
-    new URLSearchParams(window.location.search).get('dev') === '1' ||
-    safeStorage.getItem('yememunnai_dev') === '1'
-  );
 
-  // Full-lifecycle consumer flow state machine: intro splash -> onboarding -> location radar -> discovery
-  const [consumerFlow, setConsumerFlow] = useState<'intro' | 'onboarding' | 'location' | 'discovery'>(() => {
+  // Consumer flow opens straight into discovery; the location radar stays reachable from the home screen.
+  const [consumerFlow, setConsumerFlow] = useState<'location' | 'discovery'>(() => {
     if (typeof window !== 'undefined') {
       const f = new URLSearchParams(window.location.search).get('flow');
-      if (f === 'discovery') return 'discovery';
-      if (f === 'onboarding') return 'onboarding';
-      if (f === 'intro') return 'intro';
+      if (f === 'location') return 'location';
     }
-    return 'intro';
+    return 'discovery';
   });
-  
+
   // Modals state
   const [selectedOrderFood, setSelectedOrderFood] = useState<FoodItem | null>(null);
   const [selectedOrderQty, setSelectedOrderQty] = useState(1);
@@ -90,8 +83,25 @@ export function App() {
   });
   const [showMenuStock, setShowMenuStock] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [activeOrder, setActiveOrder] = useState<ActiveOrderInfo | null>(null);
+  const [activeOrder, setActiveOrder] = useState<ActiveOrderInfo | null>(() => {
+    try {
+      const saved = JSON.parse(safeStorage.getItem('yemunnai_active_order') || 'null');
+      return saved && typeof saved.token === 'string' && /^\d{3}$/.test(saved.token)
+        && typeof saved.vendor === 'string' && typeof saved.status === 'string'
+        && typeof saved.orderId === 'string' && /^[a-f0-9-]{36}$/i.test(saved.orderId) ? saved : null;
+    } catch { return null; }
+  });
+  useEffect(() => {
+    if (activeOrder) safeStorage.setItem('yemunnai_active_order', JSON.stringify(activeOrder));
+    else safeStorage.removeItem('yemunnai_active_order');
+  }, [activeOrder]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // Professional launch splash: the logo animation plays on load, then the app opens by itself.
+  const [showLaunchSplash, setShowLaunchSplash] = useState(true);
+  useEffect(() => {
+    setShowMenuStock(false);
+    setIsAddEditOpen(false);
+  }, [vendor?.vendorId]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -106,14 +116,14 @@ export function App() {
       if (newStatus === 'accepted') {
         playTapSound();
         setActiveOrder((prev) =>
-          prev ? { ...prev, status: 'Preparing (~4m)', stage: 'preparing' } : null
+          prev ? { ...prev, status: 'Preparing your order', stage: 'preparing' } : null
         );
         showToast(`🍳 ${activeOrder.vendor} accepted your order! Preparing now.`);
       } else if (newStatus === 'completed') {
         playSuccessChime();
         fireOrderConfetti();
         setActiveOrder((prev) =>
-          prev ? { ...prev, status: 'READY FOR PICKUP!', stage: 'ready' } : null
+          prev ? { ...prev, status: 'Ready for pickup', stage: 'ready' } : null
         );
         showToast(`🔥 Order #${activeOrder.token} is READY for pickup at ${activeOrder.vendor}!`);
       } else if (newStatus === 'declined') {
@@ -129,125 +139,26 @@ export function App() {
     };
   }, [activeOrder?.orderId, activeOrder?.vendor, activeOrder?.token]);
 
+  // Splash first: a clean brand animation, then straight into the app (no buttons needed).
+  if (showLaunchSplash) {
+    return (
+      <div className="min-h-screen bg-[#02180A]">
+        <BrandIntroSplash onStart={() => setShowLaunchSplash(false)} />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#111A15] text-slate-100 flex flex-col items-center py-6 px-3">
-      {/* Top Header / Brand Bar */}
-      <header className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-emerald-950/60 mb-6">
-        <div 
-          onClick={() => {
-            playTapSound();
-            setActivePortal('consumer');
-            setConsumerFlow('intro');
-          }}
-          className="flex items-center gap-3.5 cursor-pointer group"
-          title="Click to replay Brand Intro Splash"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-[#09431B] border border-emerald-600/40 p-1 flex items-center justify-center shadow-lg overflow-hidden group-hover:scale-105 transition-transform">
-            <img src="/images/logo.png" alt="YEM UNNAI Logo" className="w-full h-full object-contain" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black text-white tracking-tight group-hover:text-amber-400 transition-colors">YEMUNNAI</h1>
-              {isDevMode ? (
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  DEV MODE
-                </span>
-              ) : (
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  MITS CAMPUS
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-[#5C7A6D]">A Food Discovery Platform • Tactile Mint UI</p>
-          </div>
-        </div>
-
-        {/* Portal Switcher Tabs — Dev tabs gated behind ?dev=1 */}
-        <div className="flex items-center p-1 rounded-full bg-[#18261F] border border-emerald-900/50 shadow-inner">
-          <button
-            onClick={() => {
-              playTapSound();
-              setActivePortal('consumer');
-              setConsumerFlow('intro');
-            }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activePortal === 'consumer' && consumerFlow === 'intro'
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <span>🎬 Intro</span>
-          </button>
-
-          <button
-            onClick={() => {
-              playTapSound();
-              setActivePortal('consumer');
-              if (consumerFlow === 'intro') setConsumerFlow('discovery');
-            }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activePortal === 'consumer' && consumerFlow !== 'intro'
-                ? 'bg-[#09431B] text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Utensils className="w-3.5 h-3.5" />
-            <span>Consumer App</span>
-          </button>
-
-          <button
-            onClick={() => {
-              playTapSound();
-              setActivePortal('business');
-            }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activePortal === 'business'
-                ? 'bg-[#09431B] text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Store className="w-3.5 h-3.5" />
-            <span>Business Portal</span>
-          </button>
-
-          {isDevMode && (
-            <>
-              <button
-                onClick={() => setActivePortal('artifacts')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  activePortal === 'artifacts'
-                    ? 'bg-[#09431B] text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <ImageIcon className="w-3.5 h-3.5" />
-                <span>Figma SVGs &amp; Ref</span>
-              </button>
-
-              <button
-                onClick={() => setActivePortal('gallery')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  activePortal === 'gallery'
-                    ? 'bg-[#09431B] text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>Screen Gallery</span>
-              </button>
-            </>
-          )}
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-[#0F1A15] text-slate-100">
       {/* Main Content Area */}
-      <main className="w-full flex justify-center">
+      <a className="skip-content" href="#main-content">Skip to menu</a>
+      <main id="main-content" tabIndex={-1} className="w-full flex justify-center">
         {/* Toast Notification */}
+        <div role="status" aria-live="polite" className="sr-only">{toastMessage || ''}</div>
         {toastMessage && (
           <div
-            role="status"
-            aria-live="polite"
-            className="fixed top-6 z-50 bg-[#09431B] text-white px-5 py-2.5 rounded-full text-xs font-extrabold shadow-2xl border border-emerald-400/40 animate-in fade-in slide-in-from-top-4 flex items-center gap-2"
+            aria-hidden="true"
+            className="fixed bottom-6 max-w-[calc(100%-32px)] z-50 bg-[#112019] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-2xl border border-emerald-400/40 flex items-center gap-2"
           >
             <Sparkles className="w-4 h-4 text-amber-400" aria-hidden="true" />
             <span>{toastMessage}</span>
@@ -265,44 +176,7 @@ export function App() {
           >
             <Suspense fallback={<ScreenFallback />}>
               <div className="relative">
-                {consumerFlow === 'intro' ? (
-                  <BrandIntroSplash
-                    onStart={() => {
-                      playTapSound();
-                      setConsumerFlow('discovery');
-                    }}
-                    onSkip={() => {
-                      playTapSound();
-                      setConsumerFlow('discovery');
-                    }}
-                    onVendorPortal={() => {
-                      playTapSound();
-                      setActivePortal('business');
-                    }}
-                  />
-                ) : consumerFlow === 'onboarding' ? (
-                  <div className="relative">
-                    <SplashOnboardingScreen
-                      onExplore={() => {
-                        playTapSound();
-                        setConsumerFlow('location');
-                      }}
-                      onBusinessPortal={() => {
-                        playTapSound();
-                        setActivePortal('business');
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        playTapSound();
-                        setConsumerFlow('intro');
-                      }}
-                      className="absolute top-4 left-4 z-40 px-3 py-1 rounded-full bg-black/40 text-white text-[11px] font-bold backdrop-blur-md cursor-pointer hover:bg-black/60 border border-white/20 transition-all flex items-center gap-1 active:scale-95"
-                    >
-                      <span>← Intro Splash</span>
-                    </button>
-                  </div>
-                ) : consumerFlow === 'location' ? (
+                {consumerFlow === 'location' ? (
                   <div className="relative">
                     <LocationPermissionScreen
                       onAllow={() => {
@@ -316,15 +190,6 @@ export function App() {
                         showToast('📍 Campus Center Selected');
                       }}
                     />
-                    <button
-                      onClick={() => {
-                        playTapSound();
-                        setConsumerFlow('onboarding');
-                      }}
-                      className="absolute top-4 left-4 z-40 px-3 py-1 rounded-full bg-black/40 text-white text-[11px] font-bold backdrop-blur-md cursor-pointer hover:bg-black/60 border border-white/20 transition-all flex items-center gap-1 active:scale-95"
-                    >
-                      <span>← Campus Info</span>
-                    </button>
                   </div>
                 ) : selectedDetailFood ? (
                   <FoodItemDetailScreen
@@ -343,8 +208,10 @@ export function App() {
                 ) : (
                   <HomeDiscoveryScreen
                     cartCount={cartCount}
-                    onReplayIntro={() => setConsumerFlow('intro')}
-                    onOpenRadar={() => setConsumerFlow('location')}
+                    onBusinessPortal={() => {
+                      playTapSound();
+                      setActivePortal('business');
+                    }}
                     onOrderNow={(item) => {
                       playTapSound();
                       setSelectedOrderQty(1);
@@ -381,7 +248,7 @@ export function App() {
                 )}
 
                 {/* Quick Order Modal — sits stably on top of screen with synced quantity */}
-                <QuickOrderModal
+                {selectedOrderFood && <QuickOrderModal
                   isOpen={!!selectedOrderFood}
                   item={selectedOrderFood}
                   initialQty={selectedOrderQty}
@@ -395,50 +262,45 @@ export function App() {
                       status: 'Sent to shop',
                       stage: 'sent'
                     });
-                    showToast(`Token #${orderData.token} pinned to Dynamic Island!`);
+                    showToast(`Token #${orderData.token} pinned. Check the live status above.`);
                   }}
-                />
+                />}
 
                 {/* Walk-in Map Modal */}
-                <WalkInMapModal
+                {selectedWalkInFood && <WalkInMapModal
                   isOpen={!!selectedWalkInFood}
                   item={selectedWalkInFood}
                   onClose={() => setSelectedWalkInFood(null)}
-                />
+                />}
 
                 {/* Feedback Modal */}
-                <FeedbackModal
+                {selectedReviewFood && <FeedbackModal
                   isOpen={!!selectedReviewFood}
                   item={selectedReviewFood}
                   onClose={() => setSelectedReviewFood(null)}
                   onSubmitSuccess={() => {
                     showToast(`Review published for ${selectedReviewFood?.name}!`);
                   }}
-                />
+                />}
               </div>
             </Suspense>
           </MobileDeviceShell>
         )}
 
-        {/* 2. BUSINESS PORTAL SCREEN */}
+        {/* 2. BUSINESS PORTAL SCREEN — reachable via ?portal=business (vendor login) */}
         {activePortal === 'business' && (
           <MobileDeviceShell>
             <Suspense fallback={<ScreenFallback />}>
               <div className="relative">
-                {showMenuStock ? (
+                {vendor && showMenuStock ? (
                   <div className="relative">
                     <MenuStockManagementScreen
+                      onBack={() => setShowMenuStock(false)}
                       onAddNewItem={() => setIsAddEditOpen(true)}
                       onToggleStock={(id, inStock) => {
                         showToast(`Item #${id} stock ${inStock ? 'marked LIVE' : 'marked SOLD OUT'}`);
                       }}
                     />
-                    <button
-                      onClick={() => setShowMenuStock(false)}
-                      className="absolute top-4 left-4 z-40 px-3 py-1.5 rounded-full bg-[#09431B] text-white text-xs font-extrabold shadow-md border border-white/20 flex items-center gap-1 cursor-pointer hover:bg-[#073515] active:scale-95"
-                    >
-                      <span>← Back to Dashboard</span>
-                    </button>
                   </div>
                 ) : (
                   <BusinessDashboardScreen
@@ -449,7 +311,7 @@ export function App() {
 
                 {/* Add/Edit Food Item Modal */}
                 <AddEditFoodItemScreen
-                  isOpen={isAddEditOpen}
+                  isOpen={!!vendor && isAddEditOpen}
                   onClose={() => setIsAddEditOpen(false)}
                   onPublished={(item) => {
                     showToast(`Successfully published ${item.name} (₹${item.price}) to YEMEMUNNAI!`);
@@ -519,27 +381,9 @@ export function App() {
                   cta: 'View asset'
                 },
                 {
-                  n: '00 · Brand Intro Splash',
-                  d: 'Animated steaming mascot, YEM UNNAI wordmark & tagline.',
-                  action: () => { setActivePortal('consumer'); setConsumerFlow('intro'); },
-                  cta: 'Play animation'
-                },
-                {
-                  n: '08 · Splash & Onboarding',
-                  d: 'Mascot hero card, campus address, hours, explore CTA.',
-                  action: () => { setActivePortal('consumer'); setConsumerFlow('onboarding'); },
-                  cta: 'Open screen'
-                },
-                {
-                  n: '09 · Location Permission',
-                  d: 'Radar illustration, walk-time + alerts fields, allow CTA.',
-                  action: () => { setActivePortal('consumer'); setConsumerFlow('location'); },
-                  cta: 'Open screen'
-                },
-                {
                   n: '10 · Food Item Detail',
                   d: 'Hero photo, vendor bar, portion selector, sticky order bar.',
-                  action: () => { setActivePortal('consumer'); setConsumerFlow('discovery'); setTimeout(() => setSelectedDetailFood(DEFAULT_ORDER_ITEM), 60); },
+                  action: () => { setActivePortal('consumer'); setTimeout(() => setSelectedDetailFood(DEFAULT_ORDER_ITEM), 60); },
                   cta: 'Open screen'
                 },
                 {
@@ -668,6 +512,8 @@ export function App() {
         )}
       </main>
 
+      {/* PWA install sheet — appears when the browser offers install */}
+      <InstallPrompt />
     </div>
   );
 }

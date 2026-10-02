@@ -7,13 +7,29 @@ React 19 + Vite + Tailwind 4 frontend with a **Supabase backend** (Postgres, Aut
 1. Create a Supabase project at [supabase.com/dashboard](https://supabase.com/dashboard).
 2. Open **SQL Editor → New query**, paste the whole of [`supabase/schema.sql`](supabase/schema.sql), and **Run**.
    This creates tables, RLS policies, counter triggers, realtime publications, the `food-photos` storage bucket,
-   and demo data (shops + menu items + a demo vendor login: `vendor@yememunnai.app` / `yememunnai123`).
+   and sample shops and menu items. Vendor accounts are provisioned separately.
 3. Copy **Project Settings → API → Project URL** and **anon public** key.
 4. `cp .env.example .env.local`, paste the two values, then `npm run dev`.
 
-Without credentials the app runs in **demo mode** with local mock data (a banner shows on the consumer home screen).
+Without credentials the app shows a **preview menu** with local data; ordering and business login require the backend.
+The business portal requires a configured backend and an authenticated cafe account.
+
+## Business portal login
+
+Apply the `vendor_pin_login` migration, provision accounts using `supabase/setup_vendor_auth.mjs`,
+and deploy `vendor-pin-login`. See [server setup and verification](supabase/functions/vendor-pin-login/README.md).
+The outlet picker and four-digit keypad remain; PINs are checked on the server, with five failed
+attempts locking the cafe for 15 minutes. Private PINs are stored locally in `supabase/vendor-pins.local`,
+which is ignored by git and excluded from deployment.
+
+Run `node supabase/test_vendor_pin.mjs` for the handler checks. Administrative scripts require
+server environment variables; never put an administrative key or a PIN in a `VITE_` variable.
 
 ## Architecture
+
+Consumer tokens, component contracts and verification limits are documented in the [consumer system blueprint](docs/consumer-design-system.md).
+Run `node scripts/check_consumer_colors.cjs` for contrast checks. Run `scripts/check_consumer_ui.cjs` with
+`PLAYWRIGHT_PACKAGE` pointing to an available Playwright installation for browser checks with intercepted orders.
 
 ```
 supabase/schema.sql      Tables (vendors, food_items, reactions, reviews, orders),

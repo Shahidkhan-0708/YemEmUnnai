@@ -28,3 +28,6 @@ jev-ultrafast/
 .agents/
 supabase/.temp/
 
+
+.vercel
+.env*

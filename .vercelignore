@@ -1,0 +1,8 @@
+.env*
+supabase/*.local
+.git
+.agents
+.codex
+.gstack
+node_modules
+supabase info

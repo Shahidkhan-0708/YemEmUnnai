@@ -1,542 +1,81 @@
-import React, { useState, useMemo } from 'react';
-import { Search, ShoppingCart, ThumbsUp, MessageSquare, MapPin, ChevronRight, Sparkles, Flame, X, WifiOff } from 'lucide-react';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Card, CardContent } from './ui/card';
-import { Input } from './ui/input';
+import { useState } from 'react';
+import { Search, ThumbsUp, MessageSquare, MapPin, ArrowUpRight, X, Flame, Package, Utensils } from 'lucide-react';
 import { useFoodItems, useShops, useReactions } from '../lib/hooks';
-import { isBackendConfigured } from '../lib/supabase';
 import { cleanShopTag } from '../lib/api';
-import type { FoodCategory, FoodItem } from '../lib/types';
-
+import type { FoodItem } from '../lib/types';
 export type { FoodItem } from '../lib/types';
 
 interface HomeDiscoveryScreenProps {
-  cartCount?: number;
-  onOrderNow?: (item: FoodItem) => void;
-  onWalkIn?: (item: FoodItem) => void;
-  onReview?: (item: FoodItem) => void;
-  onCartClick?: () => void;
-  onSelectShop?: (shopName: string) => void;
-  onVendorLogin?: () => void;
-  onSelectItem?: (item: FoodItem) => void;
-  onReplayIntro?: () => void;
-  onOpenRadar?: () => void;
+  cartCount?: number; onOrderNow?: (item: FoodItem) => void; onWalkIn?: (item: FoodItem) => void;
+  onReview?: (item: FoodItem) => void; onCartClick?: () => void; onSelectShop?: (name: string) => void;
+  onVendorLogin?: () => void; onSelectItem?: (item: FoodItem) => void; onBusinessPortal?: () => void;
 }
-
-export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
-  cartCount = 0,
-  onOrderNow,
-  onWalkIn,
-  onReview,
-  onCartClick,
-  onSelectShop,
-  onSelectItem,
-  onReplayIntro,
-  onOpenRadar
-}) => {
-  const [selectedCategory, setSelectedCategory] = useState<FoodCategory>('cooked');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedShop, setSelectedShop] = useState<string>('All');
-
+const filters = [ { id: 'all', label: 'All', icon: Utensils }, { id: 'cooked', label: 'Cooked', icon: Flame }, { id: 'packed', label: 'Packed', icon: Package }, { id: 'deals', label: 'Hot deals', icon: Flame } ] as const;
+export function HomeDiscoveryScreen({ onOrderNow, onWalkIn, onReview, onSelectShop, onSelectItem, onBusinessPortal }: HomeDiscoveryScreenProps) {
+  const [filter, setFilter] = useState<string>('all');
+  const [search, setSearch] = useState('');
+  const [shop, setShop] = useState('All');
   const shops = useShops();
-  const { items, loading, totalByCategory } = useFoodItems(selectedCategory);
+  const { items, loading, error, retry } = useFoodItems();
   const { myReactions, counts, toggleLike } = useReactions(items);
-
-  // Filter by query + shop, hiding offline shop items when browsing all shops
-  const displayedItems = items
-    .filter(item => {
-      const q = searchQuery.toLowerCase();
-      const matchesQuery = item.name.toLowerCase().includes(q) ||
-                           item.vendor.toLowerCase().includes(q);
-      const matchesShop = selectedShop === 'All' || item.vendor.toLowerCase().includes(selectedShop.toLowerCase());
-
-      // Check if this item's shop is offline
-      const shopMeta = shops.find(s => s.name.toLowerCase() === item.vendor.toLowerCase());
-      const isShopOffline = shopMeta ? shopMeta.isOnline === false : item.isShopOnline === false;
-
-      // When browsing 'All' canteens, do not display products from offline canteens
-      if (selectedShop === 'All' && isShopOffline) {
-        return false;
-      }
-
-      return matchesQuery && matchesShop;
-    })
-    .map(item => {
-      const c = counts[item.id];
-      const shopMeta = shops.find(s => s.name.toLowerCase() === item.vendor.toLowerCase());
-      const isShopOffline = shopMeta ? shopMeta.isOnline === false : item.isShopOnline === false;
-      return {
-        ...item,
-        likes: c ? c.likes : item.likes,
-        dislikes: c ? c.dislikes : item.dislikes,
-        isShopOnline: !isShopOffline
-      };
-    });
-
-  // Group items by shop when browsing "All" shops and no search query is typed
-  const shopGroups = useMemo(() => {
-    if (selectedShop !== 'All' || searchQuery.trim()) return null;
-    const map: Record<string, FoodItem[]> = {};
-    for (const item of displayedItems) {
-      if (!map[item.vendor]) map[item.vendor] = [];
-      map[item.vendor].push(item);
-    }
-    return Object.entries(map).map(([vendorName, groupItems]) => {
-      const shopMeta = shops.find(s => s.name.toLowerCase() === vendorName.toLowerCase());
-      return { vendorName, shopMeta, items: groupItems };
-    });
-  }, [displayedItems, selectedShop, searchQuery, shops]);
-
-  const renderFoodCard = (item: FoodItem) => {
-    const isLiked = myReactions[item.id] === 'like';
-
-    return (
-      <Card
-        key={item.id}
-        className="tactile-card rounded-[20px] p-2.5 flex flex-col justify-between"
-      >
-        {/* Real Food Photograph with Live Badges */}
-        <div
-          className="w-full aspect-4/3 rounded-[14px] overflow-hidden bg-slate-100 relative shadow-xs cursor-pointer"
-          onClick={() => onSelectItem?.(item)}
-          role="button"
-          aria-label={`View ${item.name} details`}
-        >
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-full h-full object-cover object-center transition-transform hover:scale-105 duration-300"
-            loading="lazy"
-          />
-
-          {/* Bottom Scrim overlay */}
-          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
-
-          {/* Freshness or Sold Out Badge overlay */}
-          {!item.inStock ? (
-            <div className="absolute top-1.5 left-1.5 bg-red-600/95 backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 border border-red-400/40 shadow-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-white" />
-              <span>SOLD OUT</span>
-            </div>
-          ) : item.freshnessTag ? (
-            <div className="absolute top-1.5 left-1.5 bg-[#062E16]/95 backdrop-blur-xs text-white text-[8px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/40 shadow-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{item.freshnessTag}</span>
-            </div>
-          ) : null}
-
-          {/* Landmark overlay — real campus landmark */}
-          <div className="absolute bottom-1.5 right-1.5 bg-[#062E16]/90 backdrop-blur-xs text-[#A7F3D0] text-[8.5px] font-extrabold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs border border-white/20">
-            <MapPin className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
-            <span className="max-w-20 truncate">{item.locationLandmark || item.walkTime}</span>
-          </div>
-        </div>
-
-        {/* Title & Info with Indian Veg/Non-veg indicator */}
-        <CardContent className="mt-2 px-1 p-0">
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`w-3 h-3 border ${item.isVeg !== false ? 'border-emerald-700' : 'border-amber-800'} flex items-center justify-center p-0.5 rounded-xs shrink-0 bg-white/70`}
-              title={item.isVeg !== false ? 'Vegetarian' : 'Non-Vegetarian'}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${item.isVeg !== false ? 'bg-emerald-700' : 'bg-amber-800'}`} />
-            </span>
-            <h3 className="text-[13px] font-extrabold text-[#0A2E20] leading-snug truncate">
-              {item.name}
-            </h3>
-          </div>
-
-          <p className="text-[10px] font-medium text-[#5C7A6D] mt-0.5 truncate flex items-center justify-between">
-            <span className="truncate max-w-23.75">{item.vendor}</span>
-            {item.reviews > 0 && item.rating != null ? (
-              <span className="text-amber-600 font-bold">★ {Number(item.rating).toFixed(1)}</span>
-            ) : (
-              <span className="text-emerald-700 font-bold text-[9px] bg-emerald-500/10 px-1 py-0.2 rounded">New</span>
-            )}
-          </p>
-
-          <div className="mt-1 flex items-baseline justify-between">
-            <div className="flex items-baseline gap-1.5">
-              {item.price > 0 ? (
-                <>
-                  <span className={`text-[15px] font-black ${
-                    item.actionType === 'order' ? 'text-[#F26A00]' : 'text-[#09431B]'
-                  }`}>
-                    ₹{item.price}
-                  </span>
-                  {item.originalPrice && (
-                    <span className="text-[10px] text-[#7C9588] line-through font-semibold">
-                      ₹{item.originalPrice}
-                    </span>
-                  )}
-                </>
-              ) : (
-                <span className="text-[11px] font-black text-[#D96C37] bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/25">
-                  Coming Soon
-                </span>
-              )}
-            </div>
-            {item.price > 0 && item.stockLeft != null && (
-              <span className="text-[9px] font-bold text-[#D96C37]">
-                {item.stockLeft} left
-              </span>
-            )}
-          </div>
-        </CardContent>
-
-        {/* Reactions Row: Like, Review */}
-        <div className="mt-2 pt-1 border-t border-[#D6DCE2]/60 flex items-center justify-between px-1 text-[9px] text-[#5C7A6D]">
-          <button
-            type="button"
-            onClick={() => toggleLike(item.id)}
-            className={`flex items-center gap-1 font-bold transition-all cursor-pointer ${
-              isLiked ? 'text-[#09431B] scale-105' : 'hover:text-[#09431B]'
-            }`}
-            aria-label="Like item"
-          >
-            <ThumbsUp className={`w-3 h-3 ${isLiked ? 'fill-[#09431B]' : ''}`} />
-            <span>{item.likes}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onReview?.(item)}
-            className="flex items-center gap-1 hover:text-[#09431B] font-medium transition-colors cursor-pointer"
-            aria-label="Write a review"
-          >
-            <MessageSquare className="w-3 h-3" />
-            <span>{item.reviews}</span>
-          </button>
-        </div>
-
-        {/* Action Button: Unified 10px Rounded Rectangle with Consistent Intention */}
-        <div className="mt-2.5">
-          {!item.inStock ? (
-            <Button
-              disabled
-              variant="outline"
-              size="sm"
-              className="w-full rounded-[10px] text-[11px] font-black h-9 flex items-center justify-center gap-1.5 bg-[#D5DCE2] text-slate-500 border border-[#BAC3CC] cursor-not-allowed opacity-80 shadow-none"
-            >
-              <span>SOLD OUT</span>
-            </Button>
-          ) : item.isShopOnline === false ? (
-            <Button
-              disabled
-              variant="outline"
-              size="sm"
-              className="w-full rounded-[10px] text-[10.5px] font-black h-9 flex items-center justify-center gap-1.5 bg-[#D5DCE2] text-slate-500 border border-[#BAC3CC] cursor-not-allowed opacity-80 shadow-none"
-            >
-              <span>CANTEEN OFFLINE</span>
-            </Button>
-          ) : item.actionType === 'walkin' ? (
-            <Button
-              onClick={() => onWalkIn?.(item)}
-              variant="default"
-              size="sm"
-              className="w-full rounded-[10px] text-[11px] font-extrabold h-9 flex items-center justify-center gap-1.5 tracking-wide btn-green-shadow tactile-press cursor-pointer"
-            >
-              <MapPin className="w-3.5 h-3.5 fill-white/20" />
-              <span>WALK-IN (MAPS)</span>
-            </Button>
-          ) : (
-            <Button
-              onClick={() => onOrderNow?.(item)}
-              variant="orange"
-              size="sm"
-              className="w-full rounded-[10px] text-[11px] font-black h-9 flex items-center justify-center gap-1.5 tracking-wide btn-orange-shadow tactile-press cursor-pointer"
-            >
-              <ShoppingCart className="w-3.5 h-3.5 fill-white/20" />
-              <span>+ ORDER{item.price > 0 ? ` • ₹${item.price}` : ''}</span>
-            </Button>
-          )}
-        </div>
-      </Card>
-    );
-  };
-
+  const activeShops = shops.filter(s => s.isActive !== false);
+  const visible = items.filter(item => {
+    const online = shops.find(s => s.id === item.vendorId)?.isOnline ?? item.isShopOnline;
+    return (shop === 'All' ? online !== false : item.vendor === shop)
+      && (filter === 'all' || item.category === filter || (filter === 'deals' && item.originalPrice != null && item.originalPrice > item.price))
+      && `${item.name} ${item.vendor}`.toLowerCase().includes(search.trim().toLowerCase());
+  });
+  const selectShop = (name: string) => { setShop(name); onSelectShop?.(name); };
   return (
-    <div className="w-full max-w-97.5 mx-auto bg-[#E8ECEF] min-h-205 pb-10 select-none overflow-hidden relative shadow-2xl rounded-[36px] border border-[#D6DCE2] font-sans">
-      
-      {/* TOP DEEP FOREST-GREEN HEADER WITH EXTENDED TOP BREATHING ROOM */}
-      <div className="bg-linear-to-b from-[#0A461E] via-[#09431B] to-[#063214] px-4 pt-6 pb-6 rounded-b-[30px] text-white shadow-lg">
-        
-        {/* Animated Brand Identity Header with Logo & Tagline */}
-        <div className="flex items-center justify-between mb-3.5 px-0.5">
-          <div className="flex items-center gap-2.5">
-            <div className="relative w-10 h-10 rounded-xl bg-[#062814] border border-emerald-500/40 p-0.5 flex items-center justify-center shadow-md overflow-hidden">
-              <img
-                src="/images/brand_logo_full.png"
-                alt="YEM UNNAI Mascot"
-                className="w-full h-full object-contain animate-mascot-float"
-              />
+    <div className="consumer-ui discovery-screen">
+      <header className="discovery-header">
+        <div className="brand-row"><div className="brand-lockup"><img src="/images/brand_logo_full.png" width="44" height="44" alt="" /><span>YEMUNNAI</span></div><span className="campus-badge status-live">{`${activeShops.filter(s => s.isOnline).length} ${activeShops.filter(s => s.isOnline).length === 1 ? 'shop' : 'shops'} open`}</span></div>
+        <p className="campus-eyebrow campus-location">MITS campus · made for your break</p>
+        <h1>Good food.<br /><span>Between lectures.</span></h1>
+        <p className="campus-muted hero-copy">Find your next bite. Send an order or head to the counter.</p>
+        <form className="campus-search" role="search" onSubmit={e => e.preventDefault()}>
+          <Search size={20} aria-hidden="true" /><label className="sr-only" htmlFor="campus-search">Search food or shops</label>
+          <input id="campus-search" type="search" name="search" placeholder="Tea, samosa, coffee…" value={search} onChange={e => setSearch(e.target.value)} />
+          {search && <button type="button" className="campus-icon" aria-label="Clear search" onClick={() => setSearch('')}><X size={18} aria-hidden="true" /></button>}
+        </form>
+      </header>
+      <section className="shops-section" aria-labelledby="shops-heading">
+        <div className="section-row"><h2 id="shops-heading">Around campus</h2><button className="campus-text-button" onClick={() => selectShop('All')}>Show all shops <ArrowUpRight size={16} aria-hidden="true" /></button></div>
+        <div className="shop-carousel" aria-label="Filter by shop">
+          {activeShops.map(s => <button key={s.id} className="shop-choice" aria-pressed={shop === s.name} onClick={() => selectShop(shop === s.name ? 'All' : s.name)}>
+            <img src={s.image} width="64" height="64" alt="" loading="lazy" />
+            <strong>{s.name}</strong><span className={s.isOnline ? 'shop-open' : 'shop-closed'}>{s.isOnline ? cleanShopTag(s.tag) : 'Closed'}</span>
+          </button>)}
+        </div>
+      </section>
+      <nav className="food-filters" aria-label="Food categories">{filters.map(({ id, label, icon: Icon }) => <button key={id} aria-pressed={filter === id} onClick={() => setFilter(id)}><Icon size={16} aria-hidden="true" />{label}</button>)}</nav>
+      <section className="menu-section" aria-labelledby="menu-heading" aria-busy={loading}>
+        <div className="section-row"><div><p className="campus-eyebrow">{shop === 'All' ? 'The campus menu' : shop}</p><h2 id="menu-heading">{filter === 'deals' ? 'A little less. Just as good.' : 'What sounds good?'}</h2></div><span className="menu-count">{visible.length} items</span></div>
+        <p role="status" className="sr-only">{loading ? 'Refreshing the menu' : `${visible.length} items shown`}</p>
+        {error && <div className="campus-error"><p role="alert">{error}</p><button className="campus-text-button" onClick={retry}>Retry menu</button></div>}
+        {loading && items.length === 0 && <div className="food-grid" aria-hidden="true">{[0,1,2,3].map(id => <div key={id} className="food-skeleton campus-surface"><div className="food-photo" /><div className="skeleton-lines" /></div>)}</div>}
+        {shop !== 'All' && shops.find(s => s.name === shop)?.isOnline === false && <p className="campus-error">{shop} is closed. Browse the menu or choose another shop.</p>}
+        <div className="food-grid">{visible.map(item => {
+          const online = shops.find(s => s.id === item.vendorId)?.isOnline ?? item.isShopOnline;
+          const available = !error && item.inStock && online !== false && item.price > 0;
+          const current = { ...item, isShopOnline: online };
+          return <article key={item.id} className="food-card campus-surface">
+            <button className="food-photo" aria-label={`View ${item.name} details`} onClick={() => onSelectItem?.(current)}>
+              <img src={item.image} width="480" height="360" alt="" loading="lazy" decoding="async" />
+              <span className={`campus-badge photo-status ${available ? 'status-live' : 'status-closed'}`}>{!item.inStock ? 'Sold out' : online === false ? 'Closed' : item.price <= 0 ? 'Price pending' : 'In stock'}</span>
+            </button>
+            <div className="food-card-body"><div className="food-meta"><span>{item.isVeg === undefined ? item.category : item.isVeg ? 'Veg' : 'Non-veg'}</span>{item.stockLeft != null && <span className="stock-count">{item.stockLeft} left</span>}</div>
+              <h3><button onClick={() => onSelectItem?.(current)}>{item.name}</button></h3>
+              <p className="food-vendor">{item.vendor}</p><p className="food-location"><MapPin size={12} aria-hidden="true" />{item.walkTime || item.locationLandmark || 'MITS campus'}</p>
+              <div className="food-price"><strong>{item.price > 0 ? `₹${item.price}` : 'Price pending'}</strong>{item.originalPrice != null && item.originalPrice > item.price && <s>₹{item.originalPrice}</s>}</div>
+              <div className="food-reactions"><button aria-label={`Like ${item.name}`} aria-pressed={myReactions[item.id] === 'like'} onClick={() => toggleLike(item.id)}><ThumbsUp size={15} aria-hidden="true" /><span>{counts[item.id]?.likes ?? item.likes}</span></button><button aria-label={`Review ${item.name}`} onClick={() => onReview?.(current)}><MessageSquare size={15} aria-hidden="true" /><span>{item.reviews}</span></button></div>
+              <button className="campus-card-action" disabled={!available} onClick={() => item.actionType === 'walkin' ? onWalkIn?.(current) : onOrderNow?.(current)}>{!available ? (error ? 'Menu offline' : !item.inStock ? 'Sold out' : online === false ? 'Shop closed' : 'Price pending') : item.actionType === 'walkin' ? 'Find shop' : 'Quick order'}<ArrowUpRight size={16} aria-hidden="true" /></button>
             </div>
-            <div>
-              <div className="flex items-center gap-1.5 leading-none">
-                <span className="text-[15px] font-black tracking-tight text-white">YEMUNNAI</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
-              </div>
-              <div className="flex items-center gap-1 text-[8.5px] font-extrabold tracking-wider uppercase text-[#FF8A2A] mt-0.5">
-                <span className="animate-brand-shimmer">A FOOD DISCOVERY PLATFORM</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Access Badges for Intro & Campus Radar */}
-          <div className="flex items-center gap-1.5">
-            {onReplayIntro && (
-              <button
-                type="button"
-                onClick={onReplayIntro}
-                title="Replay Brand Intro Splash"
-                className="text-[10px] font-extrabold text-[#A7F3D0] hover:text-white bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-full transition-all cursor-pointer border border-white/15 flex items-center gap-1 active:scale-95"
-              >
-                <span>🎬 Intro</span>
-              </button>
-            )}
-            {onOpenRadar && (
-              <button
-                type="button"
-                onClick={onOpenRadar}
-                title="Campus Radar & Geofence"
-                className="text-[10px] font-extrabold text-amber-300 hover:text-white bg-amber-500/20 hover:bg-amber-500/30 px-2.5 py-1 rounded-full transition-all cursor-pointer border border-amber-500/35 flex items-center gap-1 active:scale-95"
-              >
-                <span>📡 Radar</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Search Bar + Orange Circular Cart Button */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 relative flex items-center bg-[#E8ECEF]/95 backdrop-blur-xs border border-[#D6DCE2] rounded-full px-4 py-2 shadow-inner transition-all focus-within:ring-2 focus-within:ring-[#10B981] focus-within:bg-white">
-            <Search className="w-4 h-4 text-[#527063] shrink-0 mr-2.5" />
-            <Input
-              type="text"
-              placeholder="Search tea, samosa, puff, coffee..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 p-0 border-0 focus-visible:ring-0 text-xs"
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="p-1 text-[#527063] hover:text-[#0A2E20]">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Circular Orange Cart Button with Shadcn styling */}
-          <Button
-            onClick={onCartClick}
-            variant="orange"
-            size="icon"
-            className="w-10 h-10 shrink-0 relative"
-            aria-label="View Cart"
-          >
-            <ShoppingCart className="w-4.5 h-4.5 fill-white/10" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-white text-[#F26A00] text-[10px] font-extrabold w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md animate-in zoom-in-75">
-                {cartCount}
-              </span>
-            )}
-          </Button>
-        </div>
-
-        {/* Local Shops Section */}
-        <div className="mt-4">
-          <div 
-            onClick={() => {
-              setSelectedShop('All');
-              onSelectShop?.('All Shops');
-            }}
-            className="flex items-center justify-between cursor-pointer group mb-2.5"
-          >
-            <div className="flex items-center gap-1.5">
-              <span className="text-white text-[13.5px] font-bold tracking-wide">Local Canteens &amp; Shops</span>
-              <Badge variant="live" className="text-[8px] py-0 px-1.5">LIVE RADAR</Badge>
-            </div>
-            <div className="flex items-center gap-1 text-[11px] text-[#A7F3D0] group-hover:text-white transition-colors">
-              <span>{selectedShop === 'All' ? 'View All' : `Filter: ${selectedShop}`}</span>
-              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </div>
-          </div>
-
-          {/* Symmetrical Horizontal Scrolling Shop Avatars */}
-          <div className="-mx-4 px-4 flex items-start gap-2.5 overflow-x-auto no-scrollbar pt-1 pb-1">
-            {shops
-              .filter(shop => shop.isActive !== false && !['royal hotel', 'royal corner', 'chai corner', 'vatika', 'vatika tuck', 'lays corner'].includes(shop.name.toLowerCase()))
-              .map((shop) => {
-              const isSelected = selectedShop.toLowerCase() === shop.name.toLowerCase();
-              const displayTag = shop.isOnline === false ? '🔴 Closed' : cleanShopTag(shop.tag);
-
-              return (
-                <div 
-                  key={shop.id} 
-                  onClick={() => {
-                    const next = isSelected ? 'All' : shop.name;
-                    setSelectedShop(next);
-                    onSelectShop?.(next);
-                  }}
-                  className="w-18 shrink-0 flex flex-col items-center cursor-pointer group select-none text-center"
-                >
-                  <div className={`relative w-14 h-14 rounded-full p-0.5 transition-all duration-200 group-hover:scale-105 flex items-center justify-center shrink-0 ${
-                    isSelected ? 'ring-3 ring-[#F26A00] scale-105 shadow-md' : 'ring-2 ring-white/30'
-                  }`}>
-                    <img
-                      src={shop.image}
-                      alt={shop.name}
-                      className="w-full h-full object-cover rounded-full"
-                      loading="lazy"
-                    />
-                    {shop.isOnline === false ? (
-                      <span className="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full bg-slate-800 text-[7px] font-black text-slate-300 border border-white/20 shadow-xs">
-                        CLOSED
-                      </span>
-                    ) : shop.isActive ? (
-                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#09431B] rounded-full animate-radar-ring" />
-                    ) : null}
-                  </div>
-                  <span className={`text-[10.5px] font-bold tracking-tight text-center w-full truncate leading-tight mt-1.5 ${
-                    isSelected ? 'text-[#FF8A2A]' : 'text-white'
-                  }`}>
-                    {shop.name}
-                  </span>
-                  <span className="text-[8.5px] text-[#A7F3D0]/85 font-medium text-center w-full truncate leading-tight mt-0.5">
-                    {displayTag}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Offline Shop Notice when filtering by a specific shop that is closed */}
-      {selectedShop !== 'All' && shops.find(s => s.name.toLowerCase() === selectedShop.toLowerCase())?.isOnline === false && (
-        <div className="mx-4 mt-3 p-3 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-900 text-xs flex items-center gap-2.5">
-          <span className="text-lg">🔴</span>
-          <div>
-            <p className="font-extrabold text-[12px] text-[#0A2E20]">{selectedShop} is currently Offline</p>
-            <p className="text-[10px] text-[#5C7A6D] font-medium leading-tight">This canteen is not accepting orders right now. Items below are for viewing only.</p>
-          </div>
-        </div>
-      )}
-
-      {/* DEMO / LIVE backend banner */}
-      {!isBackendConfigured && (
-        <div className="mx-4 mt-3 flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-3 py-2 text-[10px] font-bold">
-          <WifiOff className="w-3.5 h-3.5 shrink-0" />
-          <span>Demo mode — add Supabase keys in .env.local to go live.</span>
-        </div>
-      )}
-
-      {/* SEGMENTED CONTROL: COOKED FOODS / PACKED FOODS */}
-      <div className="px-4 mt-3.5">
-        <div className="flex items-center p-1 rounded-full bg-[#DDE2E8] border border-[#D6DCE2] shadow-inner">
-          <button
-            onClick={() => setSelectedCategory('cooked')}
-            className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
-              selectedCategory === 'cooked'
-                ? 'bg-[#09431B] text-white shadow-md'
-                : 'text-[#09431B] hover:bg-black/5'
-            }`}
-          >
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
-            <span>Cooked Foods ({totalByCategory.cooked})</span>
-          </button>
-
-          <button
-            onClick={() => setSelectedCategory('packed')}
-            className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
-              selectedCategory === 'packed'
-                ? 'bg-[#09431B] text-white shadow-md'
-                : 'text-[#09431B] hover:bg-black/5'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Packed Foods ({totalByCategory.packed})</span>
-          </button>
-        </div>
-      </div>
-
-      {/* FOOD CARDS: GROUPED BY SHOP WHEN VIEWING ALL, OR FLAT GRID WHEN FILTERED */}
-      {loading && displayedItems.length === 0 ? (
-        <div className="px-4 mt-3.5 grid grid-cols-2 gap-3">
-          {[0, 1, 2, 3].map(i => (
-            <Card key={i} className="tactile-card rounded-[20px] p-2.5 animate-pulse">
-              <div className="w-full aspect-4/3 rounded-[14px] bg-[#DDE2E8]" />
-              <div className="mt-2 px-1 space-y-1.5">
-                <div className="h-3 w-3/4 rounded bg-[#DDE2E8]" />
-                <div className="h-2.5 w-1/2 rounded bg-[#DDE2E8]" />
-                <div className="h-3 w-1/3 rounded bg-[#DDE2E8]" />
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : shopGroups ? (
-        /* Shop-grouped view: eliminates repeating tea/coffee/samosa loop */
-        <div className="px-4 mt-4 space-y-5">
-          {shopGroups.map(group => (
-            <div key={group.vendorName} className="space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-2">
-                  {group.shopMeta && (
-                    <img
-                      src={group.shopMeta.image}
-                      alt={group.vendorName}
-                      className="w-5 h-5 rounded-full object-cover ring-1 ring-emerald-600"
-                    />
-                  )}
-                  <h3 className="text-[12.5px] font-black text-[#0A2E20] leading-none">
-                    {group.vendorName}
-                  </h3>
-                  <span className="text-[9px] font-semibold text-[#5C7A6D]">
-                    • {group.shopMeta?.tag || group.shopMeta?.locationLandmark || 'Campus'}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedShop(group.vendorName);
-                    onSelectShop?.(group.vendorName);
-                  }}
-                  className="text-[9.5px] font-bold text-[#09431B] bg-emerald-100/70 hover:bg-emerald-200/80 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
-                >
-                  View menu ({group.items.length})
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {group.items.map(item => renderFoodCard(item))}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        /* Filtered/Search view */
-        <div className="px-4 mt-3.5 grid grid-cols-2 gap-3">
-          {displayedItems.map(item => renderFoodCard(item))}
-        </div>
-      )}
-
-      {displayedItems.length === 0 && (
-        <div className="mx-4 mt-8 p-6 text-center bg-[#E8ECEF] rounded-2xl border border-[#D6DCE2]">
-          <p className="text-sm font-bold text-[#0A2E20]">No dishes found</p>
-          <p className="text-xs text-[#5C7A6D] mt-1">Try clearing your search query or switching canteen filters.</p>
-          <Button
-            onClick={() => {
-              setSearchQuery('');
-              setSelectedShop('All');
-            }}
-            variant="outline"
-            size="sm"
-            className="mt-3"
-          >
-            Reset Filters
-          </Button>
-        </div>
-      )}
+          </article>;
+        })}</div>
+        {!loading && !error && visible.length === 0 && <div className="menu-empty campus-surface"><h3>{search ? `No matches for “${search}”` : filter === 'deals' ? 'No deals listed right now' : 'No items in this view'}</h3><p className="campus-muted">Try the full menu to find your next bite.</p><button className="campus-primary" onClick={() => { setSearch(''); setFilter('all'); selectShop('All'); }}>Show the full menu</button></div>}
+      </section>
+      <footer className="consumer-footer"><span>For the MITS lunch break.</span><button className="campus-text-button" onClick={onBusinessPortal}>Open business portal <ArrowUpRight size={14} aria-hidden="true" /></button></footer>
     </div>
   );
-};
+}

@@ -4,8 +4,8 @@
  * Run: node supabase/test_backend.mjs
  */
 
-const SUPABASE_URL = 'https://hdwpaxgbdrmezwkwumwk.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhkd3BheGdiZHJtZXp3a3d1bXdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2OTM5MzksImV4cCI6MjEwNjI2OTkzOX0.KFIYSNqzlSfzjSBUDJKJfRI-LqREWnvrr2LxSpWMP6w';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 const headers = {
   'apikey': SUPABASE_ANON_KEY,
@@ -34,15 +34,6 @@ async function rest(method, path, body = null, extraHeaders = {}) {
   return { status: res.status, data, ok: res.ok };
 }
 
-async function authRequest(method, path, body) {
-  const res = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
-    method,
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  return { status: res.status, data, ok: res.ok };
-}
 
 // ─────────────────────────────── TESTS ───────────────────────────────
 
@@ -221,102 +212,13 @@ async function testOrderInsert() {
   }
 }
 
-async function testVendorAuth() {
-  console.log('\n━━━ 8. VENDOR AUTH (email/password login) ━━━');
-  const { ok, status, data } = await authRequest('POST', 'token?grant_type=password', {
-    email: 'vendor@yememunnai.app',
-    password: 'yememunnai123',
-  });
-  if (ok && data.access_token) {
-    log('✅', 'Vendor login successful', `user_id=${data.user?.id?.substring(0, 8)}...`);
-    passed++;
-
-    // Use the vendor's JWT to read orders (should see the order we inserted)
-    const vendorHeaders = {
-      ...headers,
-      'Authorization': `Bearer ${data.access_token}`,
-    };
-    const orderRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=id,item_name,status,customer_mobile&limit=5`, {
-      headers: vendorHeaders,
-    });
-    const orders = await orderRes.json();
-    if (orderRes.ok && Array.isArray(orders) && orders.length > 0) {
-      log('✅', 'Vendor can read own orders (RLS)', `${orders.length} order(s) found`);
-      passed++;
-    } else {
-      log('⚠️', 'Vendor order read', `status ${orderRes.status}, rows=${orders?.length || 0}`);
-      failed++;
-    }
-
-    // Test vendor can update their shop's is_online status
-    const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/vendors?name=eq.MITS Canteen`, {
-      method: 'PATCH',
-      headers: { ...vendorHeaders, 'Prefer': 'return=representation' },
-      body: JSON.stringify({ is_online: true }),
-    });
-    const updateData = await updateRes.json();
-    if (updateRes.ok && updateData?.[0]?.is_online === true) {
-      log('✅', 'Vendor update own shop (RLS)', 'set is_online=true');
-      passed++;
-    } else {
-      log('❌', 'Vendor shop update failed', `status ${updateRes.status}`);
-      failed++;
-    }
-
-    // Test vendor CANNOT update another vendor's shop
-    const hackRes = await fetch(`${SUPABASE_URL}/rest/v1/vendors?name=eq.Royal Hotel`, {
-      method: 'PATCH',
-      headers: { ...vendorHeaders, 'Prefer': 'return=representation' },
-      body: JSON.stringify({ is_online: true }),
-    });
-    const hackData = await hackRes.json();
-    if (hackRes.ok && (!hackData || hackData.length === 0)) {
-      log('✅', 'Vendor CANNOT update other shops (RLS)', 'Royal Hotel untouched');
-      passed++;
-    } else {
-      log('❌', 'Cross-vendor update NOT blocked!', JSON.stringify(hackData));
-      failed++;
-    }
-
-    // Test vendor can add a menu item
-    const addItemRes = await fetch(`${SUPABASE_URL}/rest/v1/food_items`, {
-      method: 'POST',
-      headers: { ...vendorHeaders, 'Prefer': 'return=representation' },
-      body: JSON.stringify({
-        vendor_id: 'a0000000-0000-4000-8000-000000000001', // MITS Canteen
-        name: 'Test Dosa',
-        price: 30,
-        category: 'cooked',
-        action_type: 'walkin',
-        in_stock: true,
-      }),
-    });
-    const addItemData = await addItemRes.json();
-    if (addItemRes.ok && addItemData?.[0]?.name === 'Test Dosa') {
-      log('✅', 'Vendor add menu item', 'Test Dosa ₹30 added');
-      passed++;
-
-      // Clean up test item
-      await fetch(`${SUPABASE_URL}/rest/v1/food_items?name=eq.Test Dosa&vendor_id=eq.a0000000-0000-4000-8000-000000000001`, {
-        method: 'DELETE',
-        headers: vendorHeaders,
-      });
-      log('✅', 'Test item cleaned up');
-      passed++;
-    } else {
-      log('❌', 'Vendor menu item add failed', `status ${addItemRes.status}`);
-      failed++;
-    }
-  } else {
-    log('❌', 'Vendor login failed', `status ${status}, ${data?.error || data?.msg || JSON.stringify(data)}`);
-    failed++;
-  }
-}
+// Cafe authentication checks live in test_vendor_pin.mjs.
 
 async function testStorageBucket() {
   console.log('\n━━━ 9. STORAGE BUCKET ━━━');
   // Try listing objects in the bucket (public bucket allows listing)
-  const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhkd3BheGdiZHJtZXp3a3d1bXdrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDY5MzkzOSwiZXhwIjoyMTA2MjY5OTM5fQ.n6WxRcW_qWlCwVLXZFB8gjF-s1CUPTKH1iKUtwIHUvM';
+  const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) throw new Error('Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in the server environment.');
   const res = await fetch(`${SUPABASE_URL}/storage/v1/bucket/food-photos`, {
     headers: { 'apikey': SERVICE_ROLE_KEY, 'Authorization': `Bearer ${SERVICE_ROLE_KEY}` },
   });
@@ -366,7 +268,7 @@ async function main() {
   await testReactionsFlow();
   await testReviewInsert();
   await testOrderInsert();
-  await testVendorAuth();
+
   await testStorageBucket();
   await testRealtimeEndpoint();
 

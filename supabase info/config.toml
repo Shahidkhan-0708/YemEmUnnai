@@ -1,0 +1,5 @@
+project_id = "YemEmUnnai"
+
+[functions.vendor-pin-login]
+# This endpoint authenticates the supplied PIN before issuing an Auth token.
+verify_jwt = false

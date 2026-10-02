@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Settings, Phone, MapPin, Check, X, ClipboardList, ThumbsUp, LogIn, LogOut, RefreshCw, BellRing, Zap } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Phone, MapPin, Check, X, ClipboardList, ThumbsUp, LogIn, LogOut, RefreshCw, BellRing } from 'lucide-react';
 import { useVendorSession, useVendorOrders, useVendorStats } from '../lib/hooks';
 import { setOrderStatus, setVendorOnline } from '../lib/api';
 import { isBackendConfigured } from '../lib/supabase';
@@ -37,16 +37,11 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
   onAddNewItem,
   onManageStock
 }) => {
-  const { vendor, checking, signOut, signInDemo } = useVendorSession();
+  const { vendor, checking, signOut } = useVendorSession();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [busyBypass, setBusyBypass] = useState(false);
-
-  // ⚡ One-tap demo bypass from the portal gate — links straight to the dashboard.
-  const handleDemoBypass = async () => {
-    setBusyBypass(true);
-    await signInDemo();
-    setBusyBypass(false);
-  };
+  const [error, setError] = useState<string | null>(null);
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const actionLock = useRef(false);
 
   // Auto-open login when a signed-out vendor visits the portal (live mode only)
   useEffect(() => {
@@ -60,10 +55,21 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
     return () => window.removeEventListener('open-vendor-login', open);
   }, []);
 
-  const { orders, loading: ordersLoading } = useVendorOrders(vendor?.vendorId ?? null);
+  const { orders, loading: ordersLoading, error: ordersError } = useVendorOrders(vendor?.vendorId ?? null);
   const stats = useVendorStats(vendor?.vendorId ?? null);
 
   const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => { setIsOnline(vendor?.isOnline ?? false); setError(null); }, [vendor?.vendorId, vendor?.isOnline]);
+
+  const save = async (key: string, action: () => Promise<void>) => {
+    if (actionLock.current) return;
+    actionLock.current = true;
+    setBusyAction(key);
+    setError(null);
+    try { await action(); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not save. Please try again.'); }
+    finally { actionLock.current = false; setBusyAction(null); }
+  };
 
   // Shop photo must match the signed-in shop (name ↔ image mirror mockData LOCAL_SHOPS)
   const SHOP_IMAGES: Record<string, string> = {
@@ -77,32 +83,36 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
 
   const handleAccept = async (id: string) => {
     playTapSound();
-    await setOrderStatus(id, 'accepted');
+    await save(id, () => setOrderStatus(id, 'accepted'));
   };
 
   const handleReady = async (id: string) => {
-    playSuccessChime();
-    await setOrderStatus(id, 'completed');
+    await save(id, async () => { await setOrderStatus(id, 'completed'); playSuccessChime(); });
   };
 
   const handleDecline = async (id: string) => {
     playTapSound();
-    await setOrderStatus(id, 'declined');
+    await save(id, () => setOrderStatus(id, 'declined'));
   };
 
   const toggleOnline = async () => {
+    if (!vendor) return;
     const next = !isOnline;
-    setIsOnline(next); // optimistic
-    const vId = vendor?.vendorId || 'a0000000-0000-4000-8000-000000000001';
-    await setVendorOnline(vId, next);
+    await save('online', async () => {
+      setIsOnline(next);
+      try { await setVendorOnline(vendor.vendorId, next); }
+      catch (cause) { setIsOnline(!next); throw cause; }
+    });
   };
 
   // ------------------------------------------------------------------ login gate
-  if (isBackendConfigured && !vendor) {
+  if (!isBackendConfigured || checking || !vendor) {
     return (
       <div className="relative">
-        <div className="w-full max-w-97.5 mx-auto bg-[#EBF2EE] min-h-205 pb-10 select-none relative shadow-2xl rounded-[36px] border border-[#D6DCE2] flex flex-col items-center justify-center gap-4 px-8 text-center">
-          {checking ? (
+        <div className="w-full bg-[#EBF2EE] min-h-screen pb-10 select-none relative flex flex-col items-center justify-center gap-4 px-8 text-center">
+          {!isBackendConfigured ? (
+            <><h2 className="text-base font-black text-[#0A2E20]">Business Portal Unavailable</h2><p className="text-sm text-[#5C7A6D]">The server connection has not been configured.</p></>
+          ) : checking ? (
             <>
               <RefreshCw className="w-8 h-8 text-[#09431B] animate-spin" />
               <p className="text-xs font-bold text-[#5C7A6D]">Checking your session…</p>
@@ -114,27 +124,19 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
               </div>
               <h2 className="text-base font-black text-[#0A2E20]">Business Portal</h2>
               <p className="text-xs text-[#5C7A6D]">
-                Enter the 4-digit campus PIN (0708) or tap Instant Demo Access to manage live orders.
+                Sign in with your cafe’s four-digit security PIN to manage its orders and menu.
               </p>
-              <button
-                onClick={() => void handleDemoBypass()}
-                disabled={busyBypass}
-                className="w-full py-3 bg-[#09431B] text-white rounded-xl text-xs font-extrabold btn-green-shadow hover:bg-[#073515] active:scale-98 transition-all cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                <Zap className="w-4 h-4 fill-amber-400 text-amber-500" />
-                <span>⚡ Instant Demo Access</span>
-              </button>
               <button
                 onClick={() => setIsLoginOpen(true)}
                 className="w-full py-3 bg-white text-[#09431B] rounded-xl text-xs font-extrabold border border-[#BACBC1] hover:bg-[#F3F8F5] active:scale-98 transition-all cursor-pointer"
               >
-                Enter Campus PIN
+                Enter Cafe PIN
               </button>
             </>
           )}
         </div>
 
-        <VendorLoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+        <VendorLoginModal isOpen={isBackendConfigured && isLoginOpen} onClose={() => setIsLoginOpen(false)} />
       </div>
     );
   }
@@ -142,7 +144,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
   // ------------------------------------------------------------------ dashboard
   return (
     <div className="relative">
-      <div className="w-full max-w-97.5 mx-auto bg-[#EBF2EE] min-h-205 pb-10 select-none overflow-hidden relative shadow-2xl rounded-[36px] border border-[#D6DCE2]">
+      <div className="mx-auto w-full max-w-3xl bg-[#E8ECEF] min-h-dvh pb-10 relative">
         {/* HEADER — emerald gradient, curve to y≈221 */}
         <div className="bg-linear-to-b from-[#0A461E] to-[#063214] px-4 pt-8 pb-6 text-white relative overflow-hidden">
           <div
@@ -152,7 +154,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
 
           {/* Shop identity — photo 60px at (23,34), name 21px w800, sub 16px w500 */}
           <div className="flex items-center justify-between relative">
-            <div className="flex items-center gap-3.5">
+            <div className="flex min-w-0 items-center gap-3.5">
               <div className="w-15 h-15 rounded-full overflow-hidden bg-[#E8ECEF] shrink-0">
                 <img
                   src={shopImage}
@@ -160,7 +162,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h2 className="text-[21px] font-extrabold text-white leading-6.5 truncate max-w-52.5">
                   {vendor?.vendorName ?? 'MITS Canteen'}
                 </h2>
@@ -170,17 +172,13 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
 
             <div className="flex items-center gap-1.5">
               <button
-                onClick={() => void signOut()}
+                onClick={() => void save('signout', signOut)}
+                disabled={busyAction !== null}
+                aria-label="Sign out"
                 title="Sign out"
                 className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
-              </button>
-              <button
-                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[#EDF5EF] hover:bg-white/20 transition-colors cursor-pointer"
-                aria-label="Settings"
-              >
-                <Settings className="w-5.75 h-5.75" strokeWidth={1.9} />
               </button>
             </div>
           </div>
@@ -189,7 +187,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
           <div className="mt-2.5 h-px bg-[#497658]/60 relative" />
 
           {/* Kitchen status row — Single ONLINE/OFFLINE segmented control */}
-          <div className="mt-4.5 flex items-center justify-between relative">
+          <div className="mt-4.5 flex flex-wrap gap-3 items-center justify-between relative">
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`} />
               <span className="text-[13px] font-bold text-white tracking-wide">
@@ -209,6 +207,8 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
               <button
                 type="button"
                 onClick={() => isOnline || void toggleOnline()}
+                disabled={busyAction !== null}
+                aria-pressed={isOnline}
                 className={`relative z-10 flex-1 text-[10px] font-extrabold tracking-wide cursor-pointer transition-colors ${
                   isOnline ? 'text-white' : 'text-[#0A2E20]'
                 }`}
@@ -218,8 +218,10 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
               <button
                 type="button"
                 onClick={() => isOnline && void toggleOnline()}
+                disabled={busyAction !== null}
+                aria-pressed={!isOnline}
                 className={`relative z-10 flex-1 text-[10px] font-bold tracking-wide cursor-pointer transition-colors ${
-                  !isOnline ? 'text-[#0A2E20] font-extrabold' : 'text-[#0A2E20]/70'
+                  !isOnline ? 'text-white font-extrabold' : 'text-[#0A2E20]/70'
                 }`}
               >
                 OFFLINE
@@ -228,6 +230,8 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
           </div>
         </div>
 
+        {error && <p role="alert" className="mx-4 mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {stats.error && <p role="alert" className="mx-4 mt-4 text-sm text-red-700">{stats.error}</p>}
         {/* 3 STAT CARDS — 109×106 rx=18 at y=237 */}
         <div className="px-4 mt-4 grid grid-cols-3 gap-2">
           {/* Orders Today — clipboard icon */}
@@ -235,7 +239,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
             <ClipboardList className="w-6 h-6 text-[#09431B]" strokeWidth={1.9} />
             <span className="mt-6 text-[11px] font-semibold text-[#0A2E20]">Orders Today</span>
             <span className="mt-0.5 text-[18px] font-extrabold text-[#0A2E20] tabular-nums">
-              {stats.ordersToday}
+              {stats.error ? '—' : stats.ordersToday}
             </span>
           </div>
 
@@ -244,7 +248,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
             <ThumbsUp className="w-6 h-6 text-[#09431B]" strokeWidth={1.9} />
             <span className="mt-6 text-[11px] font-semibold text-[#0A2E20]">Total Likes</span>
             <span className="mt-0.5 text-[18px] font-extrabold text-[#0A2E20] tabular-nums">
-              {stats.totalLikes}
+              {stats.error ? '—' : stats.totalLikes}
             </span>
           </div>
 
@@ -283,7 +287,9 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
           {/* Divider — y=412 */}
           <div className="mt-1.75 h-px bg-[#CCD9D1]" />
 
-          {ordersLoading ? (
+          {ordersError ? (
+            <p role="alert" className="py-6 text-sm text-red-700">{ordersError}</p>
+          ) : ordersLoading ? (
             <div className="py-10 text-center text-[11px] font-medium text-[#5C7A6D] animate-pulse">
               Loading live orders…
             </div>
@@ -346,6 +352,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
                         </div>
                         <button
                           onClick={() => void handleReady(ord.id)}
+                          disabled={busyAction !== null}
                           aria-label={`Mark order for ${ord.item} as ready`}
                           className="flex-[1.4] h-10.5 rounded-xl bg-[#09431B] text-white flex items-center justify-center gap-1.5 text-[12px] font-bold hover:bg-[#073515] active:scale-95 transition-all shadow-md cursor-pointer"
                         >
@@ -357,8 +364,9 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
                       <>
                         <button
                           onClick={() => void handleDecline(ord.id)}
+                          disabled={busyAction !== null}
                           aria-label={`Decline order for ${ord.item}`}
-                          className="w-37.5 h-10.5 rounded-xl bg-[#FDF3F2] border border-[#E5ABA5] flex items-center justify-center gap-2 cursor-pointer hover:bg-[#FBE9E7] tactile-press transition-all shadow-xs"
+                          className="flex-1 min-w-0 min-h-11 rounded-xl bg-[#FDF3F2] border border-[#E5ABA5] flex items-center justify-center gap-2 cursor-pointer hover:bg-[#FBE9E7] tactile-press transition-all shadow-xs disabled:opacity-50"
                         >
                           <X className="w-4.5 h-4.5 text-[#B4382B]" strokeWidth={2.2} />
                           <span className="text-[13px] font-bold text-[#B4382B]">Decline</span>
@@ -366,8 +374,9 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
 
                         <button
                           onClick={() => void handleAccept(ord.id)}
+                          disabled={busyAction !== null}
                           aria-label={`Accept order for ${ord.item}`}
-                          className="w-37.5 h-10.5 rounded-xl bg-[#09431B] flex items-center justify-center gap-2 cursor-pointer hover:bg-[#073515] btn-green-shadow tactile-press transition-all"
+                          className="flex-1 min-w-0 min-h-11 rounded-xl bg-[#09431B] flex items-center justify-center gap-2 cursor-pointer hover:bg-[#073515] btn-green-shadow tactile-press transition-all disabled:opacity-50"
                         >
                           <Check className="w-4.5 h-4.5 text-white" strokeWidth={2.2} />
                           <span className="text-[13px] font-bold text-white">Accept &amp; Prep</span>

@@ -5,9 +5,7 @@ import {
   fetchMyReactions,
   setReaction,
   fetchItemReactionCounts,
-  signInVendor,
-  signInVendorByPin,
-  signInDemoVendor,
+  signInVendorByOutlet,
   signOutVendor,
   getMyVendor,
   subscribeVendorOrders,
@@ -16,6 +14,7 @@ import {
 } from './api';
 import { DEFAULT_FOOD_ITEMS, LOCAL_SHOPS } from './mockData';
 import type { FoodCategory, FoodItem, ShopEntry, DashboardOrder, VendorStats } from './types';
+import { supabase } from './supabase';
 
 // ---------------------------------------------------------------------------
 // Consumer discovery
@@ -25,13 +24,17 @@ import type { FoodCategory, FoodItem, ShopEntry, DashboardOrder, VendorStats } f
  * Live food items for the discovery grid. Fetches the full list
  * and filters client-side, while subscribing to realtime catalog updates.
  */
-export function useFoodItems(category: FoodCategory): {
+export function useFoodItems(category?: FoodCategory): {
   items: FoodItem[];
   loading: boolean;
+  error: string | null;
+  retry: () => void;
   totalByCategory: Record<FoodCategory, number>;
 } {
-  const [allItems, setAllItems] = useState<FoodItem[]>(DEFAULT_FOOD_ITEMS);
+  const [allItems, setAllItems] = useState<FoodItem[]>(supabase ? [] : DEFAULT_FOOD_ITEMS);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,8 +42,9 @@ export function useFoodItems(category: FoodCategory): {
     const reload = () => {
       fetchFoodItems()
         .then(list => {
-          if (!cancelled && list.length > 0) setAllItems(list);
+          if (!cancelled) { setAllItems(list); setError(null); }
         })
+        .catch(() => { if (!cancelled) setError('Unable to refresh the menu. Check your connection and try again.'); })
         .finally(() => {
           if (!cancelled) setLoading(false);
         });
@@ -53,10 +57,10 @@ export function useFoodItems(category: FoodCategory): {
       cancelled = true;
       unsub();
     };
-  }, []);
+  }, [attempt]);
 
   const items = useMemo(
-    () => allItems.filter(i => i.category === category),
+    () => category ? allItems.filter(i => i.category === category) : allItems,
     [allItems, category]
   );
 
@@ -66,7 +70,7 @@ export function useFoodItems(category: FoodCategory): {
     return counts;
   }, [allItems]);
 
-  return { items, loading, totalByCategory };
+  return { items, loading, totalByCategory, error, retry: () => { setLoading(true); setAttempt(value => value + 1); } };
 }
 
 /** Shop avatars for the "Local Shops" row. Subscribes to realtime catalog updates. */
@@ -190,6 +194,7 @@ export function useReactions(items: FoodItem[]) {
 export interface VendorSession {
   vendorId: string;
   vendorName: string;
+  isOnline: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -201,6 +206,8 @@ export interface VendorSession {
 
 let sharedVendor: VendorSession | null = null;
 const vendorListeners = new Set<(v: VendorSession | null) => void>();
+let vendorAuthSubscription: { unsubscribe: () => void } | null = null;
+let sessionRevision = 0;
 
 function publishVendor(next: VendorSession | null) {
   sharedVendor = next;
@@ -211,63 +218,54 @@ function publishVendor(next: VendorSession | null) {
 export function useVendorSession(): {
   vendor: VendorSession | null;
   checking: boolean;
-  signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
-  signInWithPin: (pin: string) => Promise<{ ok: boolean; error?: string }>;
-  signInDemo: () => Promise<{ ok: boolean; error?: string }>;
+  signInWithOutlet: (outletId: string, pin: string) => Promise<{ ok: boolean; error?: string; retrySeconds?: number }>;
   signOut: () => Promise<void>;
 } {
   const [vendor, setVendor] = useState<VendorSession | null>(sharedVendor);
   const [checking, setChecking] = useState(() => sharedVendor === null);
 
   useEffect(() => {
-    const listener = (v: VendorSession | null) => setVendor(v);
+    const listener = (v: VendorSession | null) => { setVendor(v); setChecking(false); };
     vendorListeners.add(listener);
     setVendor(sharedVendor);
 
-    if (sharedVendor !== null) {
-      // Another component (e.g. the login modal) already established a session.
-      setChecking(false);
-      return () => vendorListeners.delete(listener);
-    }
-
-    let cancelled = false;
-    getMyVendor().then(v => {
-      if (!cancelled) {
-        if (v) publishVendor({ vendorId: v.id, vendorName: v.name });
-        setChecking(false);
+    if (sharedVendor) setChecking(false);
+    const refresh = async (revision: number) => {
+      try {
+        const v = await getMyVendor();
+        if (revision === sessionRevision) publishVendor(v ? { vendorId: v.id, vendorName: v.name, isOnline: v.isOnline } : null);
+      } catch {
+        if (revision === sessionRevision) publishVendor(null);
       }
-    });
+    };
+    if (!vendorAuthSubscription && supabase) {
+      vendorAuthSubscription = supabase.auth.onAuthStateChange((_event, session) => {
+        const revision = ++sessionRevision;
+        if (!session) publishVendor(null);
+        // Supabase auth callbacks run under its session lock; query after it releases.
+        else setTimeout(() => { if (revision === sessionRevision) void refresh(revision); }, 0);
+      }).data.subscription;
+    }
+    void refresh(++sessionRevision);
+    const unsubscribeCatalog = subscribeCatalogUpdates(() => { void refresh(++sessionRevision); });
     return () => {
-      cancelled = true;
+      unsubscribeCatalog();
       vendorListeners.delete(listener);
+      if (vendorListeners.size === 0) {
+        vendorAuthSubscription?.unsubscribe();
+        vendorAuthSubscription = null;
+        sessionRevision++;
+      }
     };
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    const res = await signInVendor(email, password);
+  const signInWithOutlet = useCallback(async (outletId: string, pin: string) => {
+    const res = await signInVendorByOutlet(outletId, pin);
     if (res.ok) {
-      publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
+      publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName, isOnline: res.isOnline });
       return { ok: true };
     }
-    return { ok: false, error: res.error };
-  }, []);
-
-  const signInWithPin = useCallback(async (pin: string) => {
-    const res = await signInVendorByPin(pin);
-    if (res.ok) {
-      publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
-      return { ok: true };
-    }
-    return { ok: false, error: res.error };
-  }, []);
-
-  const signInDemo = useCallback(async () => {
-    const res = await signInDemoVendor();
-    if (res.ok) {
-      publishVendor({ vendorId: res.vendorId, vendorName: res.vendorName });
-      return { ok: true };
-    }
-    return { ok: false, error: res.error };
+    return { ok: false, error: res.error, retrySeconds: res.retrySeconds };
   }, []);
 
   const signOut = useCallback(async () => {
@@ -275,19 +273,23 @@ export function useVendorSession(): {
     publishVendor(null);
   }, []);
 
-  return { vendor, checking, signIn, signInWithPin, signInDemo, signOut };
+  return { vendor, checking, signInWithOutlet, signOut };
 }
 
 /** Realtime incoming-order feed for the signed-in vendor. */
 export function useVendorOrders(vendorId: string | null): {
   orders: DashboardOrder[];
   loading: boolean;
+  error: string | null;
 } {
   const [orders, setOrders] = useState<DashboardOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const firstLoad = useRef(true);
 
   useEffect(() => {
+    setOrders([]);
+    setError(null);
     if (!vendorId) {
       setOrders([]);
       setLoading(false);
@@ -302,30 +304,38 @@ export function useVendorOrders(vendorId: string | null): {
         firstLoad.current = false;
         setLoading(false);
       }
-    });
+    }, message => { setError(message); if (message) setLoading(false); });
 
     return unsubscribe;
   }, [vendorId]);
 
-  return { orders, loading };
+  return { orders, loading, error };
 }
 
-/** Live stats cards for the signed-in vendor (demo values when unconfigured). */
-export function useVendorStats(vendorId: string | null): VendorStats {
+/** Live stats cards for the signed-in vendor. */
+export function useVendorStats(vendorId: string | null): VendorStats & { error: string | null } {
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<VendorStats>(
-    vendorId ? { ordersToday: 0, totalLikes: 0, avgRating: null } : { ordersToday: 14, totalLikes: 8, avgRating: 4.5 }
+    { ordersToday: 0, totalLikes: 0, avgRating: null }
   );
 
   useEffect(() => {
-    if (!vendorId) return; // keep demo values
+    setStats({ ordersToday: 0, totalLikes: 0, avgRating: null });
+    setError(null);
+    if (!vendorId) return;
     let cancelled = false;
-    fetchVendorStats(vendorId).then(s => {
-      if (!cancelled) setStats(s);
-    });
+    const load = () => {
+      void fetchVendorStats(vendorId).then(s => {
+        if (!cancelled) { setStats(s); setError(null); }
+      }).catch(() => { if (!cancelled) setError('Unable to load cafe statistics.'); });
+    };
+    load();
+    const unsubscribe = subscribeCatalogUpdates(load);
     return () => {
       cancelled = true;
+      unsubscribe();
     };
   }, [vendorId]);
 
-  return stats;
+  return { ...stats, error };
 }

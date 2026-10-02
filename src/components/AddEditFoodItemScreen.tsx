@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Upload, CheckCircle, AlertCircle, ShoppingCart, MapPin } from 'lucide-react';
 import { createFoodItem, uploadFoodPhoto } from '../lib/api';
 import { useModalA11y } from '../lib/useModalA11y';
@@ -51,13 +51,21 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sheetRef = useModalA11y<HTMLDivElement>(isOpen, onClose);
+  const submitLock = useRef(false);
+  const sheetRef = useModalA11y<HTMLDivElement>(isOpen, () => { if (!submitLock.current) onClose(); });
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
+  useEffect(() => {
+    if (!photoPreview) return;
+    return () => URL.revokeObjectURL(photoPreview);
+  }, [photoPreview]);
 
   if (!isOpen) return null;
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!['image/jpeg', 'image/png'].includes(file.type)) { setError('Choose a JPG or PNG photo.'); return; }
     if (file.size > 5 * 1024 * 1024) {
       setError('Photo must be under 5MB.');
       return;
@@ -70,18 +78,20 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitLock.current) return;
     setError(null);
 
     if (!vendor) {
       setError('Sign in as a vendor first.');
       return;
     }
-    const priceNum = Math.max(0, Math.round(Number(price)));
-    if (!name.trim() || !Number.isFinite(priceNum)) {
+    const priceNum = Number(price);
+    if (!name.trim() || !price.trim() || !Number.isFinite(priceNum) || priceNum < 0) {
       setError('Please enter a valid name and price.');
       return;
     }
 
+    submitLock.current = true;
     setSubmitting(true);
     try {
       // 1. Upload photo (live mode only)
@@ -114,12 +124,14 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
 
       setSubmitting(false);
       setSubmitted(true);
-      setTimeout(() => {
+      closeTimer.current = setTimeout(() => {
         setSubmitted(false);
         onPublished?.({ name: name.trim(), price: priceNum });
         onClose();
         // reset form
         setName('');
+        setVegetarian(true);
+        setCategory('cooked');
         setPrice('');
         setActionType('order');
         setPhoto(null);
@@ -129,27 +141,30 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
     } catch {
       setSubmitting(false);
       setError('Something went wrong. Please try again.');
+    } finally {
+      submitLock.current = false;
+      setSubmitting(false);
     }
   };
 
   return (
     <div
-      className="absolute inset-0 z-50"
+      className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center"
       style={{ background: 'rgba(3, 42, 21, 0.43)' }}
-      onClick={onClose}
+      onClick={() => { if (!submitting) onClose(); }}
     >
       {/* Sheet x=13 y=174 w=349 h=611 rx=27 */}
       <div
         ref={sheetRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Add or edit food item"
-        className="absolute left-3.25 right-3.25 top-43.5 bottom-6.75 rounded-[27px] bg-[#E8ECEF] border border-white/60 overflow-y-auto no-scrollbar animate-in fade-in slide-in-from-bottom-6 duration-200"
+        aria-label="Add food item"
+        className="relative w-full max-w-lg max-h-[calc(100dvh-1.5rem)] rounded-[27px] bg-[#E8ECEF] border border-white/60 overflow-y-auto"
         style={{ boxShadow: '-6px -6px 12px rgba(255,255,255,0.85), 6px 6px 12px rgba(163,174,187,0.45)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {submitted ? (
-          <div className="h-full min-h-140 flex flex-col items-center justify-center text-center px-4.5">
+          <div className="py-16 flex flex-col items-center justify-center text-center px-4.5">
             <CheckCircle className="w-14 h-14 text-[#09431B]" />
             <h3 className="text-[17px] font-extrabold text-[#0A2E20] mt-3">Item Published!</h3>
             <p className="text-[11px] font-semibold text-[#5C7A6D] mt-1">
@@ -158,6 +173,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
+            <fieldset disabled={submitting} className="min-w-0 border-0 p-0">
             {/* Handle — 45×4, 9px from top */}
             <div className="mx-auto mt-2.25 w-11.25 h-1 rounded-xs bg-[#BAC8C0]" />
 
@@ -166,7 +182,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="absolute left-76.75 top-2.75 w-7 h-7 rounded-full bg-[#E8ECEF] flex items-center justify-center cursor-pointer"
+              className="absolute right-3 top-3 size-11 rounded-full bg-[#E8ECEF] flex items-center justify-center cursor-pointer"
             >
               <X className="w-4.5 h-4.5 text-[#0A2E20]" strokeWidth={2.2} />
             </button>
@@ -174,7 +190,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
             <div className="px-4.5 pb-6.75">
               {/* Title — baseline y=215 (41px from sheet top) */}
               <h2 className="mt-5.25 text-[17px] font-extrabold leading-5.5 text-[#0A2E20]">
-                Add &amp; Edit Food Item
+                Add Food Item
               </h2>
               {/* Subtitle — baseline y=231 */}
               <p className="mt-px text-[11px] font-semibold leading-3.5 text-[#5C7A6D]">
@@ -229,12 +245,12 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
 
               {/* Service Mode — Walk-In or Order Toggle */}
               <div className="mt-5">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap gap-1 items-center justify-between">
                   <span className="block text-[13px] font-bold leading-4.25 text-[#0A2E20]">
                     Service Mode
                   </span>
                   <span className="text-[10px] font-semibold text-[#5C7A6D]">
-                    {actionType === 'order' ? 'Students order & pay in app' : 'Students walk in with live map'}
+                    {actionType === 'order' ? 'Students send an order to your cafe' : 'Students walk in with the live map'}
                   </span>
                 </div>
                 <div
@@ -287,11 +303,12 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                   id="aef-price"
                   type="number"
                   min="0"
+                  step="0.01"
                   required
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="Enter price"
-                  className="flex-1 bg-transparent text-[12px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
+                  className="flex-1 min-w-0 bg-transparent text-[12px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
                 />
               </div>
 
@@ -363,12 +380,6 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                 </div>
               )}
 
-              {!isBackendConfigured && (
-                <p className="mt-2 text-[9px] text-amber-700 font-bold">
-                  Demo mode — add Supabase keys to publish for real.
-                </p>
-              )}
-
               {/* CTA — 317×47 rx=12 #09431B (y=710 → 27px from sheet bottom) */}
               <button
                 type="submit"
@@ -379,6 +390,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                 {submitting ? 'Publishing…' : 'Publish to YEMEMUNNAI'}
               </button>
             </div>
+            </fieldset>
           </form>
         )}
       </div>

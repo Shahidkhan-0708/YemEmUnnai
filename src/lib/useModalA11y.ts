@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 
 /**
  * Modal/sheet accessibility:
@@ -16,23 +16,40 @@ export function useModalA11y<T extends HTMLElement>(
   onClose: () => void
 ) {
   const ref = useRef<T | null>(null);
+  const close = useEffectEvent(onClose);
 
   useEffect(() => {
     if (!isOpen) return;
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
     const root = ref.current;
+    if (!root) return;
+    const hidden: HTMLElement[] = [];
+    // Inert sibling branches while leaving the dialog and its ancestors usable.
+    for (let branch: HTMLElement = root; branch.parentElement; branch = branch.parentElement) {
+      for (const sibling of Array.from(branch.parentElement.children)) {
+        if (sibling !== branch && sibling instanceof HTMLElement && !sibling.inert) {
+          sibling.inert = true;
+          hidden.push(sibling);
+        }
+      }
+    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
 
     // Move focus into the dialog so SR/keyboard users land inside it
     const focusables = root?.querySelectorAll<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
-    focusables?.[0]?.focus();
+    const firstFocusable = Array.from(focusables ?? []).find(el => !el.matches(':disabled') && el.tabIndex >= 0 && el.getClientRects().length > 0);
+    root.tabIndex = -1;
+    (firstFocusable ?? root).focus();
 
     const onKeyDown = (e: KeyboardEvent) => {
+      if (root.closest('[inert]')) return;
       if (e.key === 'Escape') {
         e.stopPropagation();
-        onClose();
+        close();
         return;
       }
       if (e.key === 'Tab' && root) {
@@ -40,8 +57,8 @@ export function useModalA11y<T extends HTMLElement>(
           root.querySelectorAll<HTMLElement>(
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
           )
-        ).filter(el => !el.hasAttribute('disabled'));
-        if (items.length === 0) return;
+        ).filter(el => !el.matches(':disabled') && el.tabIndex >= 0 && el.getClientRects().length > 0);
+        if (items.length === 0) { e.preventDefault(); root.focus(); return; }
         const first = items[0];
         const last = items[items.length - 1];
         if (e.shiftKey && document.activeElement === first) {
@@ -57,9 +74,11 @@ export function useModalA11y<T extends HTMLElement>(
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
+      hidden.forEach(el => { el.inert = false; });
+      document.body.style.overflow = previousOverflow;
       previouslyFocused?.focus?.();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   return ref;
 }

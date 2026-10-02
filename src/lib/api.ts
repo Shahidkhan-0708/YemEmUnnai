@@ -1,5 +1,6 @@
 import { supabase, isBackendConfigured } from './supabase';
 import { DEFAULT_FOOD_ITEMS, LOCAL_SHOPS } from './mockData';
+import { VENDOR_OUTLETS } from './vendorAuth';
 import type {
   FoodItem,
   FoodItemRow,
@@ -145,9 +146,7 @@ export async function fetchFoodItems(category?: FoodCategory): Promise<FoodItem[
   const { data, error } = await query;
   if (error) {
     console.error('[api] fetchFoodItems:', error.message);
-    let items = inMemoryFoodItems;
-    if (category) items = items.filter(i => i.category === category);
-    return items;
+    throw new Error('Unable to refresh the menu. Check your connection and try again.');
   }
   return (data as unknown as FoodItemRow[]).map(rowToItem);
 }
@@ -345,7 +344,7 @@ export async function placeOrder(input: {
   const itemName = qty > 1 ? `${input.foodItem.name} (${qty}x)` : input.foodItem.name;
 
   if (!supabase) {
-    return { success: true, token, orderId: clientOrderId || `demo-${Date.now()}` };
+    return { success: false, reason: 'Ordering is unavailable in the preview. Open the connected site to place an order.' };
   }
 
   const payload: Record<string, unknown> = {
@@ -377,14 +376,17 @@ export async function placeOrder(input: {
  */
 export function subscribeVendorOrders(
   vendorId: string,
-  onData: (orders: DashboardOrder[]) => void
+  onData: (orders: DashboardOrder[]) => void,
+  onError: (message: string | null) => void = () => {}
 ): () => void {
   if (!supabase) return () => {};
 
   const mapRows = (rows: OrderRow[]) => rows.map(r => orderRowToDashboard(r, 'Your Shop'));
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
+  let cancelled = false;
   const load = async () => {
+    try {
     const { data, error } = await supabase!
       .from('orders')
       .select('id, vendor_id, food_item_id, item_name, unit_price, customer_mobile, delivery_address, status, created_at, food_items(image_url)')
@@ -393,11 +395,13 @@ export function subscribeVendorOrders(
       .order('created_at', { ascending: false })
       .limit(50);
 
-    if (error) {
-      console.error('[api] subscribeVendorOrders load:', error.message);
-      return;
-    }
+    if (cancelled) return;
+    if (error) throw error;
+    onError(null);
     onData(mapRows(data as unknown as OrderRow[]));
+    } catch {
+      if (!cancelled) onError('Unable to load orders. Check your connection.');
+    }
   };
 
   const scheduleLoad = () => {
@@ -419,12 +423,16 @@ export function subscribeVendorOrders(
     .subscribe();
 
   return () => {
+    cancelled = true;
     if (debounceTimer) clearTimeout(debounceTimer);
     void supabase!.removeChannel(channel);
   };
 }
 
 export async function setOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
+  if (!supabase) throw new Error('Business portal is unavailable.');
+  const { data, error } = await supabase.from('orders').update({ status }).eq('id', orderId).select('id').single();
+  if (error || !data) throw new Error('Could not save the order status. Please try again.');
   // Broadcast locally for instant reactivity within the current app window
   if (typeof window !== 'undefined') {
     window.dispatchEvent(
@@ -433,10 +441,8 @@ export async function setOrderStatus(orderId: string, status: OrderStatus): Prom
       })
     );
   }
+  notifySubscribers();
 
-  if (!supabase) return;
-  const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
-  if (error) console.error('[api] setOrderStatus:', error.message);
 }
 
 export async function fetchOrderStatus(orderId: string): Promise<OrderStatus | null> {
@@ -568,56 +574,37 @@ export function subscribeOrderStatus(
 // Vendor auth (business portal)
 // ---------------------------------------------------------------------------
 
-export async function signInVendor(email: string, password: string): Promise<
-  { ok: true; vendorId: string; vendorName: string } | { ok: false; error: string }
+export async function signInVendorByOutlet(outletId: string, pin: string): Promise<
+  { ok: true; vendorId: string; vendorName: string; isOnline: boolean } | { ok: false; error: string; retrySeconds?: number }
 > {
-  if (!supabase) return { ok: false, error: 'Backend not configured (demo mode)' };
-
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { ok: false, error: error.message };
-
-  const vendor = await getMyVendor();
-  if (!vendor) return { ok: false, error: 'No shop is linked to this account yet' };
-  return { ok: true, vendorId: vendor.id, vendorName: vendor.name };
-}
-
-/** Demo vendor credentials (seeded via supabase/setup_vendor_auth.mjs). */
-const DEMO_VENDOR_EMAIL = 'vendor@yememunnai.app';
-const DEMO_VENDOR_PASSWORD = 'yememunnai123';
-/** Campus PINs accepted at the canteen dashboard keypad (no keyboard needed). */
-export const CAMPUS_ACCESS_PINS = ['0708', '1234'];
-
-/**
- * Sign the demo vendor in with the 4-digit campus PIN — designed for the
- * tactile numpad so vendors never touch the on-screen keyboard on mobile.
- */
-export async function signInVendorByPin(pin: string): Promise<
-  { ok: true; vendorId: string; vendorName: string } | { ok: false; error: string }
-> {
-  if (!CAMPUS_ACCESS_PINS.includes(pin)) return { ok: false, error: 'Invalid campus PIN — try 0708 or 1234' };
-  if (!supabase) {
-    return { ok: true, vendorId: 'demo', vendorName: 'MITS Canteen (Demo)' };
+  const outlet = VENDOR_OUTLETS.find(o => o.id === outletId);
+  if (!outlet) return { ok: false, error: 'Unknown canteen outlet' };
+  if (!/^\d{4}$/.test(pin)) return { ok: false, error: 'Enter a four-digit PIN.' };
+  if (!supabase) return { ok: false, error: 'Business portal is unavailable.' };
+  try {
+    const { data, error } = await supabase.functions.invoke('vendor-pin-login', { body: { outletId, pin } });
+    if (error) {
+      const body = error.context instanceof Response ? await error.context.json().catch(() => null) : null;
+      return { ok: false, error: body?.error ?? 'Unable to connect. Please try again.', retrySeconds: body?.retrySeconds };
+    }
+    if (typeof data?.token_hash !== 'string') return { ok: false, error: 'Unable to sign in. Please try again.' };
+    const verified = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: 'email' });
+    if (verified.error || !verified.data.session) return { ok: false, error: 'Unable to sign in. Please try again.' };
+    const vendor = await getMyVendor();
+    if (!vendor || vendor.id !== outletId) {
+      await supabase.auth.signOut({ scope: 'local' });
+      return { ok: false, error: 'This cafe account is not linked correctly. Contact support.' };
+    }
+    return { ok: true, vendorId: vendor.id, vendorName: vendor.name, isOnline: vendor.isOnline };
+  } catch {
+    return { ok: false, error: 'Unable to connect. Please try again.' };
   }
-  return signInVendor(DEMO_VENDOR_EMAIL, DEMO_VENDOR_PASSWORD);
-}
-
-/**
- * ⚡ Instant Demo Access — one tap into the business portal. Signs in the
- * seeded demo vendor account; in demo mode (no Supabase keys) it returns a
- * local session so the dashboard still renders with mock data.
- */
-export async function signInDemoVendor(): Promise<
-  { ok: true; vendorId: string; vendorName: string } | { ok: false; error: string }
-> {
-  if (!supabase) {
-    return { ok: true, vendorId: 'demo', vendorName: 'MITS Canteen (Demo)' };
-  }
-  return signInVendor(DEMO_VENDOR_EMAIL, DEMO_VENDOR_PASSWORD);
 }
 
 export async function signOutVendor(): Promise<void> {
   if (!supabase) return;
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+  if (error) throw new Error('Could not sign out. Please try again.');
 }
 
 export async function getMyVendor(): Promise<{ id: string; name: string; isOnline: boolean } | null> {
@@ -640,6 +627,9 @@ export async function getMyVendor(): Promise<{ id: string; name: string; isOnlin
 }
 
 export async function setVendorOnline(vendorId: string, isOnline: boolean): Promise<void> {
+  if (!supabase) throw new Error('Business portal is unavailable.');
+  const { data, error } = await supabase.from('vendors').update({ is_online: isOnline }).eq('id', vendorId).select('id').single();
+  if (error || !data) throw new Error('Could not save cafe status. Please try again.');
   // Update in-memory shop
   const shop = inMemoryShops.find(s => s.id === vendorId || s.name.toLowerCase().includes(vendorId.toLowerCase()));
   if (shop) {
@@ -653,10 +643,6 @@ export async function setVendorOnline(vendorId: string, isOnline: boolean): Prom
   });
   notifySubscribers();
 
-  if (supabase) {
-    const { error } = await supabase.from('vendors').update({ is_online: isOnline }).eq('id', vendorId);
-    if (error) console.error('[api] setVendorOnline:', error.message);
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -665,7 +651,7 @@ export async function setVendorOnline(vendorId: string, isOnline: boolean): Prom
 
 export async function fetchVendorItems(vendorId: string): Promise<FoodItem[]> {
   if (!supabase) {
-    return inMemoryFoodItems.filter(i => i.vendorId === vendorId || vendorId === 'demo' || i.vendor === 'MITS Canteen');
+    throw new Error('Business portal is unavailable.');
   }
 
   const { data, error } = await supabase
@@ -675,13 +661,15 @@ export async function fetchVendorItems(vendorId: string): Promise<FoodItem[]> {
     .order('created_at', { ascending: true });
 
   if (error) {
-    console.error('[api] fetchVendorItems:', error.message);
-    return inMemoryFoodItems.filter(i => i.vendorId === vendorId || vendorId === 'demo' || i.vendor === 'MITS Canteen');
+    throw new Error('Unable to load your menu. Please try again.');
   }
   return (data as unknown as FoodItemRow[]).map(rowToItem);
 }
 
 export async function setItemStock(foodItemId: string, inStock: boolean): Promise<void> {
+  if (!supabase) throw new Error('Business portal is unavailable.');
+  const { data, error } = await supabase.from('food_items').update({ in_stock: inStock }).eq('id', foodItemId).select('id').single();
+  if (error || !data) throw new Error('Could not save stock. Please try again.');
   // Update in-memory item
   const item = inMemoryFoodItems.find(i => i.id === foodItemId || i.name.toLowerCase() === foodItemId.toLowerCase());
   if (item) {
@@ -689,56 +677,28 @@ export async function setItemStock(foodItemId: string, inStock: boolean): Promis
   }
   notifySubscribers();
 
-  if (supabase) {
-    const { error } = await supabase.from('food_items').update({ in_stock: inStock }).eq('id', foodItemId);
-    if (error) console.error('[api] setItemStock:', error.message);
-  }
 }
 
 export async function setVendorAllStock(vendorId: string, inStock: boolean): Promise<void> {
+  if (!supabase) throw new Error('Business portal is unavailable.');
+  const { data, error } = await supabase.from('food_items').update({ in_stock: inStock }).eq('vendor_id', vendorId).select('id');
+  if (error || !data?.length) throw new Error('Could not save menu stock. Please try again.');
   const shop = inMemoryShops.find(s => s.id === vendorId || s.name.toLowerCase().includes(vendorId.toLowerCase()));
   inMemoryFoodItems.forEach(i => {
-    if (i.vendorId === vendorId || (shop && i.vendor.toLowerCase() === shop.name.toLowerCase()) || vendorId === 'demo') {
+    if (i.vendorId === vendorId || (shop && i.vendor.toLowerCase() === shop.name.toLowerCase())) {
       i.inStock = inStock;
     }
   });
   notifySubscribers();
 
-  if (supabase) {
-    const { error } = await supabase.from('food_items').update({ in_stock: inStock }).eq('vendor_id', vendorId);
-    if (error) console.error('[api] setVendorAllStock:', error.message);
-  }
 }
 
 export async function createFoodItem(vendorId: string, input: NewFoodItemInput): Promise<FoodItem | null> {
+  if (!supabase) throw new Error('Business portal is unavailable.');
+  if (!input.name.trim() || !Number.isFinite(input.price) || input.price < 0) throw new Error('Enter a valid food name and price.');
   const finalName = input.isVeg === false && !/chicken|mutton|egg|meat|fish|prawn/i.test(input.name)
     ? `${input.name} (Non-Veg)`
     : input.name;
-
-  if (!supabase) {
-    const newItem: FoodItem = {
-      id: 'item-' + Date.now(),
-      vendorId,
-      name: finalName,
-      vendor: inMemoryShops.find(s => s.id === vendorId)?.name ?? 'MITS Canteen',
-      price: input.price,
-      category: input.category,
-      actionType: input.actionType,
-      image: input.imageUrl ?? '/images/item_samosa_chicken.jpg',
-      likes: 0,
-      dislikes: 0,
-      reviews: 0,
-      rating: 5.0,
-      walkTime: '2 min walk',
-      freshnessTag: 'Fresh Batch',
-      inStock: input.inStock,
-      isVeg: input.isVeg,
-      isShopOnline: true
-    };
-    inMemoryFoodItems.unshift(newItem);
-    notifySubscribers();
-    return newItem;
-  }
 
   const { data, error } = await supabase
     .from('food_items')
@@ -758,6 +718,7 @@ export async function createFoodItem(vendorId: string, input: NewFoodItemInput):
     console.error('[api] createFoodItem:', error.message);
     return null;
   }
+  notifySubscribers();
   return rowToItem(data as unknown as FoodItemRow);
 }
 
@@ -792,7 +753,7 @@ export async function uploadFoodPhoto(file: File): Promise<string | null> {
 // ---------------------------------------------------------------------------
 
 export async function fetchVendorStats(vendorId: string): Promise<VendorStats> {
-  if (!supabase) return { ordersToday: 14, totalLikes: 8, avgRating: 4.5 };
+  if (!supabase) throw new Error('Business portal is unavailable.');
 
   const midnight = new Date();
   midnight.setHours(0, 0, 0, 0);
@@ -813,9 +774,7 @@ export async function fetchVendorStats(vendorId: string): Promise<VendorStats> {
       .eq('food_items.vendor_id', vendorId)
   ]);
 
-  if (ordersRes.error) console.error('[api] stats orders:', ordersRes.error.message);
-  if (likesRes.error) console.error('[api] stats likes:', likesRes.error.message);
-  if (ratingRes.error) console.error('[api] stats rating:', ratingRes.error.message);
+  if (ordersRes.error || likesRes.error || ratingRes.error) throw new Error('Unable to load cafe statistics.');
 
   const likes = ((likesRes.data ?? []) as Array<{ likes_count: number }>)
     .reduce((sum, r) => sum + r.likes_count, 0);

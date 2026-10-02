@@ -161,7 +161,7 @@ updateFile('06_walk_in_map_modal.svg', content => {
 // ============================================================================
 // SCREEN 7: 07_mascot_logo.svg
 // ============================================================================
-updateFile('07_mascot_logo.svg', content => {
+updateFile('07_mascot_logo.svg', _content => {
   // Read base64 image of logo
   const logoPngPath = path.join(rootDir, 'public/images/logo.png');
   const logoData = fs.readFileSync(logoPngPath).toString('base64');
