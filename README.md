@@ -8,7 +8,7 @@ React 19 + Vite + Tailwind 4 frontend with a **Supabase backend** (Postgres, Aut
 2. Open **SQL Editor → New query**, paste the whole of [`supabase/schema.sql`](supabase/schema.sql), and **Run**.
    This creates tables, RLS policies, counter triggers, realtime publications, the `food-photos` storage bucket,
    and sample shops and menu items. Vendor accounts are provisioned separately.
-3. Copy **Project Settings → API → Project URL** and **anon public** key.
+3. Copy **Project Settings → API → Project URL** and a **publishable** key.
 4. `cp .env.example .env.local`, paste the two values, then `npm run dev`.
 
 Without credentials the app shows a **preview menu** with local data; ordering and business login require the backend.
@@ -27,9 +27,8 @@ server environment variables; never put an administrative key or a PIN in a `VIT
 
 ## Architecture
 
-Consumer tokens, component contracts and verification limits are documented in the [consumer system blueprint](docs/consumer-design-system.md).
-Run `node scripts/check_consumer_colors.cjs` for contrast checks. Run `scripts/check_consumer_ui.cjs` with
-`PLAYWRIGHT_PACKAGE` pointing to an available Playwright installation for browser checks with intercepted orders.
+The earlier consumer interface is restored. The [consumer system blueprint](docs/consumer-design-system.md)
+is archived; business PIN security and order tracking fixes remain active.
 
 ```
 supabase/schema.sql      Tables (vendors, food_items, reactions, reviews, orders),

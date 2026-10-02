@@ -72,7 +72,7 @@ export const InstallPrompt: React.FC = () => {
   };
 
   return (
-    <div className="consumer-ui campus-overlay">
+    <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4">
       {/* Dimmed backdrop — tap to dismiss */}
       <div
         className="absolute inset-0"
@@ -85,14 +85,14 @@ export const InstallPrompt: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-label="Install YEMUNNAI"
-        className="campus-sheet relative text-center pt-6"
+        className="relative w-full max-w-sm rounded-3xl bg-[#0A2E20] border border-emerald-500/30 shadow-2xl p-6 text-center text-white"
       >
         {/* Close */}
         <button
           type="button"
           onClick={close}
           aria-label="Dismiss install prompt"
-          className="campus-icon absolute top-3 right-3"
+          className="absolute top-3 right-3 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-white/10"
         >
           <X className="w-4 h-4" aria-hidden="true" />
         </button>
@@ -106,13 +106,13 @@ export const InstallPrompt: React.FC = () => {
 
         {deferred ? (
           <>
-            <p className="campus-muted mt-3">
+            <p className="text-xs text-emerald-100/80 leading-relaxed mt-3">
               Keep the campus menu on your home screen. Live menus and orders need a connection.
             </p>
             <button
               type="button"
               onClick={install}
-              className="campus-primary mt-4"
+              className="mt-4 w-full min-h-11 rounded-2xl bg-[#F26A00] text-white font-bold flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4" aria-hidden="true" />
               <span>Install app</span>
@@ -120,21 +120,21 @@ export const InstallPrompt: React.FC = () => {
             <button
               type="button"
               onClick={close}
-              className="campus-text-button mt-2"
+              className="mt-2 min-h-11 text-xs text-white underline"
             >
               Not now
             </button>
           </>
         ) : (
           <>
-            <p className="campus-muted mt-3 flex items-start justify-center gap-2">
+            <p className="text-xs text-emerald-100/80 leading-relaxed mt-3 flex items-start justify-center gap-2">
               <Share2 className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />
               Tap the Share icon in Safari, then choose “Add to Home Screen”.
             </p>
             <button
               type="button"
               onClick={close}
-              className="campus-primary mt-4"
+              className="mt-4 w-full min-h-11 rounded-2xl bg-[#F26A00] text-white font-bold flex items-center justify-center gap-2"
             >
               Back to menu
             </button>

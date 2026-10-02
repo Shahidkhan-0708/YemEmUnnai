@@ -5,7 +5,7 @@ then issues a single-use Supabase Auth token. The client exchanges the token
 and resolves the account's cafe through the existing ownership policies.
 
 1. Apply the `vendor_pin_login` migration to the linked project.
-2. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in a private server environment file.
+2. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in a private server environment file. Use the modern default secret key as the latter value; the variable name is retained for the administration scripts. The deployed function reads the default key from Supabase's injected `SUPABASE_SECRET_KEYS` environment value.
 3. Run `node --env-file=supabase/.env.server.local supabase/setup_vendor_auth.mjs`.
    Generated PINs are saved in `supabase/vendor-pins.local`, which must remain private.
 4. Deploy `vendor-pin-login` with JWT verification disabled. PIN verification is its authentication.

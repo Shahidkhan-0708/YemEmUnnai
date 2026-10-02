@@ -1,8 +1,12 @@
+> Archived: the Mint / Forest consumer redesign was rolled back at the user’s request. The earlier interface is active; business PIN security fixes remain in place.
+
 # YemEmUnnai consumer interface and system blueprint
 
 The consumer discovery to token flow now uses a dark forest palette, readable menu cards, and responsive sheets. The design prioritizes a quick decision during a MITS lecture break. The business workspace retains its green and light surface design and server verified PIN login.
 
 ## Scope and requirements
+
+The subsequent approved audit also migrated FeedbackModal, LocationPermissionScreen, InstallPrompt, BrandIntroSplash, and ErrorBoundary. See [the component audit](design-system-audit.md) for exact findings, the full token and utility catalog, and the remaining intentional boundaries. The final local build emits the application entry at 19.02kB gzip, feedback at 1.32kB gzip, and the welcome route at 0.47kB gzip. The largest raw chunk is 218833 bytes. Local Vite builds took about two seconds after the cache was warm; complete watchdog checks also include TypeScript and lint startup time.
 
 Implemented screens are HomeDiscoveryScreen, FoodItemDetailScreen, QuickOrderModal, WalkInMapModal, and the shared order status shell. React 19, Tailwind 4 and plain CSS remain the implementation stack. No dependency was added. Existing safeStorage, optimistic reaction reconciliation, Supabase client singleton, and multiplexed consumer order channel remain in use.
 
@@ -99,5 +103,7 @@ Vite keeps React, Supabase and UI vendor chunks separate. Detail, map, feedback 
 `scripts/check_consumer_ui.cjs` uses an available Playwright installation with backend writes intercepted. It checks five widths, all and category filtering, sold out and empty states, keyboard detail entry, map handoff, inert background, checkout error and retry, persistent tokens, RTL and text resizing. Set PLAYWRIGHT_PACKAGE to the installed module path and QA_ORIGIN to a preview or production URL. It does not place actual orders. PIN handler assertions remain in `supabase/test_vendor_pin.mjs`; its live mode verifies all five owners, attempt locking and replay protection.
 
 ## Document export limitation
+
+Frontend rollout is complete at https://yemunnai.vercel.app. The old legacy API keys have been disabled and the deployed app uses modern keys. The component audit records verification and remaining coverage limits.
 
 The invoked System Design template was found and its artifact-template.json read. Its retained reference.docx remains unchanged. The Documents capability instructions were read, but the required managed workspace dependency runtime and document render pipeline are not advertised or available in this Windows workspace. DOCX authoring was stopped at that prerequisite as required by the skill. This Markdown file is the persistent repository blueprint, not a claim of a rendered template derived Word document.

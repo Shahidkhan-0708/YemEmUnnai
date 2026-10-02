@@ -26,13 +26,13 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="consumer-ui campus-welcome text-center">
-          <div className="campus-surface w-full max-w-md p-6 space-y-4">
+        <div className="min-h-screen bg-[#111A15] text-slate-100 flex items-center justify-center p-6 text-center">
+          <div className="w-full max-w-md p-6 rounded-3xl bg-[#0A2E20] border border-emerald-500/30 shadow-2xl space-y-4">
             <div className="w-16 h-16 mx-auto rounded-full bg-amber-500/20 flex items-center justify-center text-3xl">
               🍲
             </div>
             <h1 className="text-xl font-bold">Unable to display this page</h1>
-            <p className="campus-muted">
+            <p className="text-xs text-emerald-100/80 leading-relaxed">
               Reload to try again. Saved order tracking stays on this device.
             </p>
             {import.meta.env.DEV && this.state.error?.message && (
@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
               onClick={() => {
                 window.location.reload();
               }}
-              className="campus-primary"
+              className="w-full min-h-11 rounded-2xl bg-[#F26A00] text-white font-bold"
             >
               Reload page
             </button>

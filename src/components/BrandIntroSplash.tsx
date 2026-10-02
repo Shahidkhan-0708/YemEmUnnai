@@ -24,7 +24,7 @@ export const BrandIntroSplash: React.FC<BrandIntroSplashProps> = ({
     // Auto-advance to food discovery after 2.4s (standard Swiggy / Zomato splash duration)
     const autoAdvanceTimer = setTimeout(() => {
       onStart();
-    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 900);
+    }, 2400);
 
     return () => {
       clearTimeout(enterTimer);
@@ -41,11 +41,11 @@ export const BrandIntroSplash: React.FC<BrandIntroSplashProps> = ({
   return (
     <div
       onClick={handleEnter}
+      onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleEnter(); } }}
       role="button"
       tabIndex={0}
-      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleEnter(); } }}
       aria-label="Enter YEMUNNAI campus food discovery"
-      className="consumer-ui brand-splash relative w-full min-h-screen overflow-hidden flex flex-col items-center justify-center cursor-pointer"
+      className="relative w-full max-w-97.5 mx-auto min-h-203 h-full bg-linear-to-b from-[#02180A] via-[#042410] to-[#011207] select-none overflow-hidden shadow-2xl rounded-[36px] border border-[#164326] font-sans flex flex-col items-center justify-center cursor-pointer transition-all"
     >
       {/* Cinematic ambient background glow — deep atmospheric light */}
       <div className="absolute w-80 h-80 rounded-full bg-emerald-500/20 blur-[100px] pointer-events-none -translate-y-6" />
@@ -83,26 +83,18 @@ export const BrandIntroSplash: React.FC<BrandIntroSplashProps> = ({
 
       {/* Iconic Centered Brand Logo */}
       <div
-        className={`relative z-10 flex flex-col items-center justify-center transition-[opacity,transform] duration-700 ease-out ${
+        className={`relative z-10 flex flex-col items-center justify-center transition-all duration-700 ease-out ${
           isLoaded
             ? 'opacity-100 scale-100 translate-y-0 animate-mascot-float'
             : 'opacity-0 scale-90 translate-y-4'
         }`}
       >
-        <div className="campus-surface w-76 h-76 overflow-hidden p-2.5 flex items-center justify-center">
+        <div className="w-65 h-65 rounded-[36px] overflow-hidden p-2 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_40px_rgba(16,185,129,0.25)] border border-emerald-500/25 bg-[#052613]/80 backdrop-blur-md">
           <img
             src="/images/logo.png"
             alt="YEMUNNAI"
             className="w-full h-full object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
           />
-        </div>
-
-        {/* Brand wordmark + shimmer underline */}
-        <div className="mt-7 flex flex-col items-center gap-2.5">
-          <span className="text-[26px] font-black tracking-[0.22em] text-white drop-shadow-[0_6px_18px_rgba(0,0,0,0.6)]">
-            YEMUNNAI
-          </span>
-          <span className="brand-underline h-0.75 w-28 rounded-full" />
         </div>
       </div>
     </div>

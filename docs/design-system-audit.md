@@ -1,3 +1,5 @@
+> Archived: the Mint / Forest consumer redesign was rolled back at the user’s request. The earlier interface is active; business PIN security fixes remain in place.
+
 # YemEmUnnai design system audit
 
 Three read only subagents inspected the CSS token catalog, consumer components, and business boundaries. The primary agent applied the safe consumer refactors and verified the main flow in Chromium. This report covers all 19 files under `src/components`, the shared stylesheet, and App chrome. It is a source and browser audit, not a WCAG certification or a load capacity test.
@@ -52,8 +54,8 @@ Names in this table have the CSS custom property prefix `--`. Every listed value
 | MEDIUM resolved | Colors and writing | `src/components/ErrorBoundary.tsx:30` | Independent orange reload action and vague error copy | Scoped surface, primary action and explicit recovery | Error UI remains recognizable and actionable |
 | LOW resolved | Colors | `src/index.css:333`, `src/index.css:338` | Repeated status fill and hover literals | Consumed semantic background and hover tokens | One role controls every shared state |
 | LOW remaining | Colors | `src/components/WalkInMapModal.tsx:43` | Map SVG duplicates matching forest and mint literals | Replace SVG fills and strokes with role variables in a later appearance preserving cleanup | Current hues match; this is duplication, not unreadable content |
-| LOW remaining | Colors | `src/index.css:478`, `src/App.tsx:152` | Shared shell, tracking, skip link and outer canvas use matching or nearby literals outside consumer scope | Give consumer owned chrome a local scope before replacing values | Unscoped var replacements would fail, and a whole App wrapper could affect vendors |
-| LOW remaining | Maintenance | `src/index.css:6`, `src/index.css:321` | Seventeen root declarations and mint-600 have no current source consumers | Remove only after checking non source asset and generator consumers | Dormant declarations need no runtime migration |
+| LOW remaining | Colors | `src/index.css:476`, `src/App.tsx:152` | Shared shell, tracking, skip link and outer canvas use matching or nearby literals outside consumer scope | Give consumer owned chrome a local scope before replacing values | Unscoped var replacements would fail, and a whole App wrapper could affect vendors |
+| LOW remaining | Maintenance | `src/index.css:6`, `src/index.css:322` | Seventeen root declarations and mint-600 have no current source consumers | Remove only after checking non source asset and generator consumers | Dormant declarations need no runtime migration |
 | LOW remaining | Maintenance | `src/index.css:82`, `src/index.css:151`, `src/index.css:260` | tactile-modal, route dash, scarcity, radar and device-chassis have no current source use | Check artifact consumers before deletion | Unused styles are separate from active UI defects |
 
 ## Every component inspected
@@ -75,6 +77,8 @@ Names in this table have the CSS custom property prefix `--`. Every listed value
 The business hardcodes at dashboard 147 and 200, stock 67 and 78, publishing 162 and 214, and login 78 and 89 belong to the preserved theme. A future cleanup can replace identical values with existing neu and brand variables without turning the workspace dark. These are not mislabeled consumer migration failures.
 
 ## Coverage and verification
+
+Production rollout completed at https://yemunnai.vercel.app. Both the consumer browser checks and real business login checks passed on that deployment. Legacy Supabase API keys were disabled after verifying the modern publishable and secret keys; the exposed old service key now returns 401. All five cafe logins, token replay protection, cafe isolation and lockout were checked again after retirement. New private cafe PINs remain in the ignored local `supabase/vendor-pins.local` file.
 
 | Domain | Evidence | Result |
 | --- | --- | --- |
