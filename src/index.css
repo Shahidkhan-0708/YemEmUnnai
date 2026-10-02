@@ -10,15 +10,15 @@
     --neu-well-dark: #9AA6B3;
     --neu-border: #D6DCE2;
 
-    /* Brand accents (kept) */
-    --brand-primary: #09431B;
-    --brand-primary-dark: #063214;
-    --brand-header: #0A461E;
-    --brand-accent: #F26A00;
+    /* Brand accents — exact NewLogo background #FE7200 */
+    --brand-primary: #FE7200;
+    --brand-primary-dark: #E05D00;
+    --brand-header: #FE7200;
+    --brand-accent: #FE7200;
     --brand-accent-hover: #E05D00;
-    --brand-text-main: #0A2E20;
-    --brand-text-muted: #5C7A6D;
-    --brand-live-green: #10B981;
+    --brand-text-main: #1F140A;
+    --brand-text-muted: #7A6658;
+    --brand-live-green: #FE7200;
     --brand-star-gold: #EAA02B;
 
     /* Legacy aliases remapped to neumorphic surfaces */
@@ -36,7 +36,7 @@
 
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #111A15;
+    background-color: #14110E;
     color: #F8FAFC;
     margin: 0;
     padding: 0;
@@ -75,7 +75,7 @@
   box-shadow:
     inset 3px 3px 6px rgba(154, 166, 179, 0.5),
     inset -3px -3px 6px rgba(255, 255, 255, 0.85),
-    0 0 0 2px rgba(9, 67, 27, 0.15);
+    0 0 0 2px rgba(254, 114, 0, 0.25);
 }
 
 /* Modal Surface — raised neumorphic panel */
@@ -91,7 +91,7 @@
 .btn-orange-shadow {
   box-shadow:
     -3px -3px 7px rgba(255, 255, 255, 0.8),
-    4px 4px 10px rgba(199, 123, 58, 0.42),
+    4px 4px 10px rgba(254, 114, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -100,22 +100,22 @@
   transform: translateY(-1px);
   box-shadow:
     -4px -4px 8px rgba(255, 255, 255, 0.85),
-    6px 6px 14px rgba(199, 123, 58, 0.5),
+    6px 6px 14px rgba(254, 114, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .btn-orange-shadow:active {
   transform: translateY(1px) scale(0.98);
   box-shadow:
-    inset 2px 2px 5px rgba(160, 80, 20, 0.5),
+    inset 2px 2px 5px rgba(217, 95, 0, 0.5),
     0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .btn-green-shadow {
   box-shadow:
     -3px -3px 7px rgba(255, 255, 255, 0.8),
-    4px 4px 10px rgba(9, 67, 27, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    4px 4px 10px rgba(254, 114, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -123,14 +123,14 @@
   transform: translateY(-1px);
   box-shadow:
     -4px -4px 8px rgba(255, 255, 255, 0.85),
-    6px 6px 14px rgba(9, 67, 27, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    6px 6px 14px rgba(254, 114, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .btn-green-shadow:active {
   transform: translateY(1px) scale(0.98);
   box-shadow:
-    inset 2px 2px 5px rgba(6, 40, 15, 0.6),
+    inset 2px 2px 5px rgba(217, 95, 0, 0.6),
     0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -258,11 +258,11 @@
 
 /* Mobile Device Frame Mockup */
 .device-chassis {
-  background: linear-gradient(145deg, #1A2820, #0F1914);
-  border: 10px solid #23352B;
+  background: linear-gradient(145deg, #241A14, #120D0A);
+  border: 10px solid #33241C;
   box-shadow:
     0 30px 80px -10px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(52, 211, 153, 0.25),
+    0 0 0 1px rgba(254, 114, 0, 0.3),
     inset 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
@@ -292,7 +292,7 @@
 
 /* Visible keyboard focus ring on every interactive control (incl. inside modals) */
 :focus-visible {
-  outline: 2px solid #0A461E;
+  outline: 2px solid #FE7200;
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -312,5 +312,5 @@ select,
   font-variant-numeric: tabular-nums;
 }
 
-.skip-content { position: fixed; top: -100px; left: 12px; z-index: 100; padding: 12px; background: #E8ECEF; color: #0A2E20; border-radius: 12px; }
+.skip-content { position: fixed; top: -100px; left: 12px; z-index: 100; padding: 12px; background: #E8ECEF; color: #1F140A; border-radius: 12px; }
 .skip-content:focus { top: 12px; }

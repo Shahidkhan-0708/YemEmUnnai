@@ -15,21 +15,21 @@ interface AddEditFoodItemScreenProps {
 /**
  * Screen 05 — "Add & Edit Food Item" bottom sheet, 1:1 from
  * figma_svgs/05_add_edit_food_item.svg (375 × 812):
- *   - Sheet ........ x=13 y=174 w=349 h=611 rx=27 #E5EDE9, white stroke .85, soft shadow
- *   - Handle ....... 45×4 rx=2 #BAC8C0 (y=183)
+ *   - Sheet ........ x=13 y=174 w=349 h=611 rx=27 #E8ECEF, white stroke .85, soft shadow
+ *   - Handle ....... 45×4 rx=2 #D6DCE2 (y=183)
  *   - Title ........ "Add & Edit Food Item" 17px w800 (baseline y=215)
- *   - Subtitle ..... "Manage live canteen inventory" 11px w600 #5C7A6D (y=231)
- *   - Close ........ 28px circle #DDE7E1 at (334,199), X 18px #0A2E20 sw 2.2
+ *   - Subtitle ..... "Manage live canteen inventory" 11px w600 #7A6658 (y=231)
+ *   - Close ........ 28px circle #DDE7E1 at (334,199), X 18px #1F140A sw 2.2
  *   - Title input .. label 13px w700 (y=254); input x=29 y=265 w=317 h=43 rx=21 inset,
  *                    placeholder "Add food item" 12px w500 #6B8075
  *   - Category ..... label 13px w700 (y=336); two 154×43 rx=20 inset selects at x=29/x=192,
- *                    text 13px w600 at x+14, chevron 18px #09431B at right
+ *                    text 13px w600 at x+14, chevron 18px #FE7200 at right
  *   - Price ........ label 13px w700 (y=423); input 317×43 rx=21 inset, "₹ Enter price"
  *   - Veg toggle ... "Vegetarian Only" 13px w700 (y=508) + "Pure veg preparation" 10px w500;
- *                    switch 50×28 rx=14 #09431B, knob d=22 at RIGHT (cx=332)
+ *                    switch 50×28 rx=14 #FE7200, knob d=22 at RIGHT (cx=332)
  *   - Upload ....... x=29 y=539 w=317 h=143 rx=20 dashed #9BAFA3, arrow-up icon 30px
- *                    #789184, "Upload Photo" 14px w600 #5C7A6D, "JPG or PNG" 10px #71867A
- *   - CTA .......... x=29 y=710 w=317 h=47 rx=12 #09431B "Publish to YEMEMUNNAI" 14px w700
+ *                    #789184, "Upload Photo" 14px w600 #7A6658, "JPG or PNG" 10px #71867A
+ *   - CTA .......... x=29 y=710 w=317 h=47 rx=12 #FE7200 "Publish to YEMEMUNNAI" 14px w700
  */
 export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
   isOpen,
@@ -165,9 +165,9 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
       >
         {submitted ? (
           <div className="py-16 flex flex-col items-center justify-center text-center px-4.5">
-            <CheckCircle className="w-14 h-14 text-[#09431B]" />
-            <h3 className="text-[17px] font-extrabold text-[#0A2E20] mt-3">Item Published!</h3>
-            <p className="text-[11px] font-semibold text-[#5C7A6D] mt-1">
+            <CheckCircle className="w-14 h-14 text-[#FE7200]" />
+            <h3 className="text-[17px] font-extrabold text-[#1F140A] mt-3">Item Published!</h3>
+            <p className="text-[11px] font-semibold text-[#7A6658] mt-1">
               {name} is now live on YEMEMUNNAI.
             </p>
           </div>
@@ -175,7 +175,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
           <form onSubmit={handleSubmit}>
             <fieldset disabled={submitting} className="min-w-0 border-0 p-0">
             {/* Handle — 45×4, 9px from top */}
-            <div className="mx-auto mt-2.25 w-11.25 h-1 rounded-xs bg-[#BAC8C0]" />
+            <div className="mx-auto mt-2.25 w-11.25 h-1 rounded-xs bg-[#D6DCE2]" />
 
             {/* Close — 28px circle #DDE7E1, center (334,199) → 25px from sheet top */}
             <button
@@ -184,23 +184,23 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
               aria-label="Close"
               className="absolute right-3 top-3 size-11 rounded-full bg-[#E8ECEF] flex items-center justify-center cursor-pointer"
             >
-              <X className="w-4.5 h-4.5 text-[#0A2E20]" strokeWidth={2.2} />
+              <X className="w-4.5 h-4.5 text-[#1F140A]" strokeWidth={2.2} />
             </button>
 
             <div className="px-4.5 pb-6.75">
               {/* Title — baseline y=215 (41px from sheet top) */}
-              <h2 className="mt-5.25 text-[17px] font-extrabold leading-5.5 text-[#0A2E20]">
+              <h2 className="mt-5.25 text-[17px] font-extrabold leading-5.5 text-[#1F140A]">
                 Add Food Item
               </h2>
               {/* Subtitle — baseline y=231 */}
-              <p className="mt-px text-[11px] font-semibold leading-3.5 text-[#5C7A6D]">
+              <p className="mt-px text-[11px] font-semibold leading-3.5 text-[#7A6658]">
                 Manage live canteen inventory
               </p>
 
               {/* Title field — label baseline y=254, input y=265 h=43 rx=21 */}
               <label
                 htmlFor="aef-title"
-                className="block mt-4 text-[13px] font-bold leading-4.25 text-[#0A2E20]"
+                className="block mt-4 text-[13px] font-bold leading-4.25 text-[#1F140A]"
               >
                 Title
               </label>
@@ -211,12 +211,12 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Add food item"
-                className="mt-1.25 w-full h-10.75 rounded-[21px] bg-[#E8ECEF] border border-[#D6DCE2] px-3.5 text-[12px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
+                className="mt-1.25 w-full h-10.75 rounded-[21px] bg-[#E8ECEF] border border-[#D6DCE2] px-3.5 text-[12px] font-medium text-[#1F140A] placeholder:text-[#6B8075] focus:outline-none"
                 style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
               />
 
               {/* Category — Single segmented control */}
-              <span className="block mt-6 text-[13px] font-bold leading-4.25 text-[#0A2E20]">
+              <span className="block mt-6 text-[13px] font-bold leading-4.25 text-[#1F140A]">
                 Category
               </span>
               <div
@@ -233,8 +233,8 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                       aria-pressed={selected}
                       className={`flex-1 h-full rounded-[18px] text-[12px] font-extrabold capitalize transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                         selected
-                          ? 'bg-[#09431B] text-white shadow-sm'
-                          : 'text-[#0A2E20]/70 hover:text-[#0A2E20]'
+                          ? 'bg-[#FE7200] text-white shadow-sm'
+                          : 'text-[#1F140A]/70 hover:text-[#1F140A]'
                       }`}
                     >
                       <span>{cat === 'cooked' ? '🍳 Cooked Food' : '📦 Packed Food'}</span>
@@ -246,10 +246,10 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
               {/* Service Mode — Walk-In or Order Toggle */}
               <div className="mt-5">
                 <div className="flex flex-wrap gap-1 items-center justify-between">
-                  <span className="block text-[13px] font-bold leading-4.25 text-[#0A2E20]">
+                  <span className="block text-[13px] font-bold leading-4.25 text-[#1F140A]">
                     Service Mode
                   </span>
-                  <span className="text-[10px] font-semibold text-[#5C7A6D]">
+                  <span className="text-[10px] font-semibold text-[#7A6658]">
                     {actionType === 'order' ? 'Students send an order to your cafe' : 'Students walk in with the live map'}
                   </span>
                 </div>
@@ -263,8 +263,8 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                     aria-pressed={actionType === 'walkin'}
                     className={`flex-1 h-full rounded-[18px] text-[12px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       actionType === 'walkin'
-                        ? 'bg-[#09431B] text-white shadow-sm'
-                        : 'text-[#0A2E20]/70 hover:text-[#0A2E20]'
+                        ? 'bg-[#FE7200] text-white shadow-sm'
+                        : 'text-[#1F140A]/70 hover:text-[#1F140A]'
                     }`}
                   >
                     <MapPin className="w-3.5 h-3.5" />
@@ -278,7 +278,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                     className={`flex-1 h-full rounded-[18px] text-[12px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       actionType === 'order'
                         ? 'bg-[#F26A00] text-white shadow-sm'
-                        : 'text-[#0A2E20]/70 hover:text-[#0A2E20]'
+                        : 'text-[#1F140A]/70 hover:text-[#1F140A]'
                     }`}
                   >
                     <ShoppingCart className="w-3.5 h-3.5" />
@@ -290,7 +290,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
               {/* Price — label baseline y=423, input 317×43 rx=21 */}
               <label
                 htmlFor="aef-price"
-                className="block mt-6 text-[13px] font-bold leading-4.25 text-[#0A2E20]"
+                className="block mt-6 text-[13px] font-bold leading-4.25 text-[#1F140A]"
               >
                 Price
               </label>
@@ -308,17 +308,17 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="Enter price"
-                  className="flex-1 min-w-0 bg-transparent text-[12px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
+                  className="flex-1 min-w-0 bg-transparent text-[12px] font-medium text-[#1F140A] placeholder:text-[#6B8075] focus:outline-none"
                 />
               </div>
 
               {/* Vegetarian Only — label y=508, sub y=523; switch 50×28 knob right */}
               <div className="mt-6 flex items-center justify-between">
                 <div>
-                  <span className="block text-[13px] font-bold leading-4.25 text-[#0A2E20]">
+                  <span className="block text-[13px] font-bold leading-4.25 text-[#1F140A]">
                     Vegetarian Only
                   </span>
-                  <span className="block mt-px text-[10px] font-medium leading-3.25 text-[#5C7A6D]">
+                  <span className="block mt-px text-[10px] font-medium leading-3.25 text-[#7A6658]">
                     Pure veg preparation
                   </span>
                 </div>
@@ -330,7 +330,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                   onClick={() => setVegetarian(v => !v)}
                   className="relative w-12.5 h-7 rounded-[14px] cursor-pointer transition-colors shrink-0"
                   style={{
-                    background: vegetarian ? '#09431B' : '#C9D0D8',
+                    background: vegetarian ? '#FE7200' : '#C9D0D8',
                     boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)'
                   }}
                 >
@@ -363,7 +363,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                 ) : (
                   <>
                     <Upload className="w-7.5 h-7.5 text-[#789184]" strokeWidth={1.9} />
-                    <span className="mt-3 text-[14px] font-semibold text-[#5C7A6D]">
+                    <span className="mt-3 text-[14px] font-semibold text-[#7A6658]">
                       Upload Photo
                     </span>
                     <span className="mt-1 text-[10px] font-medium text-[#71867A]">
@@ -380,11 +380,11 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                 </div>
               )}
 
-              {/* CTA — 317×47 rx=12 #09431B (y=710 → 27px from sheet bottom) */}
+              {/* CTA — 317×47 rx=12 #FE7200 (y=710 → 27px from sheet bottom) */}
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-7 w-full h-11.75 rounded-xl bg-[#09431B] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#073515] active:scale-[0.98] transition-all"
+                className="mt-7 w-full h-11.75 rounded-xl bg-[#FE7200] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#E05D00] active:scale-[0.98] transition-all"
                 style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
               >
                 {submitting ? 'Publishing…' : 'Publish to YEMEMUNNAI'}

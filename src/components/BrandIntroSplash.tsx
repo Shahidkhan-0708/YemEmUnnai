@@ -45,10 +45,10 @@ export const BrandIntroSplash: React.FC<BrandIntroSplashProps> = ({
       role="button"
       tabIndex={0}
       aria-label="Enter YEMUNNAI campus food discovery"
-      className="relative w-full max-w-97.5 mx-auto min-h-203 h-full bg-linear-to-b from-[#02180A] via-[#042410] to-[#011207] select-none overflow-hidden shadow-2xl rounded-[36px] border border-[#164326] font-sans flex flex-col items-center justify-center cursor-pointer transition-all"
+      className="relative w-full max-w-97.5 mx-auto min-h-203 h-full bg-linear-to-b from-[#1A0C02] via-[#2A1405] to-[#120701] select-none overflow-hidden shadow-2xl rounded-[36px] border border-[#4A260B] font-sans flex flex-col items-center justify-center cursor-pointer transition-all"
     >
       {/* Cinematic ambient background glow — deep atmospheric light */}
-      <div className="absolute w-80 h-80 rounded-full bg-emerald-500/20 blur-[100px] pointer-events-none -translate-y-6" />
+      <div className="absolute w-80 h-80 rounded-full bg-[#FE7200]/25 blur-[100px] pointer-events-none -translate-y-6" />
       <div className="absolute w-64 h-64 rounded-full bg-amber-500/10 blur-[80px] pointer-events-none translate-y-12" />
 
       {/* Rising Steam Effect above the steaming cup mascot */}
@@ -89,9 +89,9 @@ export const BrandIntroSplash: React.FC<BrandIntroSplashProps> = ({
             : 'opacity-0 scale-90 translate-y-4'
         }`}
       >
-        <div className="w-65 h-65 rounded-[36px] overflow-hidden p-2 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_40px_rgba(16,185,129,0.25)] border border-emerald-500/25 bg-[#052613]/80 backdrop-blur-md">
+        <div className="w-65 h-65 rounded-[36px] overflow-hidden p-2 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_40px_rgba(254,114,0,0.35)] border border-[#FE7200]/30 bg-[#FE7200]/20 backdrop-blur-md">
           <img
-            src="/images/logo.png"
+            src="/images/NewLogo.svg"
             alt="YEMUNNAI"
             className="w-full h-full object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
           />

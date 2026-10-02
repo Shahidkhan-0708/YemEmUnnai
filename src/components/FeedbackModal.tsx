@@ -30,18 +30,18 @@ const STAR_PATHS = Array.from({ length: 5 }, (_, i) => {
 /**
  * Screen 03 — "Rating & Feedback" bottom sheet, 1:1 from
  * figma_svgs/03_feedback_popup.svg (375 × 812):
- *   - Sheet ......... x=13 y=270 w=349 h=440 rx=27 #E5EDE9, white stroke .85, soft shadow
- *   - Handle ........ 45×4 rx=2 #BAC8C0, 9px from top
+ *   - Sheet ......... x=13 y=270 w=349 h=440 rx=27 #E8ECEF, white stroke .85, soft shadow
+ *   - Handle ........ 45×4 rx=2 #D6DCE2, 9px from top
  *   - Title ......... "Rating & Feedback" 17px w800 (baseline y=310)
- *   - Subtitle ...... "Help {vendor} improve live batch quality" 11px w600 #5C7A6D
- *   - Divider ....... y=336 #CAD8D0
+ *   - Subtitle ...... "Help {vendor} improve live batch quality" 11px w600 #7A6658
+ *   - Divider ....... y=336 #D6DCE2
  *   - "Rate your stars" 13px w700 (x=32, baseline y=343)
  *   - 5 stars ....... centers (61 + 59·i, 376.2), outer R≈13.75 / inner R≈5.5, fill #EAA02B
- *   - Like row ...... thumb icon @36 (scaled .875, stroke #5C7A6D) + "Like" 13px w700 (x=65)
+ *   - Like row ...... thumb icon @36 (scaled .875, stroke #7A6658) + "Like" 13px w700 (x=65)
  *                     toggle 43×24 rx=12 #ABB8B0, knob d=18 at LEFT (cx=158)
  *   - Dislike ....... same icon rotated 180° @x=235 + "Dislike" (x=264), no toggle
  *   - Comment box ... x=29 y=438 w=317 h=175 rx=16 inset #DCE5E0, "Write your review…" 13px w500 #6B8075
- *   - CTA ........... x=29 y=636 w=317 h=46 rx=12 #09431B "Submit Review" 14px w700
+ *   - CTA ........... x=29 y=636 w=317 h=46 rx=12 #FE7200 "Submit Review" 14px w700
  */
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   isOpen,
@@ -108,16 +108,16 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       >
         {submitted ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4.5">
-            <ThumbsUp className="w-14 h-14 text-[#09431B]" />
-            <h3 className="text-[17px] font-extrabold text-[#0A2E20] mt-3">Review Published!</h3>
-            <p className="text-[11px] font-semibold text-[#5C7A6D] mt-1">
+            <ThumbsUp className="w-14 h-14 text-[#FE7200]" />
+            <h3 className="text-[17px] font-extrabold text-[#1F140A] mt-3">Review Published!</h3>
+            <p className="text-[11px] font-semibold text-[#7A6658] mt-1">
               Thanks for helping {item.vendor} improve.
             </p>
           </div>
         ) : (
           <div>
             {/* Handle — 45×4, 9px from top */}
-            <div className="mx-auto mt-2.25 w-11.25 h-1 rounded-xs bg-[#BAC8C0]" />
+            <div className="mx-auto mt-2.25 w-11.25 h-1 rounded-xs bg-[#D6DCE2]" />
 
             {/* Close X — 18px icon, center (337.5, 304) — 24px hit area */}
             <button
@@ -131,19 +131,19 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
             <div className="px-4.5">
               {/* Title — baseline y=310 */}
-              <h2 className="mt-3.5 text-[17px] font-extrabold leading-5.5 text-[#0A2E20]">
+              <h2 className="mt-3.5 text-[17px] font-extrabold leading-5.5 text-[#1F140A]">
                 Rating &amp; Feedback
               </h2>
               {/* Subtitle — baseline y=327 */}
-              <p className="mt-px text-[11px] font-semibold leading-3.5 text-[#5C7A6D]">
+              <p className="mt-px text-[11px] font-semibold leading-3.5 text-[#7A6658]">
                 Help {item.vendor} improve live batch quality
               </p>
 
               {/* Divider — y=336 */}
-              <div className="mt-1.75 h-px bg-[#CAD8D0]" />
+              <div className="mt-1.75 h-px bg-[#D6DCE2]" />
 
               {/* Rate your stars — baseline y=343 */}
-              <div className="mt-1.25 text-[13px] font-bold text-[#0A2E20]">Rate your stars</div>
+              <div className="mt-1.25 text-[13px] font-bold text-[#1F140A]">Rate your stars</div>
 
               {/* 5 stars — 59px pitch, centers y=376.2, R_out 13.75 / R_in 5.5 */}
               <div className="mt-0.75 flex items-center gap-7.75">
@@ -181,11 +181,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   onClick={() => setIsLiked(true)}
                   className={`flex-1 h-9.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all ${
                     isLiked
-                      ? 'bg-[#09431B] text-white btn-green-shadow font-extrabold'
-                      : 'bg-[#E8ECEF] border border-[#CAD8D0] text-[#5C7A6D] hover:text-[#0A2E20]'
+                      ? 'bg-[#FE7200] text-white btn-orange-shadow font-extrabold'
+                      : 'bg-[#E8ECEF] border border-[#D6DCE2] text-[#7A6658] hover:text-[#1F140A]'
                   }`}
                 >
-                  <ThumbsUp className={`w-4.5 h-4.5 ${isLiked ? 'text-white' : 'text-[#5C7A6D]'}`} strokeWidth={2} />
+                  <ThumbsUp className={`w-4.5 h-4.5 ${isLiked ? 'text-white' : 'text-[#7A6658]'}`} strokeWidth={2} />
                   <span className="text-[13px]">Like</span>
                 </button>
 
@@ -195,10 +195,10 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   className={`flex-1 h-9.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all ${
                     !isLiked
                       ? 'bg-[#B4382B] text-white shadow-md font-extrabold'
-                      : 'bg-[#E8ECEF] border border-[#CAD8D0] text-[#5C7A6D] hover:text-[#0A2E20]'
+                      : 'bg-[#E8ECEF] border border-[#D6DCE2] text-[#7A6658] hover:text-[#1F140A]'
                   }`}
                 >
-                  <ThumbsDown className={`w-4.5 h-4.5 ${!isLiked ? 'text-white' : 'text-[#5C7A6D]'}`} strokeWidth={2} />
+                  <ThumbsDown className={`w-4.5 h-4.5 ${!isLiked ? 'text-white' : 'text-[#7A6658]'}`} strokeWidth={2} />
                   <span className="text-[13px]">Dislike</span>
                 </button>
               </div>
@@ -214,7 +214,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Write your review…"
                   maxLength={500}
-                  className="w-full h-full resize-none bg-transparent rounded-2xl px-3.75 py-3.25 text-[13px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
+                  className="w-full h-full resize-none bg-transparent rounded-2xl px-3.75 py-3.25 text-[13px] font-medium text-[#1F140A] placeholder:text-[#6B8075] focus:outline-none"
                 />
               </div>
 
@@ -222,12 +222,12 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 <p role="alert" className="mt-1.5 text-[10px] font-bold text-red-600">{submitError}</p>
               )}
 
-              {/* CTA — 317×46 rx=12 #09431B */}
+              {/* CTA — 317×46 rx=12 #FE7200 */}
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="mt-4 w-full h-11.5 rounded-xl bg-[#09431B] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 hover:bg-[#073515] active:scale-[0.98] transition-all"
+                className="mt-4 w-full h-11.5 rounded-xl bg-[#FE7200] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 hover:bg-[#E05D00] active:scale-[0.98] transition-all"
                 style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
               >
                 {submitting ? 'Publishing…' : 'Submit Review'}

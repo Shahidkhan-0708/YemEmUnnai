@@ -30,13 +30,13 @@ assert.equal(valid.status, 200);
 assert.deepEqual(await valid.json(), { token_hash: 'one-use-token' });
 assert.equal(valid.headers.get('Cache-Control'), 'no-store');
 assert.equal(calls, 2);
-for (const [result, status] of [[{ ok: false }, 401], [{ ok: false, retrySeconds: 900 }, 429]]) {
+for (const [result, status] of [[{ ok: false }, 401], [{ ok: false, retrySeconds: 120 }, 429]]) {
   const response = await handlePinLogin(request({ outletId, pin: '0123' }), settings, async url => {
     assert.ok(url.endsWith('/verify_vendor_pin'));
     return Response.json(result);
   });
   assert.equal(response.status, status);
-  if (status === 429) assert.equal((await response.json()).retrySeconds, 900);
+  if (status === 429) assert.equal((await response.json()).retrySeconds, 120);
 }
 let step = 0;
 const mismatch = await handlePinLogin(request({ outletId, pin: '0123' }), settings, async () => Response.json(++step === 1

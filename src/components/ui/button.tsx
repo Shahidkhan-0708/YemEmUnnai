@@ -11,13 +11,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center rounded-xl text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer active:scale-97 select-none';
 
     const variants: Record<string, string> = {
-      default: 'bg-[#09431B] text-white hover:bg-[#073515] btn-green-shadow',
-      green: 'bg-gradient-to-r from-[#0A461E] to-[#063214] text-white hover:brightness-110 btn-green-shadow',
-      orange: 'bg-gradient-to-r from-[#FF8A2A] to-[#F26A00] text-white hover:brightness-105 btn-orange-shadow',
-      secondary: 'bg-[#DDE2E8] text-[#0A2E20] hover:bg-[#C4D2CB]',
-      outline: 'border border-[#D6DCE2] bg-[#E8ECEF] text-[#0A2E20] hover:bg-[#DDE2E8]',
-      ghost: 'hover:bg-black/5 text-[#0A2E20]',
-      link: 'text-[#09431B] underline-offset-4 hover:underline'
+      default: 'bg-[#FE7200] text-white hover:bg-[#E05D00] btn-orange-shadow',
+      green: 'bg-gradient-to-r from-[#FE7200] to-[#E05D00] text-white hover:brightness-105 btn-orange-shadow',
+      orange: 'bg-gradient-to-r from-[#FF8A2A] to-[#FE7200] text-white hover:brightness-105 btn-orange-shadow',
+      secondary: 'bg-[#DDE2E8] text-[#1F140A] hover:bg-[#D4DCE4]',
+      outline: 'border border-[#D6DCE2] bg-[#E8ECEF] text-[#1F140A] hover:bg-[#DDE2E8]',
+      ghost: 'hover:bg-black/5 text-[#1F140A]',
+      link: 'text-[#FE7200] underline-offset-4 hover:underline'
     };
 
     const sizes: Record<string, string> = {

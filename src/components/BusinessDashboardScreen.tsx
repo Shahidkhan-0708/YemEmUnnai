@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Phone, MapPin, Check, X, ClipboardList, ThumbsUp, LogIn, LogOut, RefreshCw, BellRing } from 'lucide-react';
+import { Phone, MapPin, Check, X, ClipboardList, ThumbsUp, LogIn, LogOut, RefreshCw, Fingerprint } from 'lucide-react';
+import { FamilyReceiveComponent } from './FamilyReceiveComponent';
 import { useVendorSession, useVendorOrders, useVendorStats } from '../lib/hooks';
 import { setOrderStatus, setVendorOnline } from '../lib/api';
 import { isBackendConfigured } from '../lib/supabase';
@@ -19,7 +20,7 @@ interface BusinessDashboardScreenProps {
  *                      settings gear 23px @ (328,50), hairline y=116 #497658 @ .6
  *   - Live row ....... "Live" 15px w600 (baseline y=157) + toggle 43×24 rx=12 #73AF83,
  *                      knob d=18 at RIGHT (cx=96); ONLINE/OFFLINE segmented control
- *                      157×32 rx=16 #DCE5E0 at x=194, active pill 75×24 #09431B
+ *                      157×32 rx=16 #DCE5E0 at x=194, active pill 75×24 #FE7200
  *   - Stat cards ..... 3 × 109×106 rx=18 at y=237, gap 8px: clipboard icon, thumbs-up icon,
  *                      gold star path (#EAA02B), label 11px w600 (y=301), value 18px w800 (y=323)
  *   - Orders panel ... x=16 y=368 w=343 h=242 rx=21, "INCOMING ORDERS" 14px w800 (y=398),
@@ -27,9 +28,9 @@ interface BusinessDashboardScreenProps {
  *   - Order row ...... photo 85×85 rx=12 at (30,427), name/price 16px w800 (y=445),
  *                      vendor 11px w500 (y=465), phone/address strips 220×26 rx=8 #DCE7E1
  *                      (y=473 / y=504, icons 24px @ .667, "Phone:"/"Deliver to:" 10px w700
- *                      #5C7A6D + value 11px w800 #0A2E20)
+ *                      #7A6658 + value 11px w800 #1F140A)
  *   - Buttons ........ Decline 150×42 rx=12 #FDF3F2 stroke #E5ABA5 (x=30, y=546), X 18px
- *                      #B4382B sw2.2, text 13px w700 #B4382B; Accept 150×42 #09431B (x=195),
+ *                      #B4382B sw2.2, text 13px w700 #B4382B; Accept 150×42 #FE7200 (x=195),
  *                      check 18px sw2.2, text 13px w700 white
  *   - Footer ......... "New orders appear here in real time" 11px w500 centered (y=657)
  */
@@ -111,24 +112,24 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
       <div className="relative">
         <div className="w-full bg-[#EBF2EE] min-h-screen pb-10 select-none relative flex flex-col items-center justify-center gap-4 px-8 text-center">
           {!isBackendConfigured ? (
-            <><h2 className="text-base font-black text-[#0A2E20]">Business Portal Unavailable</h2><p className="text-sm text-[#5C7A6D]">The server connection has not been configured.</p></>
+            <><h2 className="text-base font-black text-[#1F140A]">Business Portal Unavailable</h2><p className="text-sm text-[#7A6658]">The server connection has not been configured.</p></>
           ) : checking ? (
             <>
-              <RefreshCw className="w-8 h-8 text-[#09431B] animate-spin" />
-              <p className="text-xs font-bold text-[#5C7A6D]">Checking your session…</p>
+              <RefreshCw className="w-8 h-8 text-[#FE7200] animate-spin" />
+              <p className="text-xs font-bold text-[#7A6658]">Checking your session…</p>
             </>
           ) : (
             <>
-              <div className="w-16 h-16 rounded-3xl bg-[#09431B] flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 rounded-3xl bg-[#FE7200] flex items-center justify-center shadow-lg">
                 <LogIn className="w-7 h-7 text-white" />
               </div>
-              <h2 className="text-base font-black text-[#0A2E20]">Business Portal</h2>
-              <p className="text-xs text-[#5C7A6D]">
+              <h2 className="text-base font-black text-[#1F140A]">Business Portal</h2>
+              <p className="text-xs text-[#7A6658]">
                 Sign in with your cafe’s four-digit security PIN to manage its orders and menu.
               </p>
               <button
                 onClick={() => setIsLoginOpen(true)}
-                className="w-full py-3 bg-white text-[#09431B] rounded-xl text-xs font-extrabold border border-[#BACBC1] hover:bg-[#F3F8F5] active:scale-98 transition-all cursor-pointer"
+                className="w-full py-3 bg-white text-[#FE7200] rounded-xl text-xs font-extrabold border border-[#D6DCE2] hover:bg-[#F3F8F5] active:scale-98 transition-all cursor-pointer"
               >
                 Enter Cafe PIN
               </button>
@@ -146,9 +147,9 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
     <div className="relative">
       <div className="mx-auto w-full max-w-3xl bg-[#E8ECEF] min-h-dvh pb-10 relative">
         {/* HEADER — emerald gradient, curve to y≈221 */}
-        <div className="bg-linear-to-b from-[#0A461E] to-[#063214] px-4 pt-8 pb-6 text-white relative overflow-hidden">
+        <div className="bg-linear-to-b from-[#FE7200] to-[#E05D00] px-4 pt-8 pb-6 text-white relative overflow-hidden">
           <div
-            className="absolute inset-x-0 bottom-0 h-4 bg-[#063214]"
+            className="absolute inset-x-0 bottom-0 h-4 bg-[#E05D00]"
             style={{ borderRadius: '50% 50% 0 0 / 100% 100% 0 0' }}
           />
 
@@ -201,7 +202,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
               style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
             >
               <span
-                className="absolute top-1 w-18.75 h-6 rounded-xl bg-[#09431B] transition-all"
+                className="absolute top-1 w-18.75 h-6 rounded-xl bg-[#FE7200] transition-all"
                 style={{ left: isOnline ? 4 : 78 }}
               />
               <button
@@ -210,7 +211,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
                 disabled={busyAction !== null}
                 aria-pressed={isOnline}
                 className={`relative z-10 flex-1 text-[10px] font-extrabold tracking-wide cursor-pointer transition-colors ${
-                  isOnline ? 'text-white' : 'text-[#0A2E20]'
+                  isOnline ? 'text-white' : 'text-[#1F140A]'
                 }`}
               >
                 ONLINE
@@ -221,7 +222,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
                 disabled={busyAction !== null}
                 aria-pressed={!isOnline}
                 className={`relative z-10 flex-1 text-[10px] font-bold tracking-wide cursor-pointer transition-colors ${
-                  !isOnline ? 'text-white font-extrabold' : 'text-[#0A2E20]/70'
+                  !isOnline ? 'text-white font-extrabold' : 'text-[#1F140A]/70'
                 }`}
               >
                 OFFLINE
@@ -236,18 +237,18 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
         <div className="px-4 mt-4 grid grid-cols-3 gap-2">
           {/* Orders Today — clipboard icon */}
           <div className="tactile-card rounded-[18px] pt-3.25 pb-3.5 flex flex-col items-center">
-            <ClipboardList className="w-6 h-6 text-[#09431B]" strokeWidth={1.9} />
-            <span className="mt-6 text-[11px] font-semibold text-[#0A2E20]">Orders Today</span>
-            <span className="mt-0.5 text-[18px] font-extrabold text-[#0A2E20] tabular-nums">
+            <ClipboardList className="w-6 h-6 text-[#FE7200]" strokeWidth={1.9} />
+            <span className="mt-6 text-[11px] font-semibold text-[#1F140A]">Orders Today</span>
+            <span className="mt-0.5 text-[18px] font-extrabold text-[#1F140A] tabular-nums">
               {stats.error ? '—' : stats.ordersToday}
             </span>
           </div>
 
           {/* Total Likes — thumbs-up icon */}
           <div className="tactile-card rounded-[18px] pt-3.25 pb-3.5 flex flex-col items-center">
-            <ThumbsUp className="w-6 h-6 text-[#09431B]" strokeWidth={1.9} />
-            <span className="mt-6 text-[11px] font-semibold text-[#0A2E20]">Total Likes</span>
-            <span className="mt-0.5 text-[18px] font-extrabold text-[#0A2E20] tabular-nums">
+            <ThumbsUp className="w-6 h-6 text-[#FE7200]" strokeWidth={1.9} />
+            <span className="mt-6 text-[11px] font-semibold text-[#1F140A]">Total Likes</span>
+            <span className="mt-0.5 text-[18px] font-extrabold text-[#1F140A] tabular-nums">
               {stats.error ? '—' : stats.totalLikes}
             </span>
           </div>
@@ -260,8 +261,8 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
                 fill="#EAA02B"
               />
             </svg>
-            <span className="mt-5.75 text-[11px] font-semibold text-[#0A2E20]">Avg Rating</span>
-            <span className="mt-0.5 text-[18px] font-extrabold text-[#0A2E20] tabular-nums">
+            <span className="mt-5.75 text-[11px] font-semibold text-[#1F140A]">Avg Rating</span>
+            <span className="mt-0.5 text-[18px] font-extrabold text-[#1F140A] tabular-nums">
               {stats.avgRating != null ? Number(stats.avgRating).toFixed(1) : '—'}
             </span>
           </div>
@@ -271,16 +272,16 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
         <div className="mx-4 mt-5.5 tactile-card rounded-[21px] p-3.5">
           <div className="flex items-baseline justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-[14px] font-extrabold tracking-wide text-[#0A2E20]">
+              <span className="text-[14px] font-extrabold tracking-wide text-[#1F140A]">
                 INCOMING ORDERS
               </span>
               {orders.length > 0 && (
-                <span className="text-[10px] font-extrabold bg-[#09431B] text-white px-2 py-0.2 rounded-full">
+                <span className="text-[10px] font-extrabold bg-[#FE7200] text-white px-2 py-0.2 rounded-full">
                   {orders.length}
                 </span>
               )}
             </div>
-            <span className="text-[11px] font-medium text-[#5C7A6D]">
+            <span className="text-[11px] font-medium text-[#7A6658]">
               Feed{!isBackendConfigured ? ' • demo' : ''}
             </span>
           </div>
@@ -290,11 +291,11 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
           {ordersError ? (
             <p role="alert" className="py-6 text-sm text-red-700">{ordersError}</p>
           ) : ordersLoading ? (
-            <div className="py-10 text-center text-[11px] font-medium text-[#5C7A6D] animate-pulse">
+            <div className="py-10 text-center text-[11px] font-medium text-[#7A6658] animate-pulse">
               Loading live orders…
             </div>
           ) : orders.length === 0 ? (
-            <p className="pt-14.5 pb-13.5 text-center text-[11px] font-medium text-[#5C7A6D]">
+            <p className="pt-14.5 pb-13.5 text-center text-[11px] font-medium text-[#7A6658]">
               New orders appear here in real time
             </p>
           ) : (
@@ -310,32 +311,32 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
                     <div className="flex-1 min-w-0">
                       {/* Name / price — 16px w800, baseline y=445 */}
                       <div className="flex items-baseline justify-between">
-                        <h4 className="text-[16px] font-extrabold text-[#0A2E20] truncate">
+                        <h4 className="text-[16px] font-extrabold text-[#1F140A] truncate">
                           {ord.item}
                         </h4>
-                        <span className="text-[16px] font-extrabold text-[#0A2E20] tabular-nums">
+                        <span className="text-[16px] font-extrabold text-[#1F140A] tabular-nums">
                           ₹{ord.price}
                         </span>
                       </div>
                       {/* Vendor — 11px w500, baseline y=465 */}
-                      <p className="mt-0.75 text-[11px] font-medium text-[#5C7A6D] truncate">
+                      <p className="mt-0.75 text-[11px] font-medium text-[#7A6658] truncate">
                         {ord.vendor}
                       </p>
 
                       {/* Phone strip — 220×26 rx=8 #DCE7E1 */}
                       <div className="mt-2 h-6.5 rounded-lg bg-[#DDE2E8] flex items-center px-1.75 gap-1.5">
-                        <Phone className="w-4 h-4 text-[#09431B] shrink-0" strokeWidth={1.9} />
-                        <span className="text-[10px] font-bold text-[#5C7A6D]">Phone:</span>
-                        <span className="text-[11px] font-extrabold text-[#0A2E20] truncate">
+                        <Phone className="w-4 h-4 text-[#FE7200] shrink-0" strokeWidth={1.9} />
+                        <span className="text-[10px] font-bold text-[#7A6658]">Phone:</span>
+                        <span className="text-[11px] font-extrabold text-[#1F140A] truncate">
                           {ord.phone}
                         </span>
                       </div>
 
                       {/* Address strip — 220×26 rx=8 #DCE7E1 */}
                       <div className="mt-1.25 h-6.5 rounded-lg bg-[#DDE2E8] flex items-center px-1.75 gap-1.5">
-                        <MapPin className="w-4 h-4 text-[#09431B] shrink-0" strokeWidth={1.9} />
-                        <span className="text-[10px] font-bold text-[#5C7A6D]">Deliver to:</span>
-                        <span className="text-[11px] font-extrabold text-[#0A2E20] truncate">
+                        <MapPin className="w-4 h-4 text-[#FE7200] shrink-0" strokeWidth={1.9} />
+                        <span className="text-[10px] font-bold text-[#7A6658]">Deliver to:</span>
+                        <span className="text-[11px] font-extrabold text-[#1F140A] truncate">
                           {ord.location}
                         </span>
                       </div>
@@ -346,19 +347,21 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
                   <div className="mt-4 flex gap-3">
                     {ord.status === 'accepted' ? (
                       <div className="w-full flex gap-2">
-                        <div className="flex-1 h-10.5 rounded-xl bg-[#E4ECE7] border border-[#BACBC1] flex items-center justify-center gap-1.5 text-[#09431B] text-[12px] font-bold">
-                          <Check className="w-4 h-4 text-[#09431B]" strokeWidth={2.5} />
+                        <div className="flex-1 h-10.5 rounded-xl bg-[#E4ECE7] border border-[#D6DCE2] flex items-center justify-center gap-1.5 text-[#FE7200] text-[12px] font-bold">
+                          <Check className="w-4 h-4 text-[#FE7200]" strokeWidth={2.5} />
                           <span>Prepping</span>
                         </div>
-                        <button
-                          onClick={() => void handleReady(ord.id)}
+                        <FamilyReceiveComponent
+                          triggerLabel="Handover & Receive"
+                          title="Confirm Order Handover"
+                          description={`Confirm you have handed over ${ord.item} (Order #${ord.id.slice(-4)}) to customer (${ord.location}) and received payment of ₹${ord.price}.`}
+                          confirmLabel="Receive & Complete"
+                          cancelLabel="Cancel"
+                          icon={<Fingerprint size={28} className="text-[#FE7200]" />}
                           disabled={busyAction !== null}
-                          aria-label={`Mark order for ${ord.item} as ready`}
-                          className="flex-[1.4] h-10.5 rounded-xl bg-[#09431B] text-white flex items-center justify-center gap-1.5 text-[12px] font-bold hover:bg-[#073515] active:scale-95 transition-all shadow-md cursor-pointer"
-                        >
-                          <BellRing className="w-4 h-4 text-white" />
-                          <span>Mark Ready</span>
-                        </button>
+                          onConfirm={() => void handleReady(ord.id)}
+                          className="flex-[1.4] h-10.5 text-[12px] font-bold"
+                        />
                       </div>
                     ) : (
                       <>
@@ -376,7 +379,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
                           onClick={() => void handleAccept(ord.id)}
                           disabled={busyAction !== null}
                           aria-label={`Accept order for ${ord.item}`}
-                          className="flex-1 min-w-0 min-h-11 rounded-xl bg-[#09431B] flex items-center justify-center gap-2 cursor-pointer hover:bg-[#073515] btn-green-shadow tactile-press transition-all disabled:opacity-50"
+                          className="flex-1 min-w-0 min-h-11 rounded-xl bg-[#FE7200] flex items-center justify-center gap-2 cursor-pointer hover:bg-[#E05D00] btn-orange-shadow tactile-press transition-all disabled:opacity-50"
                         >
                           <Check className="w-4.5 h-4.5 text-white" strokeWidth={2.2} />
                           <span className="text-[13px] font-bold text-white">Accept &amp; Prep</span>
@@ -394,7 +397,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
         <div className="px-4 mt-5 grid grid-cols-2 gap-2.5">
           <button
             onClick={onAddNewItem}
-            className="w-full h-11.75 rounded-xl bg-[#09431B] text-white text-[12.5px] font-extrabold cursor-pointer hover:bg-[#073515] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
+            className="w-full h-11.75 rounded-xl bg-[#FE7200] text-white text-[12.5px] font-extrabold cursor-pointer hover:bg-[#E05D00] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
             style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
           >
             <span>+ Add Item</span>
@@ -403,7 +406,7 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
           {onManageStock && (
             <button
               onClick={onManageStock}
-              className="w-full h-11.75 rounded-xl bg-[#E8ECEF] border border-[#BACBC1] text-[#09431B] text-[12.5px] font-extrabold cursor-pointer hover:bg-white active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
+              className="w-full h-11.75 rounded-xl bg-[#E8ECEF] border border-[#D6DCE2] text-[#FE7200] text-[12.5px] font-extrabold cursor-pointer hover:bg-white active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
               style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
             >
               <span>📋 Stock Console</span>

@@ -23,15 +23,15 @@ export const MobileDeviceShell: React.FC<MobileDeviceShellProps> = ({
   return (
     <div className="relative mx-auto w-full max-w-100 flex justify-center">
       {/* Device Frame — Realistic phone chassis */}
-      <div className="w-full rounded-[48px] p-2.5 bg-linear-to-b from-[#25392E] via-[#192720] to-[#121E18] shadow-[0_30px_70px_-10px_rgba(0,0,0,0.85),0_0_0_1px_rgba(52,211,153,0.3)] border border-[#2D4537] relative">
+      <div className="w-full rounded-[48px] p-2.5 bg-linear-to-b from-[#241A14] via-[#18120E] to-[#100B08] shadow-[0_30px_70px_-10px_rgba(0,0,0,0.85),0_0_0_1px_rgba(52,211,153,0.3)] border border-[#2A1C14] relative">
         {/* Dynamic Island / Speaker Pill */}
         <div
           className={`absolute top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-out rounded-full flex items-center shadow-lg ${
             activeOrder
               ? isReady
-                ? 'w-71.25 h-8 px-3.5 justify-between cursor-pointer bg-linear-to-r from-[#0C381E] via-[#105C2E] to-[#0A3D1C] ring-2 ring-amber-400 border border-emerald-400 shadow-[0_0_22px_rgba(52,211,153,0.6)] animate-pulse'
-                : 'w-67.5 h-7 px-3 justify-between cursor-pointer bg-[#080D0A] ring-1 ring-emerald-500/40 border border-white/15'
-              : 'w-28 h-5 px-2.5 justify-between pointer-events-none bg-[#080D0A] border border-white/10'
+                ? 'w-71.25 h-8 px-3.5 justify-between cursor-pointer bg-linear-to-r from-[#FE7200] via-[#E05D00] to-[#C44E00] ring-2 ring-amber-400 border border-emerald-400 shadow-[0_0_22px_rgba(52,211,153,0.6)] animate-pulse'
+                : 'w-67.5 h-7 px-3 justify-between cursor-pointer bg-[#120A03] ring-1 ring-emerald-500/40 border border-white/15'
+              : 'w-28 h-5 px-2.5 justify-between pointer-events-none bg-[#120A03] border border-white/10'
           }`}
           onClick={activeOrder && onClearActiveOrder ? onClearActiveOrder : undefined}
           title={activeOrder ? 'Active order tracking — Click to dismiss' : undefined}

@@ -22,7 +22,7 @@ const MenuStockManagementScreen = lazy(() => import('./components/MenuStockManag
 
 function ScreenFallback() {
   return (
-    <div className="w-full min-h-115 flex flex-col items-center justify-center gap-3 bg-[#0F1A15] text-[#5C7A6D]">
+    <div className="w-full min-h-115 flex flex-col items-center justify-center gap-3 bg-[#0F1A15] text-[#7A6658]">
       <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
       <span className="text-xs font-bold text-emerald-400/90 tracking-wide">Loading Screen...</span>
     </div>
@@ -376,7 +376,7 @@ export function App() {
                 },
                 {
                   n: '07 · Mascot Logo',
-                  d: 'Official mascot badge + wordmark (extracted to /images/mascot.png).',
+                  d: 'Official mascot badge + wordmark (extracted to /images/NewLogo.svg).',
                   action: () => setActivePortal('artifacts'),
                   cta: 'View asset'
                 },
@@ -401,12 +401,12 @@ export function App() {
               ] as Array<{ n: string; d: string; action: () => void; cta: string }>).map(card => (
                 <div key={card.n} className="p-4 bg-[#131D17] border border-emerald-900/40 rounded-2xl flex flex-col justify-between hover:border-emerald-700/60 transition-colors">
                   <div>
-                    <span className="text-xs font-bold text-[#A7F3D0] block">{card.n}</span>
+                    <span className="text-xs font-bold text-[#FFEAD9] block">{card.n}</span>
                     <p className="text-[10px] text-slate-400 mt-1 line-clamp-2">{card.d}</p>
                   </div>
                   <button
                     onClick={card.action}
-                    className="mt-3 w-full py-2 rounded-lg bg-[#09431B] hover:bg-[#0B5422] text-white text-[11px] font-bold cursor-pointer transition-colors"
+                    className="mt-3 w-full py-2 rounded-lg bg-[#FE7200] hover:bg-[#0B5422] text-white text-[11px] font-bold cursor-pointer transition-colors"
                   >
                     {card.cta}
                   </button>
@@ -436,7 +436,7 @@ export function App() {
                   href="/svgs/preview.png" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="text-[11px] text-[#A7F3D0] hover:underline flex items-center gap-1 font-semibold"
+                  className="text-[11px] text-[#FFEAD9] hover:underline flex items-center gap-1 font-semibold"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   View Full Res
@@ -480,7 +480,7 @@ export function App() {
                           className="max-h-full max-w-full object-contain rounded-lg"
                         />
                       </div>
-                      <span className="text-xs font-bold text-[#A7F3D0] block">{file.label}</span>
+                      <span className="text-xs font-bold text-[#FFEAD9] block">{file.label}</span>
                       <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-2">{file.desc}</p>
                       <span className="text-[9px] text-slate-500 font-mono block mt-1">{file.name}</span>
                     </div>
@@ -490,7 +490,7 @@ export function App() {
                         href={`/svgs/${file.name}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 py-1.5 px-2.5 rounded-lg bg-emerald-900/40 hover:bg-emerald-800/50 text-[#A7F3D0] text-[10px] font-bold flex items-center justify-center gap-1 transition-colors"
+                        className="flex-1 py-1.5 px-2.5 rounded-lg bg-emerald-900/40 hover:bg-emerald-800/50 text-[#FFEAD9] text-[10px] font-bold flex items-center justify-center gap-1 transition-colors"
                       >
                         <ExternalLink className="w-3 h-3" />
                         <span>Open SVG</span>

@@ -75,7 +75,7 @@ export function VendorLoginModal({ isOpen, onClose }: VendorLoginModalProps) {
 
   return (
     <div ref={rootRef} role="dialog" aria-modal="true" aria-labelledby="vendor-login-title"
-      className="fixed inset-0 z-50 overflow-y-auto bg-[#E8ECEF] text-[#0A2E20]">
+      className="fixed inset-0 z-50 overflow-y-auto bg-[#E8ECEF] text-[#1F140A]">
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-6 sm:py-9">
         <header className="flex items-center gap-3">
           <button type="button" onClick={onClose} aria-label="Close login" disabled={busy}
@@ -84,9 +84,9 @@ export function VendorLoginModal({ isOpen, onClose }: VendorLoginModalProps) {
           </button>
           <span className="text-sm font-extrabold">Business Portal</span>
         </header>
-        <img src="/images/logo.png" alt="YEMUNNAI" className="mx-auto mt-5 size-18 rounded-full bg-[#062814] object-contain p-1" />
+        <img src="/images/NewLogo.svg" alt="YEMUNNAI" className="mx-auto mt-5 size-18 rounded-full bg-[#FE7200] object-contain p-1" />
         <h2 id="vendor-login-title" className="mt-4 text-center text-xl font-extrabold">Cafe Vendor Login</h2>
-        <p className="mt-2 text-center text-sm text-[#5C7A6D]">Select your cafe and enter its four-digit PIN.</p>
+        <p className="mt-2 text-center text-sm text-[#7A6658]">Select your cafe and enter its four-digit PIN.</p>
         <form className="mt-6 flex flex-1 flex-col" onSubmit={event => { event.preventDefault(); void attemptPin(pin); }}>
           <label htmlFor="vendor-outlet" className="text-xs font-bold">CANTEEN OUTLET</label>
           <select id="vendor-outlet" value={outletId} disabled={busy}
@@ -102,7 +102,7 @@ export function VendorLoginModal({ isOpen, onClose }: VendorLoginModalProps) {
           <div id="vendor-login-message" className="mt-3 min-h-10 text-sm" aria-live="polite">
             {retrySeconds > 0 ? <p role="alert" className="text-red-700">Too many attempts. Try again in {Math.floor(retrySeconds / 60)}:{String(retrySeconds % 60).padStart(2, '0')}.</p>
               : error ? <p role="alert" className="flex items-start gap-2 text-red-700"><AlertCircle className="size-4 shrink-0 mt-0.5" />{error}</p>
-              : <p className="text-[#5C7A6D]">Sign-in starts after the fourth digit.</p>}
+              : <p className="text-[#7A6658]">Sign-in starts after the fourth digit.</p>}
           </div>
           <div className="mt-2 grid grid-cols-3 gap-3" aria-label="PIN keypad">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'delete'].map(key => key === '' ? <span key="space" /> :
@@ -113,7 +113,7 @@ export function VendorLoginModal({ isOpen, onClose }: VendorLoginModalProps) {
               </button>)}
           </div>
           <button type="submit" disabled={disabled || pin.length !== 4}
-            className="mt-6 min-h-12 rounded-xl bg-[#09431B] px-4 py-3 text-sm font-bold text-white disabled:opacity-50">
+            className="mt-6 min-h-12 rounded-xl bg-[#FE7200] px-4 py-3 text-sm font-bold text-white disabled:opacity-50">
             {busy ? 'Signing in…' : 'Sign In'}
           </button>
         </form>

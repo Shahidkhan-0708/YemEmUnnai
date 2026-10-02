@@ -85,7 +85,7 @@ export const InstallPrompt: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-label="Install YEMUNNAI"
-        className="relative w-full max-w-sm rounded-3xl bg-[#0A2E20] border border-emerald-500/30 shadow-2xl p-6 text-center text-white"
+        className="relative w-full max-w-sm rounded-3xl bg-[#1F140A] border border-emerald-500/30 shadow-2xl p-6 text-center text-white"
       >
         {/* Close */}
         <button
@@ -99,7 +99,7 @@ export const InstallPrompt: React.FC = () => {
 
         {/* App icon — logo fills the tile completely */}
         <div className="mx-auto w-16 h-16 rounded-[20px] overflow-hidden shadow-lg">
-          <img src="/images/logo.png" alt="YEMUNNAI" className="w-full h-full object-cover" />
+          <img src="/images/NewLogo.svg" alt="YEMUNNAI" className="w-full h-full object-cover" />
         </div>
 
         <h2 className="mt-3.5 text-xl font-bold">Install YEMUNNAI</h2>

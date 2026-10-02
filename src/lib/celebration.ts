@@ -81,7 +81,7 @@ export function fireOrderConfetti() {
       angle: 60,
       spread: 55,
       origin: { x: 0.25, y: 0.6 },
-      colors: ['#00B574', '#10B981', '#34D399', '#FBBF24', '#09431B'],
+      colors: ['#00B574', '#10B981', '#34D399', '#FBBF24', '#FE7200'],
       zIndex: 99999,
       disableForReducedMotion: true,
     });
@@ -91,7 +91,7 @@ export function fireOrderConfetti() {
       angle: 120,
       spread: 55,
       origin: { x: 0.75, y: 0.6 },
-      colors: ['#00B574', '#10B981', '#34D399', '#FBBF24', '#09431B'],
+      colors: ['#00B574', '#10B981', '#34D399', '#FBBF24', '#FE7200'],
       zIndex: 99999,
       disableForReducedMotion: true,
     });

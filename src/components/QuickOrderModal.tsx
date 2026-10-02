@@ -154,14 +154,14 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
           /* Celebratory token confirmation */
           <div className="h-full flex flex-col items-center justify-center text-center px-4.5 animate-in zoom-in-95 duration-200">
             <div className="relative">
-              <CheckCircle className="w-16 h-16 text-[#09431B] animate-bounce" />
+              <CheckCircle className="w-16 h-16 text-[#FE7200] animate-bounce" />
               <Sparkles className="w-6 h-6 text-amber-500 absolute -top-1 -right-2 animate-spin" />
             </div>
             <div className="mt-3 inline-block px-3 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-[11px] font-bold font-mono tracking-wider shadow-sm">
               PICKUP TOKEN #{confirmedToken}
             </div>
-            <h3 className="text-[18px] font-extrabold text-[#0A2E20] mt-2">Order Confirmed!</h3>
-            <p className="text-[11px] font-semibold text-[#5C7A6D] mt-1 max-w-60">
+            <h3 className="text-[18px] font-extrabold text-[#1F140A] mt-2">Order Confirmed!</h3>
+            <p className="text-[11px] font-semibold text-[#7A6658] mt-1 max-w-60">
               {item.vendor} received your order for {qty}× {item.name}{total > 0 ? ` · ₹${total}` : ''}
             </p>
             <p className="text-[10px] font-medium text-emerald-700 mt-2 bg-white/70 px-3 py-0.5 rounded-full">
@@ -178,7 +178,7 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
               className="pt-2.25 pb-1 cursor-grab active:cursor-grabbing"
               title="Swipe down to dismiss"
             >
-              <div className="mx-auto w-11.25 h-1 rounded-xs bg-[#BAC8C0] hover:bg-[#8EA699] transition-colors" />
+              <div className="mx-auto w-11.25 h-1 rounded-xs bg-[#D6DCE2] hover:bg-[#8EA699] transition-colors" />
             </div>
 
             {/* Close X — 18px icon, center 24.5px from right edge, 34px from sheet top */}
@@ -193,28 +193,28 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
 
             <div className="px-4.5">
               {/* Title — 17px w800, baseline 38px from sheet top */}
-              <h2 className="mt-3 text-[17px] font-extrabold leading-5.5 text-[#0A2E20]">
+              <h2 className="mt-3 text-[17px] font-extrabold leading-5.5 text-[#1F140A]">
                 Delivery Details
               </h2>
 
               {/* Subtitle — 11px w600, baseline 55px from sheet top */}
-              <p className="mt-px text-[11px] font-semibold leading-3.5 text-[#5C7A6D]">
+              <p className="mt-px text-[11px] font-semibold leading-3.5 text-[#7A6658]">
                 Instant Campus Checkout • No Account Needed
               </p>
 
-              {/* Divider — y=336 (64px from sheet top), #CAD8D0, 18px insets */}
-              <div className="mt-1.75 h-px bg-[#CAD8D0]" />
+              {/* Divider — y=336 (64px from sheet top), #D6DCE2, 18px insets */}
+              <div className="mt-1.75 h-px bg-[#D6DCE2]" />
 
               {/* Order Details row — baselines y=352 / y=376 */}
               <div className="mt-2 flex items-baseline justify-between">
-                <span className="text-[13px] font-extrabold text-[#0A2E20]">Order Details</span>
-                <span className="text-[12px] font-bold text-[#0A2E20]">Total</span>
+                <span className="text-[13px] font-extrabold text-[#1F140A]">Order Details</span>
+                <span className="text-[12px] font-bold text-[#1F140A]">Total</span>
               </div>
               <div className="mt-1.5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {/* Quantity Stepper */}
                   <div
-                    className="flex items-center bg-[#DDE6E1] rounded-full p-0.5 border border-[#CAD8D0]"
+                    className="flex items-center bg-[#DDE6E1] rounded-full p-0.5 border border-[#D6DCE2]"
                     style={{ boxShadow: 'inset 1px 1px 3px rgba(154,166,179,0.4), inset -1px -1px 3px rgba(255,255,255,0.7)' }}
                   >
                     <button
@@ -224,11 +224,11 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
                         playTapSound();
                         setQty(q => Math.max(1, q - 1));
                       }}
-                      className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[12px] font-bold text-[#0A2E20] shadow-sm active:scale-90 transition-transform cursor-pointer"
+                      className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[12px] font-bold text-[#1F140A] shadow-sm active:scale-90 transition-transform cursor-pointer"
                     >
                       -
                     </button>
-                    <span className="px-2 text-[12px] font-extrabold text-[#0A2E20] tabular-nums">{qty}</span>
+                    <span className="px-2 text-[12px] font-extrabold text-[#1F140A] tabular-nums">{qty}</span>
                     <button
                       type="button"
                       aria-label="Increase quantity"
@@ -236,16 +236,16 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
                         playTapSound();
                         setQty(q => Math.min(10, q + 1));
                       }}
-                      className="w-5 h-5 rounded-full bg-[#09431B] flex items-center justify-center text-[12px] font-bold text-white shadow-sm active:scale-90 transition-transform cursor-pointer"
+                      className="w-5 h-5 rounded-full bg-[#FE7200] flex items-center justify-center text-[12px] font-bold text-white shadow-sm active:scale-90 transition-transform cursor-pointer"
                     >
                       +
                     </button>
                   </div>
-                  <span className="text-[11px] font-semibold text-[#5C7A6D] truncate max-w-42.5">
+                  <span className="text-[11px] font-semibold text-[#7A6658] truncate max-w-42.5">
                     {item.name} · {item.vendor}
                   </span>
                 </div>
-                <span className="text-[15px] font-extrabold text-[#0A2E20] tabular-nums">
+                <span className="text-[15px] font-extrabold text-[#1F140A] tabular-nums">
                   {total > 0 ? `₹${total}` : 'Coming Soon'}
                 </span>
               </div>
@@ -256,7 +256,7 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
               {/* Mobile Number — label baseline y=420, input y=431 h=43 rx=21 */}
               <label
                 htmlFor="quick-order-mobile"
-                className="block mt-4.75 text-[13px] font-bold leading-4.25 text-[#0A2E20]"
+                className="block mt-4.75 text-[13px] font-bold leading-4.25 text-[#1F140A]"
               >
                 Mobile Number
               </label>
@@ -276,14 +276,14 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
                   onChange={(e) => setMobileNumber(e.target.value)}
                   placeholder="Mobile number"
                   aria-describedby="quick-order-error"
-                  className="w-full h-full bg-transparent rounded-[21px] pl-10 pr-3.5 text-[12px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
+                  className="w-full h-full bg-transparent rounded-[21px] pl-10 pr-3.5 text-[12px] font-medium text-[#1F140A] placeholder:text-[#6B8075] focus:outline-none"
                 />
               </div>
 
               {/* Delivery Address — label baseline y=502, input y=513 h=43 rx=21 */}
               <label
                 htmlFor="quick-order-address"
-                className="block mt-4.75 text-[13px] font-bold leading-4.25 text-[#0A2E20]"
+                className="block mt-4.75 text-[13px] font-bold leading-4.25 text-[#1F140A]"
               >
                 Delivery Address
               </label>
@@ -302,7 +302,7 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
                   placeholder="Block, room or campus landmark"
-                  className="w-full h-full bg-transparent rounded-[21px] pl-10 pr-3.5 text-[12px] font-medium text-[#0A2E20] placeholder:text-[#6B8075] focus:outline-none"
+                  className="w-full h-full bg-transparent rounded-[21px] pl-10 pr-3.5 text-[12px] font-medium text-[#1F140A] placeholder:text-[#6B8075] focus:outline-none"
                 />
               </div>
 
@@ -322,7 +322,7 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
               <button
                 type="submit"
                 disabled={submitting || !item.inStock || item.isShopOnline === false}
-                className="absolute left-4 right-4 bottom-8.5 h-11.75 rounded-xl bg-[#09431B] text-white text-[14px] font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#073515] active:scale-[0.98] transition-all"
+                className="absolute left-4 right-4 bottom-8.5 h-11.75 rounded-xl bg-[#FE7200] text-white text-[14px] font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#E05D00] active:scale-[0.98] transition-all"
                 style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
               >
                 {submitting

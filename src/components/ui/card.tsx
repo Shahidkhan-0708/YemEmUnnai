@@ -21,14 +21,14 @@ CardHeader.displayName = 'CardHeader';
 
 export const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn('text-[13.5px] font-extrabold text-[#0A2E20] leading-tight truncate', className)} {...props} />
+    <h3 ref={ref} className={cn('text-[13.5px] font-extrabold text-[#1F140A] leading-tight truncate', className)} {...props} />
   )
 );
 CardTitle.displayName = 'CardTitle';
 
 export const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn('text-[10px] font-medium text-[#5C7A6D]', className)} {...props} />
+    <p ref={ref} className={cn('text-[10px] font-medium text-[#7A6658]', className)} {...props} />
   )
 );
 CardDescription.displayName = 'CardDescription';

@@ -121,14 +121,14 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
               <span>SOLD OUT</span>
             </div>
           ) : item.freshnessTag ? (
-            <div className="absolute top-1.5 left-1.5 bg-[#062E16]/95 backdrop-blur-xs text-white text-[8px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/40 shadow-xs">
+            <div className="absolute top-1.5 left-1.5 bg-[#1F140A]/95 backdrop-blur-xs text-white text-[8px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/40 shadow-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>{item.freshnessTag}</span>
             </div>
           ) : null}
 
           {/* Landmark overlay — real campus landmark */}
-          <div className="absolute bottom-1.5 right-1.5 bg-[#062E16]/90 backdrop-blur-xs text-[#A7F3D0] text-[8.5px] font-extrabold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs border border-white/20">
+          <div className="absolute bottom-1.5 right-1.5 bg-[#1F140A]/90 backdrop-blur-xs text-[#FFEAD9] text-[8.5px] font-extrabold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs border border-white/20">
             <MapPin className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
             <span className="max-w-20 truncate">{item.locationLandmark || item.walkTime}</span>
           </div>
@@ -143,12 +143,12 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             >
               <span className={`w-1.5 h-1.5 rounded-full ${item.isVeg !== false ? 'bg-emerald-700' : 'bg-amber-800'}`} />
             </span>
-            <h3 className="text-[13px] font-extrabold text-[#0A2E20] leading-snug truncate">
+            <h3 className="text-[13px] font-extrabold text-[#1F140A] leading-snug truncate">
               {item.name}
             </h3>
           </div>
 
-          <p className="text-[10px] font-medium text-[#5C7A6D] mt-0.5 truncate flex items-center justify-between">
+          <p className="text-[10px] font-medium text-[#7A6658] mt-0.5 truncate flex items-center justify-between">
             <span className="truncate max-w-23.75">{item.vendor}</span>
             {item.reviews > 0 && item.rating != null ? (
               <span className="text-amber-600 font-bold">★ {Number(item.rating).toFixed(1)}</span>
@@ -162,12 +162,12 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
               {item.price > 0 ? (
                 <>
                   <span className={`text-[15px] font-black ${
-                    item.actionType === 'order' ? 'text-[#F26A00]' : 'text-[#09431B]'
+                    item.actionType === 'order' ? 'text-[#FE7200]' : 'text-[#FE7200]'
                   }`}>
                     ₹{item.price}
                   </span>
                   {item.originalPrice && (
-                    <span className="text-[10px] text-[#7C9588] line-through font-semibold">
+                    <span className="text-[10px] text-[#7A6658] line-through font-semibold">
                       ₹{item.originalPrice}
                     </span>
                   )}
@@ -187,23 +187,23 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
         </CardContent>
 
         {/* Reactions Row: Like, Review */}
-        <div className="mt-2 pt-1 border-t border-[#D6DCE2]/60 flex items-center justify-between px-1 text-[9px] text-[#5C7A6D]">
+        <div className="mt-2 pt-1 border-t border-[#D6DCE2]/60 flex items-center justify-between px-1 text-[9px] text-[#7A6658]">
           <button
             type="button"
             onClick={() => toggleLike(item.id)}
             className={`flex items-center gap-1 font-bold transition-all cursor-pointer ${
-              isLiked ? 'text-[#09431B] scale-105' : 'hover:text-[#09431B]'
+              isLiked ? 'text-[#FE7200] scale-105' : 'hover:text-[#FE7200]'
             }`}
             aria-label="Like item"
           >
-            <ThumbsUp className={`w-3 h-3 ${isLiked ? 'fill-[#09431B]' : ''}`} />
+            <ThumbsUp className={`w-3 h-3 ${isLiked ? 'fill-[#FE7200]' : ''}`} />
             <span>{item.likes}</span>
           </button>
 
           <button
             type="button"
             onClick={() => onReview?.(item)}
-            className="flex items-center gap-1 hover:text-[#09431B] font-medium transition-colors cursor-pointer"
+            className="flex items-center gap-1 hover:text-[#FE7200] font-medium transition-colors cursor-pointer"
             aria-label="Write a review"
           >
             <MessageSquare className="w-3 h-3" />
@@ -260,15 +260,15 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
   return (
     <div className="w-full max-w-97.5 mx-auto bg-[#E8ECEF] min-h-205 pb-10 select-none overflow-hidden relative shadow-2xl rounded-[36px] border border-[#D6DCE2] font-sans">
       
-      {/* TOP DEEP FOREST-GREEN HEADER WITH EXTENDED TOP BREATHING ROOM */}
-      <div className="bg-linear-to-b from-[#0A461E] via-[#09431B] to-[#063214] px-4 pt-6 pb-6 rounded-b-[30px] text-white shadow-lg">
+      {/* TOP BRAND ORANGE HEADER MATCHING NEWLOGO BACKGROUND #FE7200 */}
+      <div className="bg-[#FE7200] px-4 pt-6 pb-6 rounded-b-[30px] text-white shadow-lg">
         
         {/* Animated Brand Identity Header with Logo & Tagline */}
         <div className="flex items-center justify-between mb-3.5 px-0.5">
           <div className="flex items-center gap-2.5">
-            <div className="relative w-10 h-10 rounded-xl bg-[#062814] border border-emerald-500/40 p-0.5 flex items-center justify-center shadow-md overflow-hidden">
+            <div className="relative w-10 h-10 rounded-xl bg-[#FE7200] border border-white/30 p-0.5 flex items-center justify-center shadow-md overflow-hidden">
               <img
-                src="/images/brand_logo_full.png"
+                src="/images/NewLogo.svg"
                 alt="YEM UNNAI Mascot"
                 className="w-full h-full object-contain animate-mascot-float"
               />
@@ -276,9 +276,9 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             <div>
               <div className="flex items-center gap-1.5 leading-none">
                 <span className="text-[15px] font-black tracking-tight text-white">YEMUNNAI</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               </div>
-              <div className="flex items-center gap-1 text-[8.5px] font-extrabold tracking-wider uppercase text-[#FF8A2A] mt-0.5">
+              <div className="flex items-center gap-1 text-[8.5px] font-extrabold tracking-wider uppercase text-white/90 mt-0.5">
                 <span className="animate-brand-shimmer">A FOOD DISCOVERY PLATFORM</span>
               </div>
             </div>
@@ -291,7 +291,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                 type="button"
                 onClick={onReplayIntro}
                 title="Replay Brand Intro Splash"
-                className="text-[10px] font-extrabold text-[#A7F3D0] hover:text-white bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-full transition-all cursor-pointer border border-white/15 flex items-center gap-1 active:scale-95"
+                className="text-[10px] font-extrabold text-white hover:text-white bg-white/20 hover:bg-white/30 px-2.5 py-1 rounded-full transition-all cursor-pointer border border-white/25 flex items-center gap-1 active:scale-95"
               >
                 <span>🎬 Intro</span>
               </button>
@@ -311,8 +311,8 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
 
         {/* Search Bar + Orange Circular Cart Button */}
         <div className="flex items-center gap-3">
-          <div className="flex-1 relative flex items-center bg-[#E8ECEF]/95 backdrop-blur-xs border border-[#D6DCE2] rounded-full px-4 py-2 shadow-inner transition-all focus-within:ring-2 focus-within:ring-[#10B981] focus-within:bg-white">
-            <Search className="w-4 h-4 text-[#527063] shrink-0 mr-2.5" />
+          <div className="flex-1 relative flex items-center bg-[#E8ECEF]/95 backdrop-blur-xs border border-[#D6DCE2] rounded-full px-4 py-2 shadow-inner transition-all focus-within:ring-2 focus-within:ring-[#FE7200] focus-within:bg-white">
+            <Search className="w-4 h-4 text-[#7A6658] shrink-0 mr-2.5" />
             <Input
               aria-label="Search food and canteens"
               type="text"
@@ -322,7 +322,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
               className="h-8 p-0 border-0 focus-visible:ring-0 text-xs"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="p-1 text-[#527063] hover:text-[#0A2E20]">
+              <button onClick={() => setSearchQuery('')} className="p-1 text-[#7A6658] hover:text-[#1F140A]">
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
@@ -358,7 +358,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
               <span className="text-white text-[13.5px] font-bold tracking-wide">Local Canteens &amp; Shops</span>
               <Badge variant="live" className="text-[8px] py-0 px-1.5">LIVE RADAR</Badge>
             </div>
-            <div className="flex items-center gap-1 text-[11px] text-[#A7F3D0] group-hover:text-white transition-colors">
+            <div className="flex items-center gap-1 text-[11px] text-[#FFEAD9] group-hover:text-white transition-colors">
               <span>{selectedShop === 'All' ? 'View All' : `Filter: ${selectedShop}`}</span>
               <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </div>
@@ -396,7 +396,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                         CLOSED
                       </span>
                     ) : shop.isActive ? (
-                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#09431B] rounded-full animate-radar-ring" />
+                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#FE7200] rounded-full animate-radar-ring" />
                     ) : null}
                   </div>
                   <span className={`text-[10.5px] font-bold tracking-tight text-center w-full truncate leading-tight mt-1.5 ${
@@ -404,7 +404,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                   }`}>
                     {shop.name}
                   </span>
-                  <span className="text-[8.5px] text-[#A7F3D0]/85 font-medium text-center w-full truncate leading-tight mt-0.5">
+                  <span className="text-[8.5px] text-white/80 font-medium text-center w-full truncate leading-tight mt-0.5">
                     {displayTag}
                   </span>
                 </div>
@@ -419,8 +419,8 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
         <div className="mx-4 mt-3 p-3 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-900 text-xs flex items-center gap-2.5">
           <span className="text-lg">🔴</span>
           <div>
-            <p className="font-extrabold text-[12px] text-[#0A2E20]">{selectedShop} is currently Offline</p>
-            <p className="text-[10px] text-[#5C7A6D] font-medium leading-tight">This canteen is not accepting orders right now. Items below are for viewing only.</p>
+            <p className="font-extrabold text-[12px] text-[#1F140A]">{selectedShop} is currently Offline</p>
+            <p className="text-[10px] text-[#7A6658] font-medium leading-tight">This canteen is not accepting orders right now. Items below are for viewing only.</p>
           </div>
         </div>
       )}
@@ -440,8 +440,8 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             onClick={() => setSelectedCategory('cooked')}
             className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
               selectedCategory === 'cooked'
-                ? 'bg-[#09431B] text-white shadow-md'
-                : 'text-[#09431B] hover:bg-black/5'
+                ? 'bg-[#FE7200] text-white shadow-md'
+                : 'text-[#FE7200] hover:bg-black/5'
             }`}
           >
             <Flame className="w-3.5 h-3.5 text-amber-400" />
@@ -452,11 +452,11 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             onClick={() => setSelectedCategory('packed')}
             className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
               selectedCategory === 'packed'
-                ? 'bg-[#09431B] text-white shadow-md'
-                : 'text-[#09431B] hover:bg-black/5'
+                ? 'bg-[#FE7200] text-white shadow-md'
+                : 'text-[#FE7200] hover:bg-black/5'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>Packed Foods ({totalByCategory.packed})</span>
           </button>
         </div>
@@ -487,13 +487,13 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                     <img
                       src={group.shopMeta.image}
                       alt={group.vendorName}
-                      className="w-5 h-5 rounded-full object-cover ring-1 ring-emerald-600"
+                      className="w-5 h-5 rounded-full object-cover ring-1 ring-[#FE7200]"
                     />
                   )}
-                  <h3 className="text-[12.5px] font-black text-[#0A2E20] leading-none">
+                  <h3 className="text-[12.5px] font-black text-[#1F140A] leading-none">
                     {group.vendorName}
                   </h3>
-                  <span className="text-[9px] font-semibold text-[#5C7A6D]">
+                  <span className="text-[9px] font-semibold text-[#7A6658]">
                     • {group.shopMeta?.tag || group.shopMeta?.locationLandmark || 'Campus'}
                   </span>
                 </div>
@@ -503,7 +503,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                     setSelectedShop(group.vendorName);
                     onSelectShop?.(group.vendorName);
                   }}
-                  className="text-[9.5px] font-bold text-[#09431B] bg-emerald-100/70 hover:bg-emerald-200/80 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
+                  className="text-[9.5px] font-bold text-[#FE7200] bg-orange-100/80 hover:bg-orange-200/90 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
                 >
                   View menu ({group.items.length})
                 </button>
@@ -524,8 +524,8 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
 
       {displayedItems.length === 0 && (
         <div className="mx-4 mt-8 p-6 text-center bg-[#E8ECEF] rounded-2xl border border-[#D6DCE2]">
-          <p className="text-sm font-bold text-[#0A2E20]">No dishes found</p>
-          <p className="text-xs text-[#5C7A6D] mt-1">Try clearing your search query or switching canteen filters.</p>
+          <p className="text-sm font-bold text-[#1F140A]">No dishes found</p>
+          <p className="text-xs text-[#7A6658] mt-1">Try clearing your search query or switching canteen filters.</p>
           <Button
             onClick={() => {
               setSearchQuery('');
@@ -539,7 +539,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
           </Button>
         </div>
       )}
-      <button type="button" onClick={onBusinessPortal} className="mx-4 my-6 min-h-11 text-xs font-bold text-[#09431B] underline">Open business portal</button>
+      <button type="button" onClick={onBusinessPortal} className="mx-4 my-6 min-h-11 text-xs font-bold text-[#FE7200] underline">Open business portal</button>
     </div>
   );
 };

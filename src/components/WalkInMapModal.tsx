@@ -134,13 +134,13 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Drag Handle */}
-        <div className="w-11.25 h-1 rounded-full bg-[#BAC8C0] mx-auto mb-2 shrink-0" />
+        <div className="w-11.25 h-1 rounded-full bg-[#D6DCE2] mx-auto mb-2 shrink-0" />
 
         {/* Top Header Row with Close button */}
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-black uppercase tracking-wider text-[#09431B]">
+              <span className="text-[11px] font-black uppercase tracking-wider text-[#FE7200]">
                 Walk-In Map
               </span>
               <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
@@ -151,10 +151,10 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
                 {item.isOnCampus !== false ? 'On campus' : 'Off-campus'}
               </span>
             </div>
-            <h2 className="text-[18px] font-black text-[#0A2E20] leading-tight mt-0.5">
+            <h2 className="text-[18px] font-black text-[#1F140A] leading-tight mt-0.5">
               {vendor}
             </h2>
-            <p className="text-[11px] font-semibold text-[#5C7A6D]">
+            <p className="text-[11px] font-semibold text-[#7A6658]">
               {landmarkText}
             </p>
           </div>
@@ -165,7 +165,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
             aria-label="Close"
             className="w-7.5 h-7.5 rounded-full bg-[#E8ECEF] border border-white flex items-center justify-center cursor-pointer hover:bg-slate-200 transition-colors shadow-xs"
           >
-            <X className="w-4.5 h-4.5 text-[#0A2E20]" strokeWidth={2.2} />
+            <X className="w-4.5 h-4.5 text-[#1F140A]" strokeWidth={2.2} />
           </button>
         </div>
 
@@ -176,8 +176,8 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
             onClick={() => setActiveTab('schematic')}
             className={`flex-1 py-1 rounded-full text-center transition-all cursor-pointer ${
               activeTab === 'schematic'
-                ? 'bg-[#09431B] text-white shadow-xs'
-                : 'text-[#0A2E20] hover:bg-black/5'
+                ? 'bg-[#FE7200] text-white shadow-xs'
+                : 'text-[#1F140A] hover:bg-black/5'
             }`}
           >
             🗺️ Campus Schematic
@@ -187,8 +187,8 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
             onClick={() => setActiveTab('gps')}
             className={`flex-1 py-1 rounded-full text-center transition-all cursor-pointer flex items-center justify-center gap-1 ${
               activeTab === 'gps'
-                ? 'bg-[#09431B] text-white shadow-xs'
-                : 'text-[#0A2E20] hover:bg-black/5'
+                ? 'bg-[#FE7200] text-white shadow-xs'
+                : 'text-[#1F140A] hover:bg-black/5'
             }`}
           >
             <Compass className="w-3 h-3" />
@@ -227,46 +227,46 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
                   {/* Library */}
                   <rect
                     x="47" y="375" width="70" height="45" rx="6"
-                    fill={buildingName.includes('Library') ? '#93BC8F' : '#C0D0BD'}
-                    stroke={buildingName.includes('Library') ? '#09431B' : '#C9D0D8'}
+                    fill={buildingName.includes('Library') ? '#93BC8F' : '#D6DCE2'}
+                    stroke={buildingName.includes('Library') ? '#FE7200' : '#C9D0D8'}
                     strokeWidth={buildingName.includes('Library') ? 2 : 1}
                   />
-                  <text x="82" y="400.5" fontSize="9" fontWeight="700" fill={buildingName.includes('Library') ? '#0A2E20' : '#668064'} textAnchor="middle">
+                  <text x="82" y="400.5" fontSize="9" fontWeight="700" fill={buildingName.includes('Library') ? '#1F140A' : '#668064'} textAnchor="middle">
                     Library
                   </text>
 
                   {/* Main Block */}
                   <rect
                     x="157" y="367" width="90" height="48" rx="6"
-                    fill={buildingName.includes('Main') ? '#93BC8F' : '#C0D0BD'}
-                    stroke={buildingName.includes('Main') ? '#09431B' : '#C9D0D8'}
+                    fill={buildingName.includes('Main') ? '#93BC8F' : '#D6DCE2'}
+                    stroke={buildingName.includes('Main') ? '#FE7200' : '#C9D0D8'}
                     strokeWidth={buildingName.includes('Main') ? 2 : 1}
                   />
-                  <text x="202" y="394" fontSize="9" fontWeight={buildingName.includes('Main') ? 700 : 600} fill={buildingName.includes('Main') ? '#0A2E20' : '#668064'} textAnchor="middle">Main Block</text>
+                  <text x="202" y="394" fontSize="9" fontWeight={buildingName.includes('Main') ? 700 : 600} fill={buildingName.includes('Main') ? '#1F140A' : '#668064'} textAnchor="middle">Main Block</text>
 
                   {/* Lab */}
-                  <rect x="56" y="466" width="65" height="58" rx="6" fill="#C0D0BD" stroke="#C9D0D8" />
+                  <rect x="56" y="466" width="65" height="58" rx="6" fill="#D6DCE2" stroke="#C9D0D8" />
                   <text x="88.5" y="498" fontSize="9" fontWeight="600" fill="#668064" textAnchor="middle">Lab</text>
 
                   {/* Canteen */}
                   <rect
                     x="173" y="490" width="80" height="43" rx="6"
-                    fill={buildingName.includes('Canteen') ? '#93BC8F' : '#C0D0BD'}
-                    stroke={buildingName.includes('Canteen') ? '#09431B' : '#C9D0D8'}
+                    fill={buildingName.includes('Canteen') ? '#93BC8F' : '#D6DCE2'}
+                    stroke={buildingName.includes('Canteen') ? '#FE7200' : '#C9D0D8'}
                     strokeWidth={buildingName.includes('Canteen') ? 2 : 1}
                   />
-                  <text x="213" y="514.5" fontSize="9" fontWeight="700" fill={buildingName.includes('Canteen') ? '#0A2E20' : '#668064'} textAnchor="middle">
+                  <text x="213" y="514.5" fontSize="9" fontWeight="700" fill={buildingName.includes('Canteen') ? '#1F140A' : '#668064'} textAnchor="middle">
                     Canteen
                   </text>
 
                   {/* Hostel */}
                   <rect
                     x="55" y="569" width="64" height="34" rx="6"
-                    fill={buildingName.includes('Hostel') ? '#93BC8F' : '#C0D0BD'}
-                    stroke={buildingName.includes('Hostel') ? '#09431B' : '#C9D0D8'}
+                    fill={buildingName.includes('Hostel') ? '#93BC8F' : '#D6DCE2'}
+                    stroke={buildingName.includes('Hostel') ? '#FE7200' : '#C9D0D8'}
                     strokeWidth={buildingName.includes('Hostel') ? 2 : 1}
                   />
-                  <text x="87" y="589" fontSize="9" fontWeight="700" fill={buildingName.includes('Hostel') ? '#0A2E20' : '#668064'} textAnchor="middle">
+                  <text x="87" y="589" fontSize="9" fontWeight="700" fill={buildingName.includes('Hostel') ? '#1F140A' : '#668064'} textAnchor="middle">
                     Hostel
                   </text>
                 </g>
@@ -291,7 +291,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
 
                 {/* Origin: current location */}
                 <circle cx="88" cy="550" r="14" fill="#10B981" opacity="0.3" className="animate-pulse" />
-                <circle cx="88" cy="550" r="6" fill="#09431B" stroke="#FFF" strokeWidth="2.5" />
+                <circle cx="88" cy="550" r="6" fill="#FE7200" stroke="#FFF" strokeWidth="2.5" />
 
                 {/* Destination pin (dynamic position) */}
                 <g transform={`translate(${pinX} ${pinY}) scale(1.15)`}>
@@ -311,14 +311,14 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
             <div
               className="absolute left-3 top-3 px-3 py-1.5 rounded-full bg-[#E8ECEF]/95 backdrop-blur-xs flex items-center gap-1.5 shadow-md border border-white/60"
             >
-              <Footprints className="w-4 h-4 text-[#09431B] shrink-0" strokeWidth={2.2} />
-              <span className="text-[11px] font-extrabold text-[#0A2E20]">{displayWalkTime}</span>
+              <Footprints className="w-4 h-4 text-[#FE7200] shrink-0" strokeWidth={2.2} />
+              <span className="text-[11px] font-extrabold text-[#1F140A]">{displayWalkTime}</span>
             </div>
 
             {/* Target Building chip top-right */}
-            <div className="absolute right-3 top-3 px-2.5 py-1 rounded-full bg-[#09431B]/90 backdrop-blur-xs flex items-center gap-1.5 shadow-md border border-emerald-400/30">
+            <div className="absolute right-3 top-3 px-2.5 py-1 rounded-full bg-[#FE7200]/90 backdrop-blur-xs flex items-center gap-1.5 shadow-md border border-orange-300/30">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[9px] font-extrabold uppercase text-[#A7F3D0]">Target: {buildingName}</span>
+              <span className="text-[9px] font-extrabold uppercase text-[#FFEAD9]">Target: {buildingName}</span>
             </div>
           </div>
         )}
@@ -328,9 +328,9 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
           <div className="w-full h-56.25 my-3 rounded-[20px] bg-[#121F17] border border-emerald-900/60 p-4 flex flex-col items-center justify-between text-white relative overflow-hidden">
             {/* Ambient concentric radar rings */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-              <div className="w-44 h-44 rounded-full border border-emerald-400" />
-              <div className="absolute w-32 h-32 rounded-full border border-emerald-400" />
-              <div className="absolute w-20 h-20 rounded-full border border-emerald-400" />
+              <div className="w-44 h-44 rounded-full border border-orange-300" />
+              <div className="absolute w-32 h-32 rounded-full border border-orange-300" />
+              <div className="absolute w-20 h-20 rounded-full border border-orange-300" />
             </div>
 
             <div className="w-full flex items-center justify-between text-[11px] font-bold text-slate-300 z-10">
@@ -345,7 +345,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
 
             {/* Radar Center Metric */}
             <div className="flex flex-col items-center z-10">
-              <div className="w-14 h-14 rounded-full bg-[#09431B] border-2 border-emerald-400 flex items-center justify-center shadow-lg animate-radar-ring mb-2">
+              <div className="w-14 h-14 rounded-full bg-[#FE7200] border-2 border-orange-300 flex items-center justify-center shadow-lg animate-radar-ring mb-2">
                 <MapPin className="w-7 h-7 text-amber-400 fill-amber-400/20" />
               </div>
               <span className="text-xl font-black text-white tracking-tight">{computedMeters} meters away</span>
@@ -360,10 +360,10 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
 
         {/* Footnotes */}
         <div className="space-y-0.5 mb-3 px-1">
-          <p className="text-[11px] font-bold text-[#0A2E20]">
+          <p className="text-[11px] font-bold text-[#1F140A]">
             Destination: {buildingName} ({computedMeters}m walk)
           </p>
-          <p className="text-[10px] font-medium text-[#5C7A6D]">
+          <p className="text-[10px] font-medium text-[#7A6658]">
             Tap below for turn-by-turn walking navigation on Google Maps.
           </p>
         </div>
@@ -372,7 +372,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
         <button
           type="button"
           onClick={openGoogleMaps}
-          className="w-full h-11.75 rounded-[13px] bg-[#09431B] text-white text-[13px] font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#073515] btn-green-shadow tactile-press transition-all"
+          className="w-full h-11.75 rounded-[13px] bg-[#FE7200] text-white text-[13px] font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#E05D00] btn-orange-shadow tactile-press transition-all"
         >
           <ArrowRight className="w-4 h-4" strokeWidth={2.2} />
           <span>Open in Google Maps</span>
