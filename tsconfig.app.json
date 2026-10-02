@@ -7,6 +7,10 @@
     "types": ["vite/client"],
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
+    "paths": {
+      "@hugeicons/core-free-icons": ["./src/lib/hugeicons-shim.tsx"],
+      "@hugeicons/react": ["./src/lib/hugeicons-shim.tsx"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

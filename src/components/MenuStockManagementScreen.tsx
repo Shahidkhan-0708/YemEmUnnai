@@ -2,6 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Plus, RefreshCw } from 'lucide-react';
 import { fetchVendorItems, setItemStock, setVendorAllStock, subscribeCatalogUpdates } from '../lib/api';
 import { useVendorSession } from '../lib/hooks';
+import {
+  Copy01Icon,
+  FavouriteIcon,
+  PencilEdit02Icon,
+  Share01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { InlineDisclosureMenu } from "./original";
 import type { FoodItem } from '../lib/types';
 
 interface MenuStockManagementScreenProps {
@@ -92,14 +100,75 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
         {loading ? <p role="status" className="py-8 text-sm text-[#7A6658]">Loading your menu…</p> :
           <div className="mt-5 space-y-3">
             {!visible.length && <p className="py-8 text-sm text-[#7A6658]">{items.length ? 'No items in this category.' : 'No dishes yet. Add your first dish below.'}</p>}
-            {visible.map(item => <article key={item.id} className="flex items-center gap-3 rounded-2xl tactile-card p-3">
-              <img src={item.image} alt="" className="size-16 shrink-0 rounded-xl object-cover" />
-              <div className="min-w-0 flex-1"><h2 className="break-words text-sm font-extrabold">{item.name}</h2><p className="mt-1 font-bold">₹{item.price}</p><p className="mt-1 text-xs text-[#7A6658]">{item.inStock ? 'In stock' : 'Sold out'}</p></div>
-              <button type="button" role="switch" aria-checked={item.inStock} aria-label={`Stock for ${item.name}`} disabled={busy}
-                onClick={() => void saveStock(!item.inStock, item.id)} className="flex min-h-11 shrink-0 items-center justify-center disabled:opacity-50">
-                <span className={`relative h-7 w-12 rounded-full ${item.inStock ? 'bg-[#FE7200]' : 'bg-[#A3AEBB]'}`}><span className={`absolute left-1 top-1 size-5 rounded-full bg-white transition-transform ${item.inStock ? 'translate-x-5' : ''}`} /></span>
-              </button>
-            </article>)}
+            {visible.map(item => (
+              <article key={item.id} className="flex flex-col gap-2 rounded-2xl tactile-card p-3.5">
+                <div className="flex items-center gap-3">
+                  <img src={item.image} alt="" className="size-16 shrink-0 rounded-xl object-cover" />
+                  <div className="min-w-0 flex-1">
+                    <h2 className="break-words text-sm font-extrabold">{item.name}</h2>
+                    <p className="mt-1 font-bold">₹{item.price}</p>
+                    <p className="mt-1 text-xs text-[#7A6658]">{item.inStock ? 'In stock' : 'Sold out'}</p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={item.inStock}
+                    aria-label={`Stock for ${item.name}`}
+                    disabled={busy}
+                    onClick={() => void saveStock(!item.inStock, item.id)}
+                    className="flex min-h-11 shrink-0 items-center justify-center disabled:opacity-50"
+                  >
+                    <span className={`relative h-7 w-12 rounded-full ${item.inStock ? 'bg-[#FE7200]' : 'bg-[#A3AEBB]'}`}>
+                      <span className={`absolute left-1 top-1 size-5 rounded-full bg-white transition-transform ${item.inStock ? 'translate-x-5' : ''}`} />
+                    </span>
+                  </button>
+                </div>
+
+                <div className="pt-2 border-t border-[#D6DCE2]/60 flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-[#7A6658]">Quick Actions:</span>
+                  <InlineDisclosureMenu
+                    menuItems={[
+                      {
+                        icon: <HugeiconsIcon icon={PencilEdit02Icon} />,
+                        label: 'Edit',
+                        onClick: () => {
+                          alert(`Opening editor for ${item.name}`);
+                        }
+                      },
+                      {
+                        icon: <HugeiconsIcon icon={Copy01Icon} />,
+                        label: 'Duplicate',
+                        onClick: () => {
+                          alert(`Duplicated ${item.name} as a new draft`);
+                        }
+                      },
+                      {
+                        icon: <HugeiconsIcon icon={FavouriteIcon} />,
+                        label: 'Special',
+                        onClick: () => {
+                          alert(`Marked ${item.name} as Today's Campus Special!`);
+                        }
+                      },
+                      {
+                        icon: <HugeiconsIcon icon={Share01Icon} />,
+                        label: 'Share',
+                        onClick: () => {
+                          navigator.clipboard?.writeText(window.location.origin + '?item=' + item.id);
+                          alert(`Share link for ${item.name} copied to clipboard!`);
+                        }
+                      }
+                    ]}
+                    showDelete
+                    deleteLabel="Delete"
+                    onDelete={() => {
+                      if (window.confirm(`Delete ${item.name} from your cafe menu?`)) {
+                        setItems(curr => curr.filter(i => i.id !== item.id));
+                      }
+                    }}
+                  />
+                </div>
+              </article>
+            ))}
           </div>}
         <button type="button" onClick={onAddNewItem} className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#F26A00] px-4 py-3 text-sm font-extrabold text-white"><Plus className="size-5" />Add New Dish</button>
       </>}
