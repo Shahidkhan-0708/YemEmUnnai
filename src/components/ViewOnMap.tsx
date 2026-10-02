@@ -116,7 +116,7 @@ export const ViewOnMap: React.FC<ViewOnMapProps> = ({
         {/* Floating Map Pin Badge */}
         <div className="absolute left-1/2 top-11 -translate-x-1/2 flex flex-col items-center pointer-events-none">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F06A05] text-white shadow-lg ring-4 ring-white/30 transform transition-transform group-hover:scale-110">
-            <MapPin className="h-5 w-5 fill-white stroke-[2]" />
+            <MapPin className="h-5 w-5 fill-white stroke-2" />
           </div>
           <div className="mt-1 rounded-md bg-[#1F140A]/90 px-2 py-0.5 text-[9px] font-black text-white backdrop-blur-xs shadow-md border border-white/20 whitespace-nowrap">
             {locationName}
@@ -164,7 +164,7 @@ export const ViewOnMap: React.FC<ViewOnMapProps> = ({
             {copied ? (
               <Check className="h-3.5 w-3.5 text-emerald-600 stroke-[2.5]" />
             ) : (
-              <Copy className="h-3.5 w-3.5 text-[#7A6658] stroke-[2]" />
+              <Copy className="h-3.5 w-3.5 text-[#7A6658] stroke-2" />
             )}
           </button>
         </div>

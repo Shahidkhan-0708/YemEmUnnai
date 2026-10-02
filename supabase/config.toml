@@ -3,3 +3,14 @@ project_id = "YemEmUnnai"
 [functions.vendor-pin-login]
 # This endpoint authenticates the supplied PIN before issuing an Auth token.
 verify_jwt = false
+
+[functions.pickup]
+# The handler validates each token with Auth, including anonymous buyer sessions.
+verify_jwt = false
+
+[auth]
+enable_anonymous_sign_ins = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true

@@ -11,12 +11,18 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 export const supabase: SupabaseClient | null =
   supabaseUrl && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey, {
-        auth: { persistSession: true, autoRefreshToken: true },
+        auth: { storageKey: 'yemunnai-vendor-auth', persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
         realtime: { params: { eventsPerSecond: 10 } },
       })
     : null;
 
 export const isBackendConfigured = supabase !== null;
+
+export const buyerSupabase: SupabaseClient | null = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { storageKey: 'yemunnai-buyer-auth', persistSession: true, autoRefreshToken: true },
+    })
+  : null;
 
 if (!isBackendConfigured) {
   console.warn(

@@ -66,7 +66,7 @@ export const RunActionButton: React.FC<RunActionButtonProps> = ({
   if (status === 'completed') {
     return (
       <div className={`inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-emerald-500 text-white font-extrabold text-xs shadow-md animate-in zoom-in-95 duration-200 select-none ${className}`}>
-        <Check className="w-4 h-4 stroke-[3]" />
+        <Check className="w-4 h-4 stroke-3" />
         <span>All Actions Completed!</span>
       </div>
     );

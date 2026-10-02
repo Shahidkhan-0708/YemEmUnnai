@@ -129,7 +129,7 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
         >
           <div
             ref={modalRef}
-            className="w-full max-w-sm rounded-[32px] bg-[#E8ECEF] p-6 shadow-2xl border border-white/60 tactile-modal transform animate-in zoom-in-95 duration-200 relative overflow-hidden"
+            className="w-full max-w-sm rounded-4xl bg-[#E8ECEF] p-6 shadow-2xl border border-white/60 tactile-modal transform animate-in zoom-in-95 duration-200 relative overflow-hidden"
           >
             {/* Top Close Button */}
             {!isProcessing && (

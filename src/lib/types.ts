@@ -4,7 +4,7 @@
 
 export type FoodCategory = 'cooked' | 'packed';
 export type ActionType = 'walkin' | 'order';
-export type OrderStatus = 'pending' | 'accepted' | 'declined' | 'completed';
+export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'collected' | 'declined' | 'cancelled' | 'completed';
 export type ReactionValue = 'like' | 'dislike';
 
 export interface VendorRow {
@@ -30,6 +30,8 @@ export interface FoodItemRow {
   action_type: ActionType;
   image_url: string | null;
   in_stock: boolean;
+  is_vegetarian: boolean | null;
+  remaining_quantity: number | null;
   likes_count: number;
   dislikes_count: number;
   reviews_count: number;
@@ -51,6 +53,25 @@ export interface OrderRow {
   food_item_id: string | null;
   item_name: string;
   unit_price: number;
+  buyer_id: string | null;
+  attempt_id: string | null;
+  quantity: number | null;
+  total: number;
+  pickup_number: number | null;
+  operating_date: string | null;
+  shop_name: string | null;
+  pickup_location: string | null;
+  is_legacy: boolean;
+  cancellation_requested: boolean;
+  cancellation_result: 'approved' | 'rejected' | null;
+  preparation_minutes: number | null;
+  accepted_at: string | null;
+  ready_at: string | null;
+  collected_at: string | null;
+  expires_at: string | null;
+  payment_method: 'cash' | 'counter_upi' | null;
+  outcome_reason: string | null;
+  vendors?: { name: string; latitude?: number | null; longitude?: number | null; location_landmark?: string | null };
   customer_mobile: string;
   delivery_address: string;
   status: OrderStatus;
@@ -111,6 +132,7 @@ export interface DashboardOrder {
   location: string;
   image: string;
   status: OrderStatus;
+  row: OrderRow;
 }
 
 export interface VendorStats {
@@ -127,5 +149,16 @@ export interface NewFoodItemInput {
   inStock: boolean;
   imageUrl: string | null;
   isVeg?: boolean;
+  remainingQuantity?: number | null;
 }
 
+export interface SupportRequest {
+  id: string;
+  order_id: string;
+  buyer_id: string;
+  vendor_id: string;
+  message: string;
+  status: 'open' | 'escalated' | 'resolved';
+  response: string | null;
+  created_at: string;
+}

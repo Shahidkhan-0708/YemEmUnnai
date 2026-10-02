@@ -161,7 +161,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
               successDuration={800}
               isSaved={savedItemIds.has(item.id)}
               onToggle={(saved) => handleToggleSave(item.id, saved)}
-              className="!h-6 !w-6 !p-0 !rounded-full shadow-xs bg-white/85 hover:bg-white backdrop-blur-xs border border-white/60 text-[#1F140A]"
+              className="h-6! w-6! p-0! rounded-full! shadow-xs bg-white/85 hover:bg-white backdrop-blur-xs border border-white/60 text-[#1F140A]"
             />
           </div>
 

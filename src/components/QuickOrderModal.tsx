@@ -147,7 +147,7 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label={`Quick order — ${item.name}`}
-        className="w-full max-h-[92%] flex flex-col rounded-t-[32px] bg-[#E8ECEF] border-t border-x border-white/70 shadow-2xl animate-in slide-in-from-bottom duration-200 overflow-hidden font-sans relative"
+        className="w-full max-h-[92%] flex flex-col rounded-t-4xl bg-[#E8ECEF] border-t border-x border-white/70 shadow-2xl animate-in slide-in-from-bottom duration-200 overflow-hidden font-sans relative"
         style={{
           boxShadow: '0 -10px 30px rgba(0,0,0,0.3), -4px -4px 10px rgba(255,255,255,0.7)',
           transform: dragY > 0 ? `translateY(${dragY}px)` : undefined,

@@ -49,7 +49,7 @@ export const BrandIntroSplash: React.FC<BrandIntroSplashProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center bg-white select-none p-0 sm:p-4 cursor-pointer"
     >
       {/* 9:16 Aspect Ratio Viewport */}
-      <div className="relative w-full max-w-[430px] aspect-[9/16] max-h-[100dvh] h-full sm:h-auto overflow-hidden bg-[#F06A05] sm:rounded-[36px] shadow-2xl flex items-center justify-center">
+      <div className="relative w-full max-w-107.5 aspect-9/16 max-h-dvh h-full sm:h-auto overflow-hidden bg-[#F06A05] sm:rounded-[36px] shadow-2xl flex items-center justify-center">
         <video
           ref={videoRef}
           src="/videos/yemunnai_intro_clean.mp4"

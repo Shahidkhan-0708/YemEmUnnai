@@ -88,7 +88,7 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
       </button>
       {!vendor || checking ? <p role="status">{checking ? 'Checking your session…' : 'Sign in to manage your cafe’s menu.'}</p> : <>
         <header className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0"><h1 className="text-xl font-extrabold">Live Menu &amp; Stock</h1><p className="mt-1 break-words text-sm text-[#7A6658]">{vendor.vendorName} · Vendor Terminal</p></div>
+          <div className="min-w-0"><h1 className="text-xl font-extrabold">Live Menu &amp; Stock</h1><p className="mt-1 wrap-break-word text-sm text-[#7A6658]">{vendor.vendorName} · Vendor Terminal</p></div>
           <span className="rounded-full bg-[#F06A05] px-3 py-2 text-xs font-bold text-white">{vendor.isOnline ? 'ONLINE' : 'OFFLINE'}</span>
         </header>
         <div className="mt-6 grid grid-cols-2 gap-3">
@@ -115,7 +115,7 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
                 <div className="flex items-center gap-3">
                   <img src={item.image} alt="" className="size-16 shrink-0 rounded-xl object-cover" />
                   <div className="min-w-0 flex-1">
-                    <h2 className="break-words text-sm font-extrabold">{item.name}</h2>
+                    <h2 className="wrap-break-word text-sm font-extrabold">{item.name}</h2>
                     <div className="flex items-center gap-2 mt-1">
                       <p className="font-bold">₹{item.price}</p>
                       <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${
