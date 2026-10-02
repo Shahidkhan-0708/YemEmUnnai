@@ -327,8 +327,14 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
         
         {/* Animated Brand Identity Header with Logo & Tagline */}
         <div className="flex items-center justify-between mb-3.5 px-0.5">
-          <div className="flex items-center gap-2.5">
-            <div className="relative w-10 h-10 rounded-xl bg-[#F06A05] border border-white/30 p-0.5 flex items-center justify-center shadow-md overflow-hidden">
+          <button
+            type="button"
+            onClick={onBusinessPortal}
+            aria-label="Open Vendor Business Portal"
+            title="Vendor Login / Business Portal"
+            className="flex items-center gap-2.5 cursor-pointer tactile-press text-left p-0 bg-transparent border-0 group transition-transform active:scale-95"
+          >
+            <div className="relative w-10 h-10 rounded-xl bg-[#F06A05] border border-white/30 p-0.5 flex items-center justify-center shadow-md overflow-hidden group-hover:scale-105 group-hover:border-white/60 transition-all">
               <img
                 src="/images/NewLogo.svg"
                 alt="YEM UNNAI Mascot"
@@ -337,14 +343,14 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-1.5 leading-none">
-                <span className="text-[15px] font-black tracking-tight text-white">YEMUNNAI</span>
+                <span className="text-[15px] font-black tracking-tight text-white group-hover:text-amber-100 transition-colors">YEMUNNAI</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               </div>
               <div className="flex items-center gap-1 text-[8.5px] font-extrabold tracking-wider uppercase text-white/90 mt-0.5">
                 <span className="animate-brand-shimmer">A FOOD DISCOVERY PLATFORM</span>
               </div>
             </div>
-          </div>
+          </button>
 
           {/* Quick Access Badges for Intro & Campus Radar */}
           <div className="flex items-center gap-1.5">
@@ -601,7 +607,6 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
           </Button>
         </div>
       )}
-      <button type="button" onClick={onBusinessPortal} className="mx-4 my-6 min-h-11 text-xs font-bold text-[#F06A05] underline">Open business portal</button>
     </div>
   );
 };

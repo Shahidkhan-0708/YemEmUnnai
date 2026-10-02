@@ -50,8 +50,12 @@ export const SplashOnboardingScreen: React.FC<SplashOnboardingScreenProps> = ({
         <span className="absolute left-1/2 top-28.75 -translate-x-1/2 -translate-y-1/2 w-32.5 h-32.5 rounded-full bg-[#D3E5DA]/80" />
 
         {/* Mascot badge — center (162.5,115) */}
-        <div
-          className="absolute left-[102.5px] top-13.75 w-30 h-30 rounded-full bg-[#F06A05] flex items-center justify-center"
+        <button
+          type="button"
+          onClick={onBusinessPortal}
+          aria-label="Open Vendor Business Portal"
+          title="Vendor Login / Business Portal"
+          className="absolute left-[102.5px] top-13.75 w-30 h-30 rounded-full bg-[#F06A05] flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-all p-0 border-0"
           style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 9px rgba(199,123,58,0.4)' }}
         >
           <div className="w-27.5 h-27.5 rounded-full bg-[#F06A05] overflow-hidden flex items-center justify-center p-1">
@@ -61,7 +65,7 @@ export const SplashOnboardingScreen: React.FC<SplashOnboardingScreenProps> = ({
               className="w-full h-full object-contain"
             />
           </div>
-        </div>
+        </button>
 
         {/* LIVE RADAR pill — (230,45) 72×24 */}
         <div
