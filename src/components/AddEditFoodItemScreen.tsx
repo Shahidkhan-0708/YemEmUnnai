@@ -4,6 +4,7 @@ import { createFoodItem, uploadFoodPhoto } from '../lib/api';
 import { useModalA11y } from '../lib/useModalA11y';
 import { isBackendConfigured } from '../lib/supabase';
 import { useVendorSession } from '../lib/hooks';
+import { Stepper } from './Stepper';
 import type { FoodCategory, ActionType } from '../lib/types';
 
 interface AddEditFoodItemScreenProps {
@@ -287,29 +288,47 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                 </div>
               </div>
 
-              {/* Price — label baseline y=423, input 317×43 rx=21 */}
-              <label
-                htmlFor="aef-price"
-                className="block mt-6 text-[13px] font-bold leading-4.25 text-[#1F140A]"
-              >
-                Price
-              </label>
-              <div
-                className="mt-1.25 w-full h-10.75 rounded-[21px] bg-[#E8ECEF] border border-[#D6DCE2] flex items-center px-3.5"
-                style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
-              >
-                <span className="text-[12px] font-medium text-[#6B8075] mr-1.5">₹</span>
-                <input
-                  id="aef-price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  required
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="Enter price"
-                  className="flex-1 min-w-0 bg-transparent text-[12px] font-medium text-[#1F140A] placeholder:text-[#6B8075] focus:outline-none"
-                />
+              {/* Price — with Stepper */}
+              <div className="mt-6">
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="aef-price"
+                    className="block text-[13px] font-bold leading-4.25 text-[#1F140A]"
+                  >
+                    Price
+                  </label>
+                  <span className="text-[10px] font-bold text-[#FE7200]">
+                    ₹0 – ₹200 Quick Step
+                  </span>
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <Stepper
+                    min={0}
+                    max={200}
+                    value={price ? Number(price) : 50}
+                    onChange={(val) => setPrice(String(val))}
+                    prefix="₹"
+                    size="md"
+                    className="flex-1"
+                  />
+                  <div
+                    className="w-24 h-10 rounded-2xl bg-[#E8ECEF] border border-[#D6DCE2] flex items-center px-2.5"
+                    style={{ boxShadow: 'inset 2px 2px 4px rgba(154,166,179,0.4), inset -2px -2px 4px rgba(255,255,255,0.8)' }}
+                  >
+                    <span className="text-[11px] font-bold text-[#7A6658] mr-1">₹</span>
+                    <input
+                      id="aef-price"
+                      type="number"
+                      min="0"
+                      step="1"
+                      required
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder="Custom"
+                      className="w-full bg-transparent text-[12px] font-bold text-[#1F140A] placeholder:text-[#7A6658]/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Vegetarian Only — label y=508, sub y=523; switch 50×28 knob right */}

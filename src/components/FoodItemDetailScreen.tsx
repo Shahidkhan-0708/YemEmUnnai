@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { MorphingButton } from './MorphingButton';
 import { SaveToggle } from './SaveToggle';
+import { Stepper } from './Stepper';
 import type { FoodItem } from '../lib/types';
 
 interface FoodItemDetailScreenProps {
@@ -242,26 +243,16 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
         style={{ borderTop: '1.5px solid #D6DCE2', boxShadow: '0 -6px 12px rgba(255,255,255,0.7), 0 6px 12px rgba(163,174,187,0.4)' }}
       >
         {/* Stepper — (20,707) 105×48 rx=12 */}
-        <div className="absolute left-5 top-3 w-26.25 h-12 rounded-xl bg-[#E8ECEF] border border-[#C9D0D8] flex items-center justify-between px-2.5">
-          <button
-            type="button"
+        <div className="absolute left-5 top-3 w-26.25 h-12 flex items-center justify-center">
+          <Stepper
+            min={1}
+            max={20}
+            value={qty}
+            onChange={setQty}
             disabled={!item.inStock || item.isShopOnline === false}
-            onClick={() => setQty(q => Math.max(1, q - 1))}
-            aria-label="Decrease quantity"
-            className="w-6 h-7.5 flex items-center justify-center text-[18px] font-extrabold text-[#1F140A] cursor-pointer active:scale-90 transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            −
-          </button>
-          <span className="text-[15px] font-extrabold text-[#1F140A]">{qty}</span>
-          <button
-            type="button"
-            disabled={!item.inStock || item.isShopOnline === false}
-            onClick={() => setQty(q => Math.min(20, q + 1))}
-            aria-label="Increase quantity"
-            className="w-6 h-7.5 flex items-center justify-center text-[18px] font-extrabold text-[#1F140A] cursor-pointer active:scale-90 transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            +
-          </button>
+            size="md"
+            className="w-full h-12 rounded-xl"
+          />
         </div>
 
         {/* CTA — (138,707) 217×48 rx=12 */}

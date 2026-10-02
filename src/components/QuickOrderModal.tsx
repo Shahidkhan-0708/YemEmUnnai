@@ -3,6 +3,7 @@ import { X, Phone, MapPin, CheckCircle, AlertCircle, Sparkles } from 'lucide-rea
 import { placeOrder } from '../lib/api';
 import { useModalA11y } from '../lib/useModalA11y';
 import { playTapSound, playSuccessChime, fireOrderConfetti } from '../lib/celebration';
+import { Stepper } from './Stepper';
 import type { FoodItem } from '../lib/types';
 
 export interface OrderSuccessData {
@@ -213,34 +214,14 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
               <div className="mt-1.5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {/* Quantity Stepper */}
-                  <div
-                    className="flex items-center bg-[#DDE6E1] rounded-full p-0.5 border border-[#D6DCE2]"
-                    style={{ boxShadow: 'inset 1px 1px 3px rgba(154,166,179,0.4), inset -1px -1px 3px rgba(255,255,255,0.7)' }}
-                  >
-                    <button
-                      type="button"
-                      aria-label="Decrease quantity"
-                      onClick={() => {
-                        playTapSound();
-                        setQty(q => Math.max(1, q - 1));
-                      }}
-                      className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[12px] font-bold text-[#1F140A] shadow-sm active:scale-90 transition-transform cursor-pointer"
-                    >
-                      -
-                    </button>
-                    <span className="px-2 text-[12px] font-extrabold text-[#1F140A] tabular-nums">{qty}</span>
-                    <button
-                      type="button"
-                      aria-label="Increase quantity"
-                      onClick={() => {
-                        playTapSound();
-                        setQty(q => Math.min(10, q + 1));
-                      }}
-                      className="w-5 h-5 rounded-full bg-[#FE7200] flex items-center justify-center text-[12px] font-bold text-white shadow-sm active:scale-90 transition-transform cursor-pointer"
-                    >
-                      +
-                    </button>
-                  </div>
+                  <Stepper
+                    min={1}
+                    max={20}
+                    value={qty}
+                    onChange={setQty}
+                    size="sm"
+                    className="w-24"
+                  />
                   <span className="text-[11px] font-semibold text-[#7A6658] truncate max-w-42.5">
                     {item.name} · {item.vendor}
                   </span>
