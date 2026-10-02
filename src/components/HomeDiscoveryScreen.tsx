@@ -284,6 +284,15 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             >
               <span>CANTEEN OFFLINE</span>
             </Button>
+          ) : (!item.price || item.price <= 0) ? (
+            <Button
+              disabled
+              variant="outline"
+              size="sm"
+              className="w-full rounded-[10px] text-[10.5px] font-black h-9 flex items-center justify-center gap-1.5 bg-[#D5DCE2] text-slate-500 border border-[#BAC3CC] cursor-not-allowed opacity-80 shadow-none select-none"
+            >
+              <span>COMING SOON</span>
+            </Button>
           ) : item.actionType === 'walkin' ? (
             <Button
               onClick={() => onWalkIn?.(item)}
@@ -302,7 +311,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
               className="w-full rounded-[10px] text-[11px] font-black h-9 flex items-center justify-center gap-1.5 tracking-wide btn-orange-shadow tactile-press cursor-pointer"
             >
               <ShoppingCart className="w-3.5 h-3.5 fill-white/20" />
-              <span>+ ORDER{item.price > 0 ? ` • ₹${item.price}` : ''}</span>
+              <span>+ ORDER • ₹{item.price}</span>
             </Button>
           )}
         </div>

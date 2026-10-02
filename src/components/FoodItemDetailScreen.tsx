@@ -258,7 +258,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
             max={20}
             value={qty}
             onChange={setQty}
-            disabled={!item.inStock || item.isShopOnline === false}
+            disabled={!item.inStock || item.isShopOnline === false || !item.price || item.price <= 0}
             size="md"
             className="w-full h-12 rounded-xl"
           />
@@ -283,6 +283,16 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
               }}
             />
           </div>
+        ) : (!item.price || item.price <= 0) ? (
+          <div className="absolute left-34.5 top-3 w-54.25 h-12 flex items-center justify-center">
+            <button
+              type="button"
+              disabled
+              className="w-full h-12 rounded-xl bg-[#D5DCE2] text-slate-500 border border-[#BAC3CC] text-[12px] font-black cursor-not-allowed flex items-center justify-center gap-1.5 opacity-80 shadow-none select-none"
+            >
+              <span>Coming Soon • Not Available</span>
+            </button>
+          </div>
         ) : item.actionType === 'walkin' ? (
           <button
             type="button"
@@ -305,7 +315,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
             }}
           >
             <ShoppingCart className="w-4 h-4 fill-white/20" />
-            <span>Quick Order{total > 0 ? ` • ₹${total}` : ' (Coming Soon)'}</span>
+            <span>Quick Order • ₹{total}</span>
           </button>
         )}
       </div>

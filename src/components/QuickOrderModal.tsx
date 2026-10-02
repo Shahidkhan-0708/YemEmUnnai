@@ -90,6 +90,11 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
       return;
     }
 
+    if (!item.price || item.price <= 0) {
+      setSubmitError('This item is coming soon and cannot be ordered yet.');
+      return;
+    }
+
     inFlight.current = true;
     setSubmitting(true);
     setSubmitError(null);
@@ -211,6 +216,7 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
                     max={20}
                     value={qty}
                     onChange={setQty}
+                    disabled={!item.price || item.price <= 0}
                     size="sm"
                     className="w-24 shrink-0"
                   />
@@ -228,8 +234,8 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
                   <span className="block text-[10px] font-bold uppercase tracking-wider text-[#7A6658]">
                     Total
                   </span>
-                  <span className="text-base font-black text-[#F06A05] tabular-nums">
-                    {total > 0 ? `₹${total}` : 'Free'}
+                  <span className={`text-base font-black tabular-nums ${item.price > 0 ? 'text-[#F06A05]' : 'text-[#D96C37]'}`}>
+                    {item.price > 0 ? `₹${total}` : 'Coming Soon'}
                   </span>
                 </div>
               </div>
@@ -308,7 +314,7 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
             <div className="p-4 pt-3 pb-5 bg-[#E8ECEF] border-t border-[#D6DCE2]/60 shrink-0">
               <button
                 type="submit"
-                disabled={submitting || !item.inStock || item.isShopOnline === false}
+                disabled={submitting || !item.inStock || item.isShopOnline === false || !item.price || item.price <= 0}
                 className="w-full h-12 rounded-xl bg-[#F06A05] hover:bg-[#D85800] text-white text-sm font-extrabold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed btn-orange-shadow active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 {submitting ? (
@@ -320,6 +326,8 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
                   'Item Sold Out'
                 ) : item.isShopOnline === false ? (
                   'Canteen Offline'
+                ) : (!item.price || item.price <= 0) ? (
+                  'Coming Soon • Cannot Order'
                 ) : (
                   `Confirm Order • ₹${total}`
                 )}

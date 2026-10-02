@@ -335,6 +335,11 @@ export async function placeOrder(input: {
     return { success: false, reason: 'This canteen is currently offline' };
   }
 
+  // Check if item has a valid price and is not 'Coming Soon'
+  if (!input.foodItem.price || input.foodItem.price <= 0) {
+    return { success: false, reason: 'This item is coming soon and cannot be ordered yet' };
+  }
+
   const clientOrderId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : undefined;
   const numPart = (clientOrderId || `${Date.now()}`).replace(/\D/g, '');
   const token = numPart.length >= 3 ? numPart.slice(-3) : Math.floor(100 + Math.random() * 900).toString();
