@@ -7,6 +7,7 @@ import { Input } from './ui/input';
 import { useFoodItems, useShops, useReactions } from '../lib/hooks';
 import { isBackendConfigured } from '../lib/supabase';
 import { cleanShopTag } from '../lib/api';
+import { SaveToggle } from './SaveToggle';
 import type { FoodCategory, FoodItem } from '../lib/types';
 
 export type { FoodItem } from '../lib/types';
@@ -39,6 +40,26 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory>('cooked');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedShop, setSelectedShop] = useState<string>('All');
+  const [savedItemIds, setSavedItemIds] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem('yemunnai_saved_items');
+      return raw ? new Set<string>(JSON.parse(raw)) : new Set<string>();
+    } catch {
+      return new Set<string>();
+    }
+  });
+
+  const handleToggleSave = (itemId: string, saved: boolean) => {
+    setSavedItemIds((prev) => {
+      const next = new Set(prev);
+      if (saved) next.add(itemId);
+      else next.delete(itemId);
+      try {
+        localStorage.setItem('yemunnai_saved_items', JSON.stringify(Array.from(next)));
+      } catch {}
+      return next;
+    });
+  };
 
   const shops = useShops();
   const { items, loading, totalByCategory } = useFoodItems(selectedCategory);
@@ -126,6 +147,23 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
               <span>{item.freshnessTag}</span>
             </div>
           ) : null}
+
+          {/* Quick Bookmark SaveToggle */}
+          <div
+            className="absolute top-1.5 right-1.5 z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <SaveToggle
+              size="sm"
+              idleText=""
+              savedText=""
+              loadingDuration={600}
+              successDuration={800}
+              isSaved={savedItemIds.has(item.id)}
+              onToggle={(saved) => handleToggleSave(item.id, saved)}
+              className="!h-6 !w-6 !p-0 !rounded-full shadow-xs bg-white/85 hover:bg-white backdrop-blur-xs border border-white/60 text-[#1F140A]"
+            />
+          </div>
 
           {/* Landmark overlay — real campus landmark */}
           <div className="absolute bottom-1.5 right-1.5 bg-[#1F140A]/90 backdrop-blur-xs text-[#FFEAD9] text-[8.5px] font-extrabold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs border border-white/20">

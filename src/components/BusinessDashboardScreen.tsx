@@ -1,11 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Phone, MapPin, Check, X, ClipboardList, ThumbsUp, LogIn, LogOut, RefreshCw, Fingerprint } from 'lucide-react';
 import { FamilyReceiveComponent } from './FamilyReceiveComponent';
+import { SaveToggle } from './SaveToggle';
+import { RunActionButton } from './RunActionButton';
+import { FaInbox } from 'react-icons/fa6';
+import { RiBubbleChartFill } from 'react-icons/ri';
+import { BsFileTextFill, BsSendFill, BsTagFill } from 'react-icons/bs';
+import { TbClockHour12Filled } from 'react-icons/tb';
 import { useVendorSession, useVendorOrders, useVendorStats } from '../lib/hooks';
 import { setOrderStatus, setVendorOnline } from '../lib/api';
 import { isBackendConfigured } from '../lib/supabase';
 import { VendorLoginModal } from './VendorLoginModal';
 import { playTapSound, playSuccessChime } from '../lib/celebration';
+
+const settlementSteps = [
+  { id: 1, label: 'Syncing Orders & Walk-ins', icon: FaInbox },
+  { id: 2, label: 'Auditing Kitchen Stock', icon: RiBubbleChartFill },
+  { id: 3, label: 'Reconciling UPI & Cash', icon: BsTagFill },
+  { id: 4, label: 'Calculating Daily Margin', icon: TbClockHour12Filled },
+  { id: 5, label: 'Compiling Daily Sales PDF', icon: BsFileTextFill },
+  { id: 6, label: 'Submitting Accounts Report', icon: BsSendFill },
+];
 
 interface BusinessDashboardScreenProps {
   onAddNewItem?: () => void;
@@ -171,7 +186,15 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
+              <SaveToggle
+                size="sm"
+                idleText="Save Shift"
+                savedText="Saved"
+                loadingDuration={1000}
+                successDuration={1500}
+                className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+              />
               <button
                 onClick={() => void save('signout', signOut)}
                 disabled={busyAction !== null}
@@ -412,6 +435,20 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
               <span>📋 Stock Console</span>
             </button>
           )}
+        </div>
+
+        {/* Daily Kitchen Pipeline & Settlement with RunActionButton */}
+        <div className="mx-4 mt-5 p-4 rounded-2xl bg-white/80 border border-[#D6DCE2] backdrop-blur-xs flex flex-col items-center gap-2.5 shadow-sm">
+          <div className="w-full flex items-center justify-between">
+            <span className="text-[12px] font-black tracking-wide text-[#1F140A] uppercase">Daily Closeout Pipeline</span>
+            <span className="text-[10px] font-bold text-[#FE7200] bg-[#FE7200]/10 px-2 py-0.5 rounded-full border border-[#FE7200]/20">Automated Audit</span>
+          </div>
+          <p className="text-[11px] text-[#7A6658] text-left w-full">
+            Synchronize physical counters, reconcile UPI payments, audit inventory consumption, and dispatch end-of-day kitchen statements.
+          </p>
+          <div className="w-full flex justify-center pt-1">
+            <RunActionButton steps={settlementSteps} />
+          </div>
         </div>
       </div>
 

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { MorphingButton } from './MorphingButton';
+import { SaveToggle } from './SaveToggle';
 import type { FoodItem } from '../lib/types';
 
 interface FoodItemDetailScreenProps {
@@ -81,24 +83,15 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
         <span className="absolute left-37.25 text-[14px] font-extrabold text-[#1F140A]">
           Item Details
         </span>
-        <button
-          type="button"
-          onClick={() => setFavorited(f => !f)}
-          aria-label="Favorite"
-          aria-pressed={favorited}
-          className="absolute left-73.75 w-9 h-9 rounded-full bg-[#E8ECEF] border border-white flex items-center justify-center cursor-pointer"
-          style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
-        >
-          <svg width="20" height="18" viewBox="0 0 26 24" aria-hidden>
-            <path
-              d="M13 4 C10 0 5 2 5 6 C5 11 13 15 13 15 C13 15 21 11 21 6 C21 2 16 0 13 4 Z"
-              fill={favorited ? '#F26A00' : 'none'}
-              stroke={favorited ? '#F26A00' : '#F26A00'}
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+        <div className="absolute right-5 flex items-center">
+          <SaveToggle
+            size="sm"
+            idleText="Save"
+            savedText="Saved"
+            isSaved={favorited}
+            onToggle={setFavorited}
+          />
+        </div>
       </div>
 
       {/* Hero — (20,95) 335×225 rx=24 */}
@@ -273,21 +266,23 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
 
         {/* CTA — (138,707) 217×48 rx=12 */}
         {!item.inStock ? (
-          <button
-            type="button"
-            disabled
-            className="absolute left-34.5 top-3 w-54.25 h-12 rounded-xl bg-[#D5DCE2] border border-[#BAC3CC] text-slate-500 text-[14px] font-extrabold cursor-not-allowed shadow-none"
-          >
-            SOLD OUT
-          </button>
+          <div className="absolute left-34.5 top-3 w-54.25 h-12 flex items-center justify-center">
+            <MorphingButton
+              buttonText="Notify Restock"
+              onSubmit={(email) => {
+                alert(`You will be notified at ${email} when ${item.name} is back in stock!`);
+              }}
+            />
+          </div>
         ) : item.isShopOnline === false ? (
-          <button
-            type="button"
-            disabled
-            className="absolute left-34.5 top-3 w-54.25 h-12 rounded-xl bg-[#D5DCE2] border border-[#BAC3CC] text-slate-500 text-[13px] font-extrabold cursor-not-allowed shadow-none"
-          >
-            CANTEEN OFFLINE
-          </button>
+          <div className="absolute left-34.5 top-3 w-54.25 h-12 flex items-center justify-center">
+            <MorphingButton
+              buttonText="Alert Me"
+              onSubmit={(email) => {
+                alert(`You will be alerted at ${email} when this canteen comes online!`);
+              }}
+            />
+          </div>
         ) : (
           <button
             type="button"

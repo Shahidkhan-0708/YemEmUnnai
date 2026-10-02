@@ -1,6 +1,6 @@
 'use client';
 
-import { FamilyReceiveComponent } from './FamilyReceiveComponent';
+import { FamilyReceiveComponent } from './original';
 import { Fingerprint } from 'lucide-react';
 
 export default function FamilyReceiveComponentDemo() {
