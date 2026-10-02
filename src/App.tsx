@@ -20,6 +20,15 @@ const LocationPermissionScreen = lazy(() => import('./components/LocationPermiss
 const FoodItemDetailScreen = lazy(() => import('./components/FoodItemDetailScreen').then(m => ({ default: m.FoodItemDetailScreen })));
 const MenuStockManagementScreen = lazy(() => import('./components/MenuStockManagementScreen').then(m => ({ default: m.MenuStockManagementScreen })));
 const ErrorPage = lazy(() => import('./components/ErrorPage'));
+const SaveToggleDemo = lazy(() => import('./components/SaveToggleDemo'));
+const StepperDemo = lazy(() => import('./components/StepperDemo'));
+const InlineDisclosureMenuDemo = lazy(() => import('./components/InlineDisclosureMenuDemo'));
+const ViewOnMapDemo = lazy(() => import('./components/ViewOnMapDemo'));
+const Alert3 = lazy(() => import('./components/Alert3'));
+const Popover6 = lazy(() => import('./components/Popover6'));
+const RunActionButtonDemo = lazy(() => import('./components/RunActionButtonDemo'));
+const FamilyReceiveComponentDemo = lazy(() => import('./components/FamilyReceiveComponentDemo'));
+const MorphingButtonDemo = lazy(() => import('./components/MorphingButtonDemo'));
 
 function ScreenFallback() {
   return (
@@ -53,10 +62,10 @@ const DEFAULT_ORDER_ITEM: FoodItem = {
 
 export function App() {
   const { vendor } = useVendorSession();
-  const [activePortal, setActivePortal] = useState<'consumer' | 'business' | 'artifacts' | 'gallery' | '404'>(() => {
+  const [activePortal, setActivePortal] = useState<'consumer' | 'business' | 'artifacts' | 'gallery' | 'components' | '404'>(() => {
     if (typeof window !== 'undefined') {
       const p = new URLSearchParams(window.location.search).get('portal');
-      if (p === 'business' || p === 'gallery' || p === 'artifacts' || p === '404') return p;
+      if (p === 'business' || p === 'gallery' || p === 'artifacts' || p === 'components' || p === '404') return p;
     }
     return 'consumer';
   });
@@ -512,12 +521,243 @@ export function App() {
           </div>
         )}
 
+        {activePortal === 'components' && (
+          <div className="w-full max-w-4xl bg-[#1A2620] rounded-3xl p-6 border border-emerald-900/50 shadow-2xl space-y-6 pb-20">
+            <div className="flex items-center justify-between pb-4 border-b border-emerald-900/60">
+              <div>
+                <h2 className="text-base font-black text-white flex items-center gap-2">
+                  <span>🧩 Interactive Component Showcase</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                    10 Custom Components
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-400">All components created from specifications, accessible via <code>@/components/original</code>.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* 1. SaveToggle */}
+              <div className="bg-[#121A15] p-4 rounded-2xl border border-emerald-950 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">01. SaveToggle</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded font-mono">SaveToggle.tsx</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Multi-state bookmark toggle with idle, loading, and saved states.</p>
+                </div>
+                <div className="my-4 py-3 bg-[#0D1410] rounded-xl flex items-center justify-center border border-white/5">
+                  <Suspense fallback={<ScreenFallback />}>
+                    <SaveToggleDemo />
+                  </Suspense>
+                </div>
+                <span className="text-[9px] text-slate-500">Integrated in: FoodItemDetailScreen, HomeDiscoveryScreen</span>
+              </div>
+
+              {/* 2. Stepper */}
+              <div className="bg-[#121A15] p-4 rounded-2xl border border-emerald-950 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">02. Stepper</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded font-mono">Stepper.tsx</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Tactile quantity stepper with min/max clamps, rapid press, and keyboard support.</p>
+                </div>
+                <div className="my-4 py-3 bg-[#0D1410] rounded-xl flex items-center justify-center border border-white/5">
+                  <Suspense fallback={<ScreenFallback />}>
+                    <StepperDemo />
+                  </Suspense>
+                </div>
+                <span className="text-[9px] text-slate-500">Integrated in: QuickOrderModal, FoodItemDetailScreen, AddEditFoodItemScreen</span>
+              </div>
+
+              {/* 3. InlineDisclosureMenu */}
+              <div className="bg-[#121A15] p-4 rounded-2xl border border-emerald-950 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">03. InlineDisclosureMenu</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded font-mono">InlineDisclosureMenu.tsx</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Inline expandable disclosure menu with icons, labels, and delete confirmation.</p>
+                </div>
+                <div className="my-4 py-3 bg-[#0D1410] rounded-xl flex items-center justify-center border border-white/5 min-h-20">
+                  <Suspense fallback={<ScreenFallback />}>
+                    <InlineDisclosureMenuDemo />
+                  </Suspense>
+                </div>
+                <span className="text-[9px] text-slate-500">Integrated in: MenuStockManagementScreen (canteen quick actions)</span>
+              </div>
+
+              {/* 4. ViewOnMap */}
+              <div className="bg-[#121A15] p-4 rounded-2xl border border-emerald-950 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">04. ViewOnMap</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded font-mono">ViewOnMap.tsx</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Interactive stylized map card with vector schematic, GPS coordinates, and copy address.</p>
+                </div>
+                <div className="my-4 py-2 bg-[#0D1410] rounded-xl flex items-center justify-center border border-white/5">
+                  <Suspense fallback={<ScreenFallback />}>
+                    <ViewOnMapDemo />
+                  </Suspense>
+                </div>
+                <span className="text-[9px] text-slate-500">Integrated in: WalkInMapModal (campus destination card)</span>
+              </div>
+
+              {/* 5. Alert3 */}
+              <div className="bg-[#121A15] p-4 rounded-2xl border border-emerald-950 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">05. Alert3</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded font-mono">Alert3.tsx</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Dismissible base-ui alert banner with unread counter, icon, and close button.</p>
+                </div>
+                <div className="my-4 py-3 px-3 bg-[#0D1410] rounded-xl border border-white/5">
+                  <Suspense fallback={<ScreenFallback />}>
+                    <Alert3 />
+                  </Suspense>
+                </div>
+                <span className="text-[9px] text-slate-500">Integrated in: BusinessDashboardScreen (real-time notification ribbon)</span>
+              </div>
+
+              {/* 6. Popover6 */}
+              <div className="bg-[#121A15] p-4 rounded-2xl border border-emerald-950 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">06. Popover6</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded font-mono">Popover6.tsx</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Download & export progress popover with animated percentage, pause, resume, and cancel.</p>
+                </div>
+                <div className="my-4 py-3 bg-[#0D1410] rounded-xl flex items-center justify-center border border-white/5">
+                  <Suspense fallback={<ScreenFallback />}>
+                    <Popover6 />
+                  </Suspense>
+                </div>
+                <span className="text-[9px] text-slate-500">Integrated in: BusinessDashboardScreen (sales report export)</span>
+              </div>
+
+              {/* 7. RunActionButton */}
+              <div className="bg-[#121A15] p-4 rounded-2xl border border-emerald-950 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">07. RunActionButton</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded font-mono">RunActionButton.tsx</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Multi-step action sequence runner with live progress bar and status feedback.</p>
+                </div>
+                <div className="my-4 py-3 bg-[#0D1410] rounded-xl flex items-center justify-center border border-white/5">
+                  <Suspense fallback={<ScreenFallback />}>
+                    <RunActionButtonDemo />
+                  </Suspense>
+                </div>
+                <span className="text-[9px] text-slate-500">Integrated in: BusinessDashboardScreen (daily settlement & kitchen pipeline)</span>
+              </div>
+
+              {/* 8. FamilyReceiveComponent */}
+              <div className="bg-[#121A15] p-4 rounded-2xl border border-emerald-950 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">08. FamilyReceiveComponent</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded font-mono">FamilyReceiveComponent.tsx</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Biometric/PIN confirmation modal for secure payment reception.</p>
+                </div>
+                <div className="my-4 py-3 bg-[#0D1410] rounded-xl flex items-center justify-center border border-white/5">
+                  <Suspense fallback={<ScreenFallback />}>
+                    <FamilyReceiveComponentDemo />
+                  </Suspense>
+                </div>
+                <span className="text-[9px] text-slate-500">Integrated in: BusinessDashboardScreen (student pickup settlement)</span>
+              </div>
+
+              {/* 9. MorphingButton */}
+              <div className="bg-[#121A15] p-4 rounded-2xl border border-emerald-950 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">09. MorphingButton</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded font-mono">MorphingButton.tsx</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Button that smoothly morphs into an email input form upon click.</p>
+                </div>
+                <div className="my-4 py-3 bg-[#0D1410] rounded-xl flex items-center justify-center border border-white/5 min-h-16">
+                  <Suspense fallback={<ScreenFallback />}>
+                    <MorphingButtonDemo />
+                  </Suspense>
+                </div>
+                <span className="text-[9px] text-slate-500">Integrated in: FoodItemDetailScreen (restock / offline notifications)</span>
+              </div>
+
+              {/* 10. ErrorPage (404) */}
+              <div className="bg-[#121A15] p-4 rounded-2xl border border-emerald-950 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">10. ErrorPage (404)</span>
+                    <span className="text-[9px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded font-mono">ErrorPage.tsx</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">High-tech retro cyberpunk 404 page with scanlines, matrix particles, and CRT glow.</p>
+                </div>
+                <div className="my-4 py-3 bg-[#0D1410] rounded-xl flex items-center justify-center border border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setActivePortal('404')}
+                    className="px-4 py-2 rounded-xl bg-lime-500/20 text-lime-400 border border-lime-500/30 text-xs font-black hover:bg-lime-500/30 cursor-pointer transition-all"
+                  >
+                    View 404 Error Screen →
+                  </button>
+                </div>
+                <span className="text-[9px] text-slate-500">Integrated in: ErrorBoundary & /?portal=404</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activePortal === '404' && (
           <Suspense fallback={<ScreenFallback />}>
             <ErrorPage />
           </Suspense>
         )}
       </main>
+
+      {/* Floating Global Portal Navigation Switcher Bar */}
+      <nav aria-label="Portal Navigation" className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 bg-[#14221A]/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-emerald-500/30 shadow-2xl flex items-center gap-1 text-[11px] font-extrabold text-white">
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setActivePortal('consumer'); }}
+          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'consumer' ? 'bg-[#FE7200] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
+        >
+          🍽️ App
+        </button>
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setActivePortal('business'); }}
+          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'business' ? 'bg-[#FE7200] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
+        >
+          💼 Canteen
+        </button>
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setActivePortal('gallery'); }}
+          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'gallery' ? 'bg-[#FE7200] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
+        >
+          📱 Screens
+        </button>
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setActivePortal('components'); }}
+          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'components' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
+        >
+          🧩 Components
+        </button>
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setActivePortal('artifacts'); }}
+          className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'artifacts' ? 'bg-[#FE7200] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
+        >
+          🎨 SVGs
+        </button>
+      </nav>
 
       {/* PWA install sheet — appears when the browser offers install */}
       <InstallPrompt />
