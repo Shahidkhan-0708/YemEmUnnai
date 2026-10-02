@@ -79,7 +79,7 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
       {!vendor || checking ? <p role="status">{checking ? 'Checking your session…' : 'Sign in to manage your cafe’s menu.'}</p> : <>
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0"><h1 className="text-xl font-extrabold">Live Menu &amp; Stock</h1><p className="mt-1 break-words text-sm text-[#7A6658]">{vendor.vendorName} · Vendor Terminal</p></div>
-          <span className="rounded-full bg-[#FE7200] px-3 py-2 text-xs font-bold text-white">{vendor.isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+          <span className="rounded-full bg-[#F06A05] px-3 py-2 text-xs font-bold text-white">{vendor.isOnline ? 'ONLINE' : 'OFFLINE'}</span>
         </header>
         <div className="mt-6 grid grid-cols-2 gap-3">
           <div className="rounded-2xl tactile-card p-4"><p className="text-xs font-bold text-[#7A6658]">ACTIVE</p><p className="mt-2 text-2xl font-extrabold">{active}</p></div>
@@ -87,7 +87,7 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
         </div>
         <div className="mt-6 flex flex-wrap gap-2" aria-label="Menu categories">
           {(['all', 'snacks', 'chai'] as const).map(value => <button type="button" key={value} aria-pressed={category === value} onClick={() => setCategory(value)}
-            className={`min-h-11 rounded-xl px-4 text-sm font-bold ${category === value ? 'bg-[#FE7200] text-white' : 'tactile-inset'}`}>
+            className={`min-h-11 rounded-xl px-4 text-sm font-bold ${category === value ? 'bg-[#F06A05] text-white' : 'tactile-inset'}`}>
             {value === 'all' ? `All (${items.length})` : value === 'snacks' ? 'Snacks' : 'Chai'}
           </button>)}
         </div>
@@ -111,7 +111,7 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
                       <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${
                         item.actionType === 'walkin'
                           ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                          : 'bg-orange-100 text-[#FE7200] border border-orange-200'
+                          : 'bg-orange-100 text-[#F06A05] border border-orange-200'
                       }`}>
                         {item.actionType === 'walkin' ? '📍 Walk-In' : '🛒 Order In'}
                       </span>
@@ -127,7 +127,7 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
                     onClick={() => void saveStock(!item.inStock, item.id)}
                     className="flex min-h-11 shrink-0 items-center justify-center disabled:opacity-50"
                   >
-                    <span className={`relative h-7 w-12 rounded-full ${item.inStock ? 'bg-[#FE7200]' : 'bg-[#A3AEBB]'}`}>
+                    <span className={`relative h-7 w-12 rounded-full ${item.inStock ? 'bg-[#F06A05]' : 'bg-[#A3AEBB]'}`}>
                       <span className={`absolute left-1 top-1 size-5 rounded-full bg-white transition-transform ${item.inStock ? 'translate-x-5' : ''}`} />
                     </span>
                   </button>

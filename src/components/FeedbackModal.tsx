@@ -41,7 +41,7 @@ const STAR_PATHS = Array.from({ length: 5 }, (_, i) => {
  *                     toggle 43×24 rx=12 #ABB8B0, knob d=18 at LEFT (cx=158)
  *   - Dislike ....... same icon rotated 180° @x=235 + "Dislike" (x=264), no toggle
  *   - Comment box ... x=29 y=438 w=317 h=175 rx=16 inset #DCE5E0, "Write your review…" 13px w500 #6B8075
- *   - CTA ........... x=29 y=636 w=317 h=46 rx=12 #FE7200 "Submit Review" 14px w700
+ *   - CTA ........... x=29 y=636 w=317 h=46 rx=12 #F06A05 "Submit Review" 14px w700
  */
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   isOpen,
@@ -108,7 +108,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       >
         {submitted ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4.5">
-            <ThumbsUp className="w-14 h-14 text-[#FE7200]" />
+            <ThumbsUp className="w-14 h-14 text-[#F06A05]" />
             <h3 className="text-[17px] font-extrabold text-[#1F140A] mt-3">Review Published!</h3>
             <p className="text-[11px] font-semibold text-[#7A6658] mt-1">
               Thanks for helping {item.vendor} improve.
@@ -181,7 +181,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   onClick={() => setIsLiked(true)}
                   className={`flex-1 h-9.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all ${
                     isLiked
-                      ? 'bg-[#FE7200] text-white btn-orange-shadow font-extrabold'
+                      ? 'bg-[#F06A05] text-white btn-orange-shadow font-extrabold'
                       : 'bg-[#E8ECEF] border border-[#D6DCE2] text-[#7A6658] hover:text-[#1F140A]'
                   }`}
                 >
@@ -222,12 +222,12 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 <p role="alert" className="mt-1.5 text-[10px] font-bold text-red-600">{submitError}</p>
               )}
 
-              {/* CTA — 317×46 rx=12 #FE7200 */}
+              {/* CTA — 317×46 rx=12 #F06A05 */}
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="mt-4 w-full h-11.5 rounded-xl bg-[#FE7200] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 hover:bg-[#E05D00] active:scale-[0.98] transition-all"
+                className="mt-4 w-full h-11.5 rounded-xl bg-[#F06A05] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 hover:bg-[#E05D00] active:scale-[0.98] transition-all"
                 style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
               >
                 {submitting ? 'Publishing…' : 'Submit Review'}

@@ -155,7 +155,7 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
           /* Celebratory token confirmation */
           <div className="h-full flex flex-col items-center justify-center text-center px-4.5 animate-in zoom-in-95 duration-200">
             <div className="relative">
-              <CheckCircle className="w-16 h-16 text-[#FE7200] animate-bounce" />
+              <CheckCircle className="w-16 h-16 text-[#F06A05] animate-bounce" />
               <Sparkles className="w-6 h-6 text-amber-500 absolute -top-1 -right-2 animate-spin" />
             </div>
             <div className="mt-3 inline-block px-3 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-[11px] font-bold font-mono tracking-wider shadow-sm">
@@ -303,7 +303,7 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
               <button
                 type="submit"
                 disabled={submitting || !item.inStock || item.isShopOnline === false}
-                className="absolute left-4 right-4 bottom-8.5 h-11.75 rounded-xl bg-[#FE7200] text-white text-[14px] font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#E05D00] active:scale-[0.98] transition-all"
+                className="absolute left-4 right-4 bottom-8.5 h-11.75 rounded-xl bg-[#F06A05] text-white text-[14px] font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#E05D00] active:scale-[0.98] transition-all"
                 style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
               >
                 {submitting

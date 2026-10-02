@@ -179,7 +179,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                 <span>WALK-IN</span>
               </span>
             ) : (
-              <span className="bg-[#FE7200]/95 backdrop-blur-xs text-white text-[8px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-xs border border-orange-300/40">
+              <span className="bg-[#F06A05]/95 backdrop-blur-xs text-white text-[8px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-xs border border-orange-300/40">
                 <ShoppingCart className="w-2.5 h-2.5 text-white" />
                 <span>ORDER IN</span>
               </span>
@@ -215,7 +215,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
               {item.price > 0 ? (
                 <>
                   <span className={`text-[15px] font-black ${
-                    item.actionType === 'walkin' ? 'text-emerald-700' : 'text-[#FE7200]'
+                    item.actionType === 'walkin' ? 'text-emerald-700' : 'text-[#F06A05]'
                   }`}>
                     ₹{item.price}
                   </span>
@@ -245,18 +245,18 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             type="button"
             onClick={() => toggleLike(item.id)}
             className={`flex items-center gap-1 font-bold transition-all cursor-pointer ${
-              isLiked ? 'text-[#FE7200] scale-105' : 'hover:text-[#FE7200]'
+              isLiked ? 'text-[#F06A05] scale-105' : 'hover:text-[#F06A05]'
             }`}
             aria-label="Like item"
           >
-            <ThumbsUp className={`w-3 h-3 ${isLiked ? 'fill-[#FE7200]' : ''}`} />
+            <ThumbsUp className={`w-3 h-3 ${isLiked ? 'fill-[#F06A05]' : ''}`} />
             <span>{item.likes}</span>
           </button>
 
           <button
             type="button"
             onClick={() => onReview?.(item)}
-            className="flex items-center gap-1 hover:text-[#FE7200] font-medium transition-colors cursor-pointer"
+            className="flex items-center gap-1 hover:text-[#F06A05] font-medium transition-colors cursor-pointer"
             aria-label="Write a review"
           >
             <MessageSquare className="w-3 h-3" />
@@ -313,13 +313,13 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
   return (
     <div className="w-full max-w-97.5 mx-auto bg-[#E8ECEF] min-h-205 pb-10 select-none overflow-hidden relative shadow-2xl rounded-[36px] border border-[#D6DCE2] font-sans">
       
-      {/* TOP BRAND ORANGE HEADER MATCHING NEWLOGO BACKGROUND #FE7200 */}
-      <div className="bg-[#FE7200] px-4 pt-6 pb-6 rounded-b-[30px] text-white shadow-lg">
+      {/* TOP BRAND ORANGE HEADER MATCHING NEWLOGO BACKGROUND #F06A05 */}
+      <div className="bg-[#F06A05] px-4 pt-6 pb-6 rounded-b-[30px] text-white shadow-lg">
         
         {/* Animated Brand Identity Header with Logo & Tagline */}
         <div className="flex items-center justify-between mb-3.5 px-0.5">
           <div className="flex items-center gap-2.5">
-            <div className="relative w-10 h-10 rounded-xl bg-[#FE7200] border border-white/30 p-0.5 flex items-center justify-center shadow-md overflow-hidden">
+            <div className="relative w-10 h-10 rounded-xl bg-[#F06A05] border border-white/30 p-0.5 flex items-center justify-center shadow-md overflow-hidden">
               <img
                 src="/images/NewLogo.svg"
                 alt="YEM UNNAI Mascot"
@@ -364,7 +364,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
 
         {/* Search Bar + Orange Circular Cart Button */}
         <div className="flex items-center gap-3">
-          <div className="flex-1 relative flex items-center bg-[#E8ECEF]/95 backdrop-blur-xs border border-[#D6DCE2] rounded-full px-4 py-2 shadow-inner transition-all focus-within:ring-2 focus-within:ring-[#FE7200] focus-within:bg-white">
+          <div className="flex-1 relative flex items-center bg-[#E8ECEF]/95 backdrop-blur-xs border border-[#D6DCE2] rounded-full px-4 py-2 shadow-inner transition-all focus-within:ring-2 focus-within:ring-[#F06A05] focus-within:bg-white">
             <Search className="w-4 h-4 text-[#7A6658] shrink-0 mr-2.5" />
             <Input
               aria-label="Search food and canteens"
@@ -449,7 +449,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                         CLOSED
                       </span>
                     ) : shop.isActive ? (
-                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#FE7200] rounded-full animate-radar-ring" />
+                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#F06A05] rounded-full animate-radar-ring" />
                     ) : null}
                   </div>
                   <span className={`text-[10.5px] font-bold tracking-tight text-center w-full truncate leading-tight mt-1.5 ${
@@ -493,8 +493,8 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             onClick={() => setSelectedCategory('cooked')}
             className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
               selectedCategory === 'cooked'
-                ? 'bg-[#FE7200] text-white shadow-md'
-                : 'text-[#FE7200] hover:bg-black/5'
+                ? 'bg-[#F06A05] text-white shadow-md'
+                : 'text-[#F06A05] hover:bg-black/5'
             }`}
           >
             <Flame className="w-3.5 h-3.5 text-amber-400" />
@@ -505,8 +505,8 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             onClick={() => setSelectedCategory('packed')}
             className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
               selectedCategory === 'packed'
-                ? 'bg-[#FE7200] text-white shadow-md'
-                : 'text-[#FE7200] hover:bg-black/5'
+                ? 'bg-[#F06A05] text-white shadow-md'
+                : 'text-[#F06A05] hover:bg-black/5'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -540,7 +540,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                     <img
                       src={group.shopMeta.image}
                       alt={group.vendorName}
-                      className="w-5 h-5 rounded-full object-cover ring-1 ring-[#FE7200]"
+                      className="w-5 h-5 rounded-full object-cover ring-1 ring-[#F06A05]"
                     />
                   )}
                   <h3 className="text-[12.5px] font-black text-[#1F140A] leading-none">
@@ -556,7 +556,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
                     setSelectedShop(group.vendorName);
                     onSelectShop?.(group.vendorName);
                   }}
-                  className="text-[9.5px] font-bold text-[#FE7200] bg-orange-100/80 hover:bg-orange-200/90 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
+                  className="text-[9.5px] font-bold text-[#F06A05] bg-orange-100/80 hover:bg-orange-200/90 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
                 >
                   View menu ({group.items.length})
                 </button>
@@ -592,7 +592,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
           </Button>
         </div>
       )}
-      <button type="button" onClick={onBusinessPortal} className="mx-4 my-6 min-h-11 text-xs font-bold text-[#FE7200] underline">Open business portal</button>
+      <button type="button" onClick={onBusinessPortal} className="mx-4 my-6 min-h-11 text-xs font-bold text-[#F06A05] underline">Open business portal</button>
     </div>
   );
 };

@@ -67,7 +67,7 @@ export const MorphingButton: React.FC<MorphingButtonProps> = ({
     return (
       <form
         onSubmit={handleSubmit}
-        className={`inline-flex items-center h-10 bg-white border border-[#FE7200] rounded-xl shadow-lg p-1 transition-all duration-300 animate-in fade-in zoom-in-95 ${className}`}
+        className={`inline-flex items-center h-10 bg-white border border-[#F06A05] rounded-xl shadow-lg p-1 transition-all duration-300 animate-in fade-in zoom-in-95 ${className}`}
       >
         <input
           ref={inputRef}
@@ -82,7 +82,7 @@ export const MorphingButton: React.FC<MorphingButtonProps> = ({
           type="submit"
           disabled={!email}
           aria-label="Submit"
-          className="w-8 h-8 rounded-lg bg-[#FE7200] hover:bg-[#E05D00] text-white flex items-center justify-center shrink-0 transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
+          className="w-8 h-8 rounded-lg bg-[#F06A05] hover:bg-[#E05D00] text-white flex items-center justify-center shrink-0 transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
         >
           <ArrowRight className="w-4 h-4" />
         </button>
@@ -102,7 +102,7 @@ export const MorphingButton: React.FC<MorphingButtonProps> = ({
     <button
       type="button"
       onClick={handleExpand}
-      className={`inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl bg-[#FE7200] hover:bg-[#E05D00] text-white text-xs font-extrabold btn-orange-shadow transition-all duration-200 active:scale-97 cursor-pointer ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl bg-[#F06A05] hover:bg-[#E05D00] text-white text-xs font-extrabold btn-orange-shadow transition-all duration-200 active:scale-97 cursor-pointer ${className}`}
     >
       <Bell className="w-3.5 h-3.5" />
       <span>{buttonText}</span>

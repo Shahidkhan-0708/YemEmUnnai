@@ -24,13 +24,13 @@ interface AddEditFoodItemScreenProps {
  *   - Title input .. label 13px w700 (y=254); input x=29 y=265 w=317 h=43 rx=21 inset,
  *                    placeholder "Add food item" 12px w500 #6B8075
  *   - Category ..... label 13px w700 (y=336); two 154×43 rx=20 inset selects at x=29/x=192,
- *                    text 13px w600 at x+14, chevron 18px #FE7200 at right
+ *                    text 13px w600 at x+14, chevron 18px #F06A05 at right
  *   - Price ........ label 13px w700 (y=423); input 317×43 rx=21 inset, "₹ Enter price"
  *   - Veg toggle ... "Vegetarian Only" 13px w700 (y=508) + "Pure veg preparation" 10px w500;
- *                    switch 50×28 rx=14 #FE7200, knob d=22 at RIGHT (cx=332)
+ *                    switch 50×28 rx=14 #F06A05, knob d=22 at RIGHT (cx=332)
  *   - Upload ....... x=29 y=539 w=317 h=143 rx=20 dashed #9BAFA3, arrow-up icon 30px
  *                    #789184, "Upload Photo" 14px w600 #7A6658, "JPG or PNG" 10px #71867A
- *   - CTA .......... x=29 y=710 w=317 h=47 rx=12 #FE7200 "Publish to YEMEMUNNAI" 14px w700
+ *   - CTA .......... x=29 y=710 w=317 h=47 rx=12 #F06A05 "Publish to YEMEMUNNAI" 14px w700
  */
 export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
   isOpen,
@@ -166,7 +166,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
       >
         {submitted ? (
           <div className="py-16 flex flex-col items-center justify-center text-center px-4.5">
-            <CheckCircle className="w-14 h-14 text-[#FE7200]" />
+            <CheckCircle className="w-14 h-14 text-[#F06A05]" />
             <h3 className="text-[17px] font-extrabold text-[#1F140A] mt-3">Item Published!</h3>
             <p className="text-[11px] font-semibold text-[#7A6658] mt-1">
               {name} is now live on YEMEMUNNAI.
@@ -234,7 +234,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                       aria-pressed={selected}
                       className={`flex-1 h-full rounded-[18px] text-[12px] font-extrabold capitalize transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                         selected
-                          ? 'bg-[#FE7200] text-white shadow-sm'
+                          ? 'bg-[#F06A05] text-white shadow-sm'
                           : 'text-[#1F140A]/70 hover:text-[#1F140A]'
                       }`}
                     >
@@ -250,7 +250,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                   <span className="block text-[13px] font-bold leading-4.25 text-[#1F140A]">
                     Service Mode
                   </span>
-                  <span className={`text-[10px] font-extrabold ${actionType === 'walkin' ? 'text-emerald-700' : 'text-[#FE7200]'}`}>
+                  <span className={`text-[10px] font-extrabold ${actionType === 'walkin' ? 'text-emerald-700' : 'text-[#F06A05]'}`}>
                     {actionType === 'order' ? '🛒 Students send an order to your cafe' : '📍 Students walk in with the live map'}
                   </span>
                 </div>
@@ -278,8 +278,8 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                     aria-pressed={actionType === 'order'}
                     className={`flex-1 h-full rounded-[18px] text-[12px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       actionType === 'order'
-                        ? 'bg-gradient-to-r from-[#FF8A2A] to-[#FE7200] text-white shadow-md btn-orange-shadow'
-                        : 'text-[#1F140A]/70 hover:text-[#FE7200]'
+                        ? 'bg-gradient-to-r from-[#FF8A2A] to-[#F06A05] text-white shadow-md btn-orange-shadow'
+                        : 'text-[#1F140A]/70 hover:text-[#F06A05]'
                     }`}
                   >
                     <ShoppingCart className="w-3.5 h-3.5" />
@@ -297,7 +297,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                   >
                     Price
                   </label>
-                  <span className="text-[10px] font-bold text-[#FE7200]">
+                  <span className="text-[10px] font-bold text-[#F06A05]">
                     ₹0 – ₹200 Quick Step
                   </span>
                 </div>
@@ -349,7 +349,7 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                   onClick={() => setVegetarian(v => !v)}
                   className="relative w-12.5 h-7 rounded-[14px] cursor-pointer transition-colors shrink-0"
                   style={{
-                    background: vegetarian ? '#FE7200' : '#C9D0D8',
+                    background: vegetarian ? '#F06A05' : '#C9D0D8',
                     boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)'
                   }}
                 >
@@ -399,11 +399,11 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                 </div>
               )}
 
-              {/* CTA — 317×47 rx=12 #FE7200 (y=710 → 27px from sheet bottom) */}
+              {/* CTA — 317×47 rx=12 #F06A05 (y=710 → 27px from sheet bottom) */}
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-7 w-full h-11.75 rounded-xl bg-[#FE7200] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#E05D00] active:scale-[0.98] transition-all"
+                className="mt-7 w-full h-11.75 rounded-xl bg-[#F06A05] text-white text-[14px] font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#E05D00] active:scale-[0.98] transition-all"
                 style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
               >
                 {submitting ? 'Publishing…' : 'Publish to YEMEMUNNAI'}

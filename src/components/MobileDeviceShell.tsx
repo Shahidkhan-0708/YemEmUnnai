@@ -29,7 +29,7 @@ export const MobileDeviceShell: React.FC<MobileDeviceShellProps> = ({
           className={`absolute top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-out rounded-full flex items-center shadow-lg ${
             activeOrder
               ? isReady
-                ? 'w-71.25 h-8 px-3.5 justify-between cursor-pointer bg-linear-to-r from-[#FE7200] via-[#E05D00] to-[#C44E00] ring-2 ring-amber-400 border border-emerald-400 shadow-[0_0_22px_rgba(52,211,153,0.6)] animate-pulse'
+                ? 'w-71.25 h-8 px-3.5 justify-between cursor-pointer bg-linear-to-r from-[#F06A05] via-[#E05D00] to-[#C44E00] ring-2 ring-amber-400 border border-emerald-400 shadow-[0_0_22px_rgba(52,211,153,0.6)] animate-pulse'
                 : 'w-67.5 h-7 px-3 justify-between cursor-pointer bg-[#120A03] ring-1 ring-emerald-500/40 border border-white/15'
               : 'w-28 h-5 px-2.5 justify-between pointer-events-none bg-[#120A03] border border-white/10'
           }`}

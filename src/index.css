@@ -10,15 +10,15 @@
     --neu-well-dark: #9AA6B3;
     --neu-border: #D6DCE2;
 
-    /* Brand accents — exact NewLogo background #FE7200 */
-    --brand-primary: #FE7200;
-    --brand-primary-dark: #E05D00;
-    --brand-header: #FE7200;
-    --brand-accent: #FE7200;
-    --brand-accent-hover: #E05D00;
+    /* Brand accents — exact logo video background #F06A05 */
+    --brand-primary: #F06A05;
+    --brand-primary-dark: #D85800;
+    --brand-header: #F06A05;
+    --brand-accent: #F06A05;
+    --brand-accent-hover: #D85800;
     --brand-text-main: #1F140A;
     --brand-text-muted: #7A6658;
-    --brand-live-green: #FE7200;
+    --brand-live-green: #F06A05;
     --brand-star-gold: #EAA02B;
 
     /* Legacy aliases remapped to neumorphic surfaces */
@@ -36,8 +36,8 @@
 
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #14110E;
-    color: #F8FAFC;
+    background-color: #FFFFFF;
+    color: #0F172A;
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
@@ -91,7 +91,7 @@
 .btn-orange-shadow {
   box-shadow:
     -3px -3px 7px rgba(255, 255, 255, 0.8),
-    4px 4px 10px rgba(254, 114, 0, 0.42),
+    4px 4px 10px rgba(240, 106, 5, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -100,14 +100,14 @@
   transform: translateY(-1px);
   box-shadow:
     -4px -4px 8px rgba(255, 255, 255, 0.85),
-    6px 6px 14px rgba(254, 114, 0, 0.5),
+    6px 6px 14px rgba(240, 106, 5, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .btn-orange-shadow:active {
   transform: translateY(1px) scale(0.98);
   box-shadow:
-    inset 2px 2px 5px rgba(217, 95, 0, 0.5),
+    inset 2px 2px 5px rgba(216, 88, 0, 0.5),
     0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -292,7 +292,7 @@
 
 /* Visible keyboard focus ring on every interactive control (incl. inside modals) */
 :focus-visible {
-  outline: 2px solid #FE7200;
+  outline: 2px solid #F06A05;
   outline-offset: 2px;
   border-radius: 4px;
 }

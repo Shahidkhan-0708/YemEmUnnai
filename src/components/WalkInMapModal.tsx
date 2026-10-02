@@ -178,7 +178,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
             onClick={() => setActiveTab('schematic')}
             className={`flex-1 py-1 rounded-full text-center transition-all cursor-pointer ${
               activeTab === 'schematic'
-                ? 'bg-[#FE7200] text-white shadow-xs'
+                ? 'bg-[#F06A05] text-white shadow-xs'
                 : 'text-[#1F140A] hover:bg-black/5'
             }`}
           >
@@ -189,7 +189,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
             onClick={() => setActiveTab('gps')}
             className={`flex-1 py-1 rounded-full text-center transition-all cursor-pointer flex items-center justify-center gap-1 ${
               activeTab === 'gps'
-                ? 'bg-[#FE7200] text-white shadow-xs'
+                ? 'bg-[#F06A05] text-white shadow-xs'
                 : 'text-[#1F140A] hover:bg-black/5'
             }`}
           >
@@ -230,7 +230,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
                   <rect
                     x="47" y="375" width="70" height="45" rx="6"
                     fill={buildingName.includes('Library') ? '#93BC8F' : '#D6DCE2'}
-                    stroke={buildingName.includes('Library') ? '#FE7200' : '#C9D0D8'}
+                    stroke={buildingName.includes('Library') ? '#F06A05' : '#C9D0D8'}
                     strokeWidth={buildingName.includes('Library') ? 2 : 1}
                   />
                   <text x="82" y="400.5" fontSize="9" fontWeight="700" fill={buildingName.includes('Library') ? '#1F140A' : '#668064'} textAnchor="middle">
@@ -241,7 +241,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
                   <rect
                     x="157" y="367" width="90" height="48" rx="6"
                     fill={buildingName.includes('Main') ? '#93BC8F' : '#D6DCE2'}
-                    stroke={buildingName.includes('Main') ? '#FE7200' : '#C9D0D8'}
+                    stroke={buildingName.includes('Main') ? '#F06A05' : '#C9D0D8'}
                     strokeWidth={buildingName.includes('Main') ? 2 : 1}
                   />
                   <text x="202" y="394" fontSize="9" fontWeight={buildingName.includes('Main') ? 700 : 600} fill={buildingName.includes('Main') ? '#1F140A' : '#668064'} textAnchor="middle">Main Block</text>
@@ -254,7 +254,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
                   <rect
                     x="173" y="490" width="80" height="43" rx="6"
                     fill={buildingName.includes('Canteen') ? '#93BC8F' : '#D6DCE2'}
-                    stroke={buildingName.includes('Canteen') ? '#FE7200' : '#C9D0D8'}
+                    stroke={buildingName.includes('Canteen') ? '#F06A05' : '#C9D0D8'}
                     strokeWidth={buildingName.includes('Canteen') ? 2 : 1}
                   />
                   <text x="213" y="514.5" fontSize="9" fontWeight="700" fill={buildingName.includes('Canteen') ? '#1F140A' : '#668064'} textAnchor="middle">
@@ -265,7 +265,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
                   <rect
                     x="55" y="569" width="64" height="34" rx="6"
                     fill={buildingName.includes('Hostel') ? '#93BC8F' : '#D6DCE2'}
-                    stroke={buildingName.includes('Hostel') ? '#FE7200' : '#C9D0D8'}
+                    stroke={buildingName.includes('Hostel') ? '#F06A05' : '#C9D0D8'}
                     strokeWidth={buildingName.includes('Hostel') ? 2 : 1}
                   />
                   <text x="87" y="589" fontSize="9" fontWeight="700" fill={buildingName.includes('Hostel') ? '#1F140A' : '#668064'} textAnchor="middle">
@@ -293,7 +293,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
 
                 {/* Origin: current location */}
                 <circle cx="88" cy="550" r="14" fill="#10B981" opacity="0.3" className="animate-pulse" />
-                <circle cx="88" cy="550" r="6" fill="#FE7200" stroke="#FFF" strokeWidth="2.5" />
+                <circle cx="88" cy="550" r="6" fill="#F06A05" stroke="#FFF" strokeWidth="2.5" />
 
                 {/* Destination pin (dynamic position) */}
                 <g transform={`translate(${pinX} ${pinY}) scale(1.15)`}>
@@ -313,12 +313,12 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
             <div
               className="absolute left-3 top-3 px-3 py-1.5 rounded-full bg-[#E8ECEF]/95 backdrop-blur-xs flex items-center gap-1.5 shadow-md border border-white/60"
             >
-              <Footprints className="w-4 h-4 text-[#FE7200] shrink-0" strokeWidth={2.2} />
+              <Footprints className="w-4 h-4 text-[#F06A05] shrink-0" strokeWidth={2.2} />
               <span className="text-[11px] font-extrabold text-[#1F140A]">{displayWalkTime}</span>
             </div>
 
             {/* Target Building chip top-right */}
-            <div className="absolute right-3 top-3 px-2.5 py-1 rounded-full bg-[#FE7200]/90 backdrop-blur-xs flex items-center gap-1.5 shadow-md border border-orange-300/30">
+            <div className="absolute right-3 top-3 px-2.5 py-1 rounded-full bg-[#F06A05]/90 backdrop-blur-xs flex items-center gap-1.5 shadow-md border border-orange-300/30">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-[9px] font-extrabold uppercase text-[#FFEAD9]">Target: {buildingName}</span>
             </div>
@@ -347,7 +347,7 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
 
             {/* Radar Center Metric */}
             <div className="flex flex-col items-center z-10">
-              <div className="w-14 h-14 rounded-full bg-[#FE7200] border-2 border-orange-300 flex items-center justify-center shadow-lg animate-radar-ring mb-2">
+              <div className="w-14 h-14 rounded-full bg-[#F06A05] border-2 border-orange-300 flex items-center justify-center shadow-lg animate-radar-ring mb-2">
                 <MapPin className="w-7 h-7 text-amber-400 fill-amber-400/20" />
               </div>
               <span className="text-xl font-black text-white tracking-tight">{computedMeters} meters away</span>

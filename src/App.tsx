@@ -152,23 +152,23 @@ export function App() {
   // Splash first: a clean brand animation, then straight into the app (no buttons needed).
   if (showLaunchSplash) {
     return (
-      <div className="min-h-screen bg-[#02180A]">
+      <div className="min-h-screen bg-white">
         <BrandIntroSplash onStart={() => setShowLaunchSplash(false)} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1A15] text-slate-100">
+    <div className="min-h-screen bg-white text-slate-900">
       {/* Main Content Area */}
       <a className="skip-content" href="#main-content">Skip to menu</a>
-      <main id="main-content" tabIndex={-1} className="w-full flex justify-center">
+      <main id="main-content" tabIndex={-1} className="w-full flex justify-center py-0 sm:py-6">
         {/* Toast Notification */}
         <div role="status" aria-live="polite" className="sr-only">{toastMessage || ''}</div>
         {toastMessage && (
           <div
             aria-hidden="true"
-            className="fixed bottom-6 max-w-[calc(100%-32px)] z-50 bg-[#112019] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-2xl border border-emerald-400/40 flex items-center gap-2"
+            className="fixed bottom-6 max-w-[calc(100%-32px)] z-50 bg-[#1E293B] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-2xl border border-white/20 flex items-center gap-2"
           >
             <Sparkles className="w-4 h-4 text-amber-400" aria-hidden="true" />
             <span>{toastMessage}</span>
@@ -416,7 +416,7 @@ export function App() {
                   </div>
                   <button
                     onClick={card.action}
-                    className="mt-3 w-full py-2 rounded-lg bg-[#FE7200] hover:bg-[#0B5422] text-white text-[11px] font-bold cursor-pointer transition-colors"
+                    className="mt-3 w-full py-2 rounded-lg bg-[#F06A05] hover:bg-[#0B5422] text-white text-[11px] font-bold cursor-pointer transition-colors"
                   >
                     {card.cta}
                   </button>
@@ -725,21 +725,21 @@ export function App() {
         <button
           type="button"
           onClick={() => { playTapSound(); setActivePortal('consumer'); }}
-          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'consumer' ? 'bg-[#FE7200] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
+          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'consumer' ? 'bg-[#F06A05] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
         >
           🍽️ App
         </button>
         <button
           type="button"
           onClick={() => { playTapSound(); setActivePortal('business'); }}
-          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'business' ? 'bg-[#FE7200] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
+          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'business' ? 'bg-[#F06A05] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
         >
           💼 Canteen
         </button>
         <button
           type="button"
           onClick={() => { playTapSound(); setActivePortal('gallery'); }}
-          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'gallery' ? 'bg-[#FE7200] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
+          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'gallery' ? 'bg-[#F06A05] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
         >
           📱 Screens
         </button>
@@ -753,7 +753,7 @@ export function App() {
         <button
           type="button"
           onClick={() => { playTapSound(); setActivePortal('artifacts'); }}
-          className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'artifacts' ? 'bg-[#FE7200] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
+          className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'artifacts' ? 'bg-[#F06A05] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
         >
           🎨 SVGs
         </button>

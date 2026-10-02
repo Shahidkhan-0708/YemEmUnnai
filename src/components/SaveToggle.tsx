@@ -85,7 +85,7 @@ export const SaveToggle: React.FC<SaveToggleProps> = ({
         sizeClasses[size]
       } ${
         saved || status === 'saved'
-          ? 'bg-[#FE7200] text-white btn-orange-shadow'
+          ? 'bg-[#F06A05] text-white btn-orange-shadow'
           : status === 'loading'
           ? 'bg-[#E8ECEF] border border-[#D6DCE2] text-[#7A6658] cursor-wait'
           : 'bg-[#E8ECEF] text-[#1F140A] border border-[#D6DCE2] hover:bg-[#DDE2E8] tactile-card'
@@ -93,7 +93,7 @@ export const SaveToggle: React.FC<SaveToggleProps> = ({
     >
       {status === 'loading' ? (
         <>
-          <Loader2 className={`${iconSizes[size]} animate-spin text-[#FE7200]`} />
+          <Loader2 className={`${iconSizes[size]} animate-spin text-[#F06A05]`} />
           {idleText ? <span>Saving…</span> : null}
         </>
       ) : saved || status === 'saved' ? (

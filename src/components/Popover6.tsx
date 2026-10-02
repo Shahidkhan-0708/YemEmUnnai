@@ -80,7 +80,7 @@ export const Popover6 = () => {
                   'absolute inset-0 rounded-xl border-2 border-dashed',
                   value === 100
                     ? 'border-emerald-500 opacity-30'
-                    : 'border-[#FE7200] opacity-30',
+                    : 'border-[#F06A05] opacity-30',
                   {
                     'animate-spin [animation-duration:8s]':
                       value < 100 && !isPaused && !isCanceled,
@@ -90,7 +90,7 @@ export const Popover6 = () => {
               {value === 100 ? (
                 <CheckCircle2Icon className="size-5 text-emerald-500" />
               ) : (
-                <DownloadIcon className="z-1 size-5 text-[#FE7200]" />
+                <DownloadIcon className="z-1 size-5 text-[#F06A05]" />
               )}
             </div>
             <div className="flex min-w-0 flex-1 flex-col">
@@ -124,7 +124,7 @@ export const Popover6 = () => {
                 'h-1.5 bg-neutral-50 dark:bg-neutral-900',
                 value === 100
                   ? '[&>[data-slot=progress-indicator]]:bg-emerald-500'
-                  : '[&>[data-slot=progress-indicator]]:bg-[#FE7200]',
+                  : '[&>[data-slot=progress-indicator]]:bg-[#F06A05]',
               )}
             />
 

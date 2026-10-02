@@ -83,7 +83,7 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
         disabled={disabled}
         className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-150 active:scale-97 cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed ${
           variant === 'primary' || variant === 'orange'
-            ? 'bg-[#FE7200] text-white hover:bg-[#E05D00] btn-orange-shadow'
+            ? 'bg-[#F06A05] text-white hover:bg-[#E05D00] btn-orange-shadow'
             : 'bg-[#E8ECEF] text-[#1F140A] border border-[#D6DCE2] tactile-card hover:bg-[#DDE2E8]'
         } ${className}`}
       >
@@ -129,9 +129,9 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
 
             {/* Central Illuminated Icon */}
             <div className="flex flex-col items-center text-center mt-2">
-              <div className="relative w-20 h-20 rounded-full bg-linear-to-b from-orange-100 to-amber-50 border-2 border-[#FE7200]/40 flex items-center justify-center text-[#FE7200] shadow-[0_10px_25px_rgba(254,114,0,0.25)] mb-4">
-                <div className="absolute inset-0 rounded-full animate-ping bg-[#FE7200]/15 pointer-events-none" />
-                {icon ? icon : <Fingerprint size={36} className="text-[#FE7200]" />}
+              <div className="relative w-20 h-20 rounded-full bg-linear-to-b from-orange-100 to-amber-50 border-2 border-[#F06A05]/40 flex items-center justify-center text-[#F06A05] shadow-[0_10px_25px_rgba(254,114,0,0.25)] mb-4">
+                <div className="absolute inset-0 rounded-full animate-ping bg-[#F06A05]/15 pointer-events-none" />
+                {icon ? icon : <Fingerprint size={36} className="text-[#F06A05]" />}
               </div>
 
               {/* Title & Description */}
@@ -156,7 +156,7 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
                 type="button"
                 onClick={handleConfirm}
                 disabled={isProcessing}
-                className="w-full h-12 rounded-xl bg-[#FE7200] hover:bg-[#E05D00] text-white font-extrabold text-sm flex items-center justify-center gap-2 btn-orange-shadow cursor-pointer transition-all active:scale-98 disabled:opacity-60"
+                className="w-full h-12 rounded-xl bg-[#F06A05] hover:bg-[#E05D00] text-white font-extrabold text-sm flex items-center justify-center gap-2 btn-orange-shadow cursor-pointer transition-all active:scale-98 disabled:opacity-60"
               >
                 {isProcessing ? (
                   <>

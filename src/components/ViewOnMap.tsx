@@ -53,7 +53,7 @@ export const ViewOnMap: React.FC<ViewOnMapProps> = ({
   return (
     <div
       onClick={handleCardClick}
-      className={`group relative w-full max-w-sm overflow-hidden rounded-3xl bg-[#E8ECEF] border border-[#D6DCE2] p-3.5 shadow-md transition-all duration-300 hover:shadow-xl hover:border-[#FE7200]/40 cursor-pointer font-sans ${className}`}
+      className={`group relative w-full max-w-sm overflow-hidden rounded-3xl bg-[#E8ECEF] border border-[#D6DCE2] p-3.5 shadow-md transition-all duration-300 hover:shadow-xl hover:border-[#F06A05]/40 cursor-pointer font-sans ${className}`}
       style={{
         boxShadow: '-4px -4px 10px rgba(255,255,255,0.9), 5px 5px 12px rgba(163,174,187,0.4)',
       }}
@@ -78,7 +78,7 @@ export const ViewOnMap: React.FC<ViewOnMapProps> = ({
           <path
             d="M-20 70 Q 100 90, 180 50 T 340 75"
             fill="none"
-            stroke="#FE7200"
+            stroke="#F06A05"
             strokeWidth="3"
             strokeDasharray="6 6"
             className="animate-pulse"
@@ -109,13 +109,13 @@ export const ViewOnMap: React.FC<ViewOnMapProps> = ({
           <rect x="230" y="85" width="65" height="45" rx="6" fill="#1B3125" stroke="#335643" strokeWidth="1" />
 
           {/* Destination Pin Pulse Ripple */}
-          <circle cx="160" cy="55" r="24" fill="#FE7200" fillOpacity="0.18" className="animate-ping" />
-          <circle cx="160" cy="55" r="14" fill="#FE7200" fillOpacity="0.3" />
+          <circle cx="160" cy="55" r="24" fill="#F06A05" fillOpacity="0.18" className="animate-ping" />
+          <circle cx="160" cy="55" r="14" fill="#F06A05" fillOpacity="0.3" />
         </svg>
 
         {/* Floating Map Pin Badge */}
         <div className="absolute left-1/2 top-11 -translate-x-1/2 flex flex-col items-center pointer-events-none">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FE7200] text-white shadow-lg ring-4 ring-white/30 transform transition-transform group-hover:scale-110">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F06A05] text-white shadow-lg ring-4 ring-white/30 transform transition-transform group-hover:scale-110">
             <MapPin className="h-5 w-5 fill-white stroke-[2]" />
           </div>
           <div className="mt-1 rounded-md bg-[#1F140A]/90 px-2 py-0.5 text-[9px] font-black text-white backdrop-blur-xs shadow-md border border-white/20 whitespace-nowrap">
@@ -125,7 +125,7 @@ export const ViewOnMap: React.FC<ViewOnMapProps> = ({
 
         {/* Distance / Walk Time Overlay Chip */}
         <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5 rounded-full bg-[#1F140A]/85 px-2.5 py-1 text-[10px] font-extrabold text-white backdrop-blur-md border border-white/20 shadow-sm">
-          <Compass className="h-3 w-3 text-[#FE7200] animate-spin" style={{ animationDuration: '8s' }} />
+          <Compass className="h-3 w-3 text-[#F06A05] animate-spin" style={{ animationDuration: '8s' }} />
           <span>{distance} • {walkTime}</span>
         </div>
 
@@ -145,7 +145,7 @@ export const ViewOnMap: React.FC<ViewOnMapProps> = ({
       <div className="mt-3 px-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-extrabold text-[#1F140A] group-hover:text-[#FE7200] transition-colors">
+            <h3 className="truncate text-sm font-extrabold text-[#1F140A] group-hover:text-[#F06A05] transition-colors">
               {locationName}
             </h3>
             <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-[#7A6658]">
@@ -179,7 +179,7 @@ export const ViewOnMap: React.FC<ViewOnMapProps> = ({
           <button
             type="button"
             onClick={handleOpenExternalMap}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#FE7200] px-3 py-1.5 text-[11px] font-extrabold text-white btn-orange-shadow hover:bg-[#E05D00] active:scale-95 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#F06A05] px-3 py-1.5 text-[11px] font-extrabold text-white btn-orange-shadow hover:bg-[#E05D00] active:scale-95 transition-all cursor-pointer"
           >
             <Navigation className="h-3 w-3 fill-white" />
             <span>Navigate</span>

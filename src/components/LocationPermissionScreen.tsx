@@ -14,14 +14,14 @@ interface LocationPermissionScreenProps {
  *   - Handle ......... 45×4 rx=2 #D6DCE2 at (147,14) inside dialog
  *   - Radar .......... center (169.5,115): r72 #DFEBE3 stroke #D6DCE2 1.5; r50 dashed
  *                      #BACFC2 "4 4"; r28 dashed #A6C2B0 "3 3"; sweep wedge 0°→90°
- *                      #FE7200 @.18; center dot r7 #FE7200 + halo r16 @.18 + white stroke 2.5;
+ *                      #F06A05 @.18; center dot r7 #F06A05 + halo r16 @.18 + white stroke 2.5;
  *                      Canteen pin (36,-30) r5 #F26A00 + halo r10 @.25; Chai Spot (-34,28)
- *                      r4 #FE7200 + halo r8 @.2; labels 8 w700
+ *                      r4 #F06A05 + halo r8 @.2; labels 8 w700
  *   - Title .......... "Enable Campus Radar" 19 w800 centered (y=224); two copy lines
  *                      11.5 w500 #7A6658 (y=247/263)
  *   - Field 1 ........ (24,288) 291×56 rx=14 #E8ECEF stroke #C4D8CB; clock badge r17
  *                      #DDECE3; "Live Distance & Walk Time" 11.5 w800; sub 10 w600;
- *                      "⏱ 2 min" chip 48×22 rx=11 #DCEAE1 9 w700 #FE7200 at (230,16)
+ *                      "⏱ 2 min" chip 48×22 rx=11 #DCEAE1 9 w700 #F06A05 at (230,16)
  *   - Field 2 ........ (24,354) same; runner badge r17 #FFEAD9 orange icon; "Fresh Batch
  *                      Arrival Alerts"; "Hot Samosas ready in 6m • Pot #2 Biryani";
  *                      "🔥 Hot" chip 46×22 rx=11 #FFE8D6 9 w700 #F26A00 at (232,16)
@@ -40,8 +40,8 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
       <div className="absolute left-5 top-47.5 w-40 h-50 rounded-[18px] bg-[#E8ECEF]/60" />
       <div className="absolute left-48.75 top-47.5 w-40 h-50 rounded-[18px] bg-[#E8ECEF]/60" />
 
-      {/* Dark overlay — #241204 @ 0.55 */}
-      <div className="absolute inset-0" style={{ background: 'rgba(3, 42, 21, 0.55)' }} />
+      {/* Dark overlay */}
+      <div className="absolute inset-0" style={{ background: 'rgba(15, 23, 42, 0.6)' }} />
 
       {/* Floating dialog — (18,130) 339×590 rx=28 */}
       <div
@@ -58,10 +58,10 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
             <circle cx="0" cy="0" r="50" fill="none" stroke="#C9D0D8" strokeWidth="1.5" strokeDasharray="4 4" />
             <circle cx="0" cy="0" r="28" fill="none" stroke="#A6C2B0" strokeWidth="1.5" strokeDasharray="3 3" />
             {/* Sweep wedge (top-right quadrant) */}
-            <path d="M0 0 L51 -51 A72 72 0 0 1 72 0 Z" fill="#FE7200" opacity="0.18" />
+            <path d="M0 0 L51 -51 A72 72 0 0 1 72 0 Z" fill="#F06A05" opacity="0.18" />
             {/* Center user marker */}
-            <circle cx="0" cy="0" r="16" fill="#FE7200" opacity="0.18" />
-            <circle cx="0" cy="0" r="7" fill="#FE7200" stroke="#FFFFFF" strokeWidth="2.5" />
+            <circle cx="0" cy="0" r="16" fill="#F06A05" opacity="0.18" />
+            <circle cx="0" cy="0" r="7" fill="#F06A05" stroke="#FFFFFF" strokeWidth="2.5" />
             {/* Canteen pin at (36,-30) */}
             <g transform="translate(36 -30)">
               <circle cx="0" cy="0" r="10" fill="#F26A00" opacity="0.25" />
@@ -70,8 +70,8 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
             </g>
             {/* MITS Cafe at (-34,28) */}
             <g transform="translate(-34 28)">
-              <circle cx="0" cy="0" r="8" fill="#FE7200" opacity="0.2" />
-              <circle cx="0" cy="0" r="4" fill="#FE7200" stroke="#FFF" strokeWidth="1.5" />
+              <circle cx="0" cy="0" r="8" fill="#F06A05" opacity="0.2" />
+              <circle cx="0" cy="0" r="4" fill="#F06A05" stroke="#FFF" strokeWidth="1.5" />
               <text x="7" y="3" fontSize="8" fontWeight="700" fill="#1F140A">MITS Cafe</text>
             </g>
           </svg>
@@ -93,8 +93,8 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
         >
           <div className="absolute left-3.5 top-2.75 w-8.5 h-8.5 rounded-full bg-[#D6DCE2] flex items-center justify-center">
             <svg width="20" height="20" viewBox="0 0 34 34" aria-hidden>
-              <circle cx="17" cy="17" r="9" fill="none" stroke="#FE7200" strokeWidth="1.8" />
-              <path d="M17 12 V17 H20.5" stroke="#FE7200" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+              <circle cx="17" cy="17" r="9" fill="none" stroke="#F06A05" strokeWidth="1.8" />
+              <path d="M17 12 V17 H20.5" stroke="#F06A05" strokeWidth="1.8" strokeLinecap="round" fill="none" />
             </svg>
           </div>
           <p className="absolute left-14 top-3.5 text-[11.5px] font-extrabold text-[#1F140A]">
@@ -104,7 +104,7 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
             Main Canteen: 2 min walk • MITS Cafe: 4 min
           </p>
           <div className="absolute left-57.5 top-4 w-12 h-5.5 rounded-[11px] bg-[#D6DCE2] flex items-center justify-center">
-            <span className="text-[9px] font-bold text-[#FE7200]">⏱ 2 min</span>
+            <span className="text-[9px] font-bold text-[#F06A05]">⏱ 2 min</span>
           </div>
         </div>
 
@@ -147,7 +147,7 @@ export const LocationPermissionScreen: React.FC<LocationPermissionScreenProps> =
           onClick={onAllow}
           className="absolute left-6 top-114.5 w-72.75 h-11.5 rounded-xl text-white text-[14px] font-extrabold cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all"
           style={{
-            background: 'linear-gradient(180deg, #FE7200 0%, #E05D00 100%)',
+            background: 'linear-gradient(180deg, #F06A05 0%, #E05D00 100%)',
             boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)'
           }}
         >

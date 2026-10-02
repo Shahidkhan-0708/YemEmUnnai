@@ -77,17 +77,17 @@ export const RunActionButton: React.FC<RunActionButtonProps> = ({
       <div className={`relative inline-flex items-center gap-2.5 h-11 px-4 rounded-xl bg-[#1F140A] text-white text-xs font-bold overflow-hidden shadow-md select-none ${className}`}>
         {/* Progress Fill Bar */}
         <div
-          className="absolute inset-y-0 left-0 bg-[#FE7200]/30 transition-all duration-300 ease-out"
+          className="absolute inset-y-0 left-0 bg-[#F06A05]/30 transition-all duration-300 ease-out"
           style={{ width: `${progressPercent}%` }}
         />
 
         <div className="relative z-10 flex items-center gap-2">
-          {StepIcon && <StepIcon className="w-4 h-4 text-[#FE7200] animate-pulse" />}
+          {StepIcon && <StepIcon className="w-4 h-4 text-[#F06A05] animate-pulse" />}
           <span className="truncate max-w-44">{currentStep?.label}…</span>
         </div>
 
         <div className="relative z-10 ml-auto flex items-center gap-1.5 pl-2">
-          <RotateCw className="w-3.5 h-3.5 animate-spin text-[#FE7200]" />
+          <RotateCw className="w-3.5 h-3.5 animate-spin text-[#F06A05]" />
           <span className="text-[10px] font-mono opacity-80">{progressPercent}%</span>
         </div>
       </div>
@@ -98,7 +98,7 @@ export const RunActionButton: React.FC<RunActionButtonProps> = ({
     <button
       type="button"
       onClick={handleStart}
-      className={`inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-[#FE7200] hover:bg-[#E05D00] text-white font-extrabold text-xs btn-orange-shadow transition-all duration-150 active:scale-97 cursor-pointer select-none ${className}`}
+      className={`inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-[#F06A05] hover:bg-[#E05D00] text-white font-extrabold text-xs btn-orange-shadow transition-all duration-150 active:scale-97 cursor-pointer select-none ${className}`}
     >
       <Play className="w-3.5 h-3.5 fill-white" />
       <span>{actionLabel}</span>

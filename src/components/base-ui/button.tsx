@@ -13,12 +13,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       'inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer active:scale-97 select-none';
 
     const variants: Record<string, string> = {
-      default: 'bg-[#FE7200] text-white hover:bg-[#E05D00] btn-orange-shadow',
+      default: 'bg-[#F06A05] text-white hover:bg-[#E05D00] btn-orange-shadow',
       destructive: 'bg-red-600 text-white hover:bg-red-700 shadow-sm',
       outline: 'border border-[#D6DCE2] bg-white text-[#1F140A] hover:bg-[#F4F6F8] shadow-xs',
       secondary: 'bg-[#DDE2E8] text-[#1F140A] hover:bg-[#D4DCE4]',
       ghost: 'hover:bg-black/5 text-[#1F140A]',
-      link: 'text-[#FE7200] underline-offset-4 hover:underline',
+      link: 'text-[#F06A05] underline-offset-4 hover:underline',
     };
 
     const sizes: Record<string, string> = {

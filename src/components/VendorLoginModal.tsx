@@ -84,7 +84,7 @@ export function VendorLoginModal({ isOpen, onClose }: VendorLoginModalProps) {
           </button>
           <span className="text-sm font-extrabold">Business Portal</span>
         </header>
-        <img src="/images/NewLogo.svg" alt="YEMUNNAI" className="mx-auto mt-5 size-18 rounded-full bg-[#FE7200] object-contain p-1" />
+        <img src="/images/NewLogo.svg" alt="YEMUNNAI" className="mx-auto mt-5 size-18 rounded-full bg-[#F06A05] object-contain p-1" />
         <h2 id="vendor-login-title" className="mt-4 text-center text-xl font-extrabold">Cafe Vendor Login</h2>
         <p className="mt-2 text-center text-sm text-[#7A6658]">Select your cafe and enter its four-digit PIN.</p>
         <form className="mt-6 flex flex-1 flex-col" onSubmit={event => { event.preventDefault(); void attemptPin(pin); }}>
@@ -113,7 +113,7 @@ export function VendorLoginModal({ isOpen, onClose }: VendorLoginModalProps) {
               </button>)}
           </div>
           <button type="submit" disabled={disabled || pin.length !== 4}
-            className="mt-6 min-h-12 rounded-xl bg-[#FE7200] px-4 py-3 text-sm font-bold text-white disabled:opacity-50">
+            className="mt-6 min-h-12 rounded-xl bg-[#F06A05] px-4 py-3 text-sm font-bold text-white disabled:opacity-50">
             {busy ? 'Signing in…' : 'Sign In'}
           </button>
         </form>

@@ -61,7 +61,7 @@ export const InlineDisclosureMenu: React.FC<InlineDisclosureMenuProps> = ({
         aria-label={triggerLabel || 'Toggle actions menu'}
         className={`h-9 px-3 rounded-xl flex items-center gap-1.5 text-xs font-bold transition-all duration-200 cursor-pointer select-none ${
           isOpen
-            ? 'bg-[#FE7200] text-white btn-orange-shadow'
+            ? 'bg-[#F06A05] text-white btn-orange-shadow'
             : 'bg-white text-[#1F140A] hover:bg-[#F4F6F8] border border-[#D6DCE2]'
         }`}
       >
@@ -95,7 +95,7 @@ export const InlineDisclosureMenu: React.FC<InlineDisclosureMenuProps> = ({
               className={`h-9 px-2.5 rounded-xl flex items-center gap-1.5 text-xs font-bold transition-all duration-150 cursor-pointer select-none whitespace-nowrap active:scale-95 ${
                 item.disabled
                   ? 'opacity-40 cursor-not-allowed text-[#7A6658]'
-                  : 'bg-white/80 hover:bg-white text-[#1F140A] hover:text-[#FE7200] border border-[#D6DCE2]'
+                  : 'bg-white/80 hover:bg-white text-[#1F140A] hover:text-[#F06A05] border border-[#D6DCE2]'
               }`}
             >
               <span className="w-4 h-4 flex items-center justify-center text-inherit shrink-0">

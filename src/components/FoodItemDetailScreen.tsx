@@ -19,16 +19,16 @@ interface FoodItemDetailScreenProps {
  *                      "Item Details" 14 w800 centered (y=59); heart circle 36px at
  *                      (333,54) with orange heart path #F26A00
  *   - Hero ........... (20,95) 335×225 rx=24 #131F17 + photo slice; "🔥 Fresh Batch •
- *                      12 mins ago" pill 180×28 rx=12 #FE7200 11 w800 at (34,109);
+ *                      12 mins ago" pill 180×28 rx=12 #F06A05 11 w800 at (34,109);
  *                      "14 Left In Pot" pill 118×28 rx=12 #FF8A2A (warm shadow) at
  *                      (216,265), text 11 w800
- *   - Info ........... (20,335): name 20 w800 + "₹140" 22 w800 #FE7200 right-aligned;
+ *   - Info ........... (20,335): name 20 w800 + "₹140" 22 w800 #F06A05 right-aligned;
  *                      "₹160" strike 12 w600 #8EA397; vendor bar 335×54 rx=14 #E8ECEF
  *                      stroke #D6DCE2 with 34px photo circle + name 12 w800 +
  *                      "★ 4.8 (128 ratings) • 160m (2 min walk)" 10 w600 + "Map 📍"
- *                      chip 62×24 rx=12 #D9E8DF 10 w700 #FE7200; 3 tags 24px high
+ *                      chip 62×24 rx=12 #D9E8DF 10 w700 #F06A05; 3 tags 24px high
  *                      (95/85/105 wide) rx=12 10 w700; portion selector label 11 w800
- *                      ls.5, options 162×42 rx=12 (#FE7200 active / #E8ECEF inactive)
+ *                      ls.5, options 162×42 rx=12 (#F06A05 active / #E8ECEF inactive)
  *                      12 w800/w700 with prices; kitchen note 335×54 rx=14
  *   - Bottom bar ..... (0,695) 375×117 #E8ECEF stroke #D6DCE2; stepper 105×48 rx=12
  *                      #E8ECEF stroke #BACFC2 (−/1/+ 18/15/18 w800); CTA 217×48 rx=12
@@ -104,7 +104,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
         {/* Fresh batch pill / Service Mode Pill */}
         <div
           className={`absolute left-3.5 top-3.5 px-3 h-7 rounded-xl flex items-center justify-center ${
-            item.actionType === 'walkin' ? 'bg-emerald-700' : 'bg-[#FE7200]'
+            item.actionType === 'walkin' ? 'bg-emerald-700' : 'bg-[#F06A05]'
           }`}
           style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
         >
@@ -138,7 +138,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
               {item.name}
             </h1>
           </div>
-          <span className={`font-extrabold ${item.price > 0 ? (item.actionType === 'walkin' ? 'text-[22px] text-emerald-700' : 'text-[22px] text-[#FE7200]') : 'text-[14px] text-[#D96C37] bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/25'}`}>
+          <span className={`font-extrabold ${item.price > 0 ? (item.actionType === 'walkin' ? 'text-[22px] text-emerald-700' : 'text-[22px] text-[#F06A05]') : 'text-[14px] text-[#D96C37] bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/25'}`}>
             {item.price > 0 ? `₹${item.price}` : 'Coming Soon'}
           </span>
         </div>
@@ -153,7 +153,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
         <div
           className="mt-2.5 w-full h-13.5 rounded-[14px] bg-[#E8ECEF] border border-[#D6DCE2] relative"
         >
-          <div className="absolute left-3 top-2.5 w-8.5 h-8.5 rounded-full bg-[#FE7200] overflow-hidden">
+          <div className="absolute left-3 top-2.5 w-8.5 h-8.5 rounded-full bg-[#F06A05] overflow-hidden">
             <img
               src={vendorImage}
               alt={item.vendor}
@@ -175,7 +175,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
             className={`absolute left-65 top-3.75 w-15.5 h-6 rounded-xl flex items-center justify-center cursor-pointer transition-colors ${
               item.actionType === 'walkin'
                 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 shadow-xs'
-                : 'bg-[#D6DCE2] text-[#FE7200] hover:bg-[#C9DEd2]'
+                : 'bg-[#D6DCE2] text-[#F06A05] hover:bg-[#C9DEd2]'
             }`}
           >
             <span className="text-[10px] font-bold">Map 📍</span>
@@ -206,7 +206,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
             aria-pressed={portion === 'single'}
             className={`w-40.5 h-10.5 rounded-xl flex items-center justify-between px-5 cursor-pointer transition-all ${
               portion === 'single'
-                ? 'bg-[#FE7200] text-white btn-orange-shadow'
+                ? 'bg-[#F06A05] text-white btn-orange-shadow'
                 : 'bg-[#E8ECEF] border border-[#D6DCE2] text-[#1F140A]'
             }`}
           >
@@ -219,7 +219,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
             aria-pressed={portion === 'double'}
             className={`w-40.5 h-10.5 rounded-xl flex items-center justify-between px-5 cursor-pointer transition-all ${
               portion === 'double'
-                ? 'bg-[#FE7200] text-white btn-orange-shadow'
+                ? 'bg-[#F06A05] text-white btn-orange-shadow'
                 : 'bg-[#E8ECEF] border border-[#D6DCE2] text-[#1F140A]'
             }`}
           >
@@ -300,7 +300,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
             onClick={() => onOrder?.(qty)}
             className="absolute left-34.5 top-3 w-54.25 h-12 rounded-xl text-white text-[14px] font-extrabold cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 btn-orange-shadow"
             style={{
-              background: 'linear-gradient(180deg, #FE7200 0%, #E05D00 100%)',
+              background: 'linear-gradient(180deg, #F06A05 0%, #E05D00 100%)',
             }}
           >
             <ShoppingCart className="w-4 h-4 fill-white/20" />

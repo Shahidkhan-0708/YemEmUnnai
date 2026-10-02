@@ -123,7 +123,7 @@ export const Stepper: React.FC<StepperProps> = ({
       aria-valuemin={min}
       aria-valuemax={max}
       onKeyDown={handleKeyDown}
-      className={`relative inline-flex items-center justify-between rounded-2xl bg-[#E8ECEF] border border-[#D6DCE2] select-none transition-all shadow-inner overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#FE7200]/40 ${
+      className={`relative inline-flex items-center justify-between rounded-2xl bg-[#E8ECEF] border border-[#D6DCE2] select-none transition-all shadow-inner overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#F06A05]/40 ${
         sizeClasses[size]
       } ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
       style={{
@@ -132,7 +132,7 @@ export const Stepper: React.FC<StepperProps> = ({
     >
       {/* Background progress indicator subtle fill */}
       <div
-        className="absolute left-0 top-0 bottom-0 bg-[#FE7200]/10 transition-all duration-150 pointer-events-none rounded-l-2xl"
+        className="absolute left-0 top-0 bottom-0 bg-[#F06A05]/10 transition-all duration-150 pointer-events-none rounded-l-2xl"
         style={{ width: `${progressPercent}%` }}
       />
 
@@ -161,7 +161,7 @@ export const Stepper: React.FC<StepperProps> = ({
             onChange={(e) => setInputValue(e.target.value)}
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
-            className="w-14 text-center font-black text-[#1F140A] bg-transparent outline-none border-b-2 border-[#FE7200]"
+            className="w-14 text-center font-black text-[#1F140A] bg-transparent outline-none border-b-2 border-[#F06A05]"
           />
         ) : (
           <div
@@ -184,7 +184,7 @@ export const Stepper: React.FC<StepperProps> = ({
         disabled={disabled || currentValue >= max}
         onClick={handleIncrement}
         aria-label="Increase value"
-        className={`relative z-10 rounded-xl bg-[#FE7200] text-white flex items-center justify-center hover:bg-[#E05D00] active:scale-90 transition-all shadow-xs cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+        className={`relative z-10 rounded-xl bg-[#F06A05] text-white flex items-center justify-center hover:bg-[#E05D00] active:scale-90 transition-all shadow-xs cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
           buttonSizes[size]
         }`}
       >

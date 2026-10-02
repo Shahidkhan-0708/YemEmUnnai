@@ -22,7 +22,7 @@ export const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
       >
         <div
           data-slot="progress-indicator"
-          className="h-full w-full flex-1 bg-[#FE7200] transition-all duration-300 ease-out"
+          className="h-full w-full flex-1 bg-[#F06A05] transition-all duration-300 ease-out"
           style={{ transform: `translateX(-${100 - percentage}%)` }}
         />
       </div>
