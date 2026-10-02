@@ -4,9 +4,10 @@ import type { FoodItem } from './lib/types';
 import { QuickOrderModal } from './components/QuickOrderModal';
 import { BrandIntroSplash } from './components/BrandIntroSplash';
 import { InstallPrompt } from './components/InstallPrompt';
-import { MobileDeviceShell, type ActiveOrderInfo } from './components/MobileDeviceShell';
-import { playTapSound, playSuccessChime, fireOrderConfetti } from './lib/celebration';
-import { subscribeOrderStatus } from './lib/api';
+import { MobileDeviceShell } from './components/MobileDeviceShell';
+import { playTapSound, playSuccessChime } from './lib/celebration';
+import { OrdersScreen, useBuyerOrders } from './components/OrdersScreen';
+import { useLanguage } from './lib/language';
 import { useVendorSession } from './lib/hooks';
 import { safeStorage } from './lib/storage';
 import { Download, ExternalLink, Eye } from 'lucide-react';
@@ -63,6 +64,8 @@ const DEFAULT_ORDER_ITEM: FoodItem = {
 
 export function App() {
   const { vendor } = useVendorSession();
+  const { t, lang, setLanguage } = useLanguage();
+  const [buyerTab, setBuyerTab] = useState<'discover' | 'saved' | 'orders'>('discover');
   const [activePortal, setActivePortal] = useState<'consumer' | 'business' | 'artifacts' | 'gallery' | 'components' | '404'>(() => {
     if (typeof window !== 'undefined') {
       const p = new URLSearchParams(window.location.search).get('portal');
@@ -93,21 +96,8 @@ export function App() {
     return false;
   });
   const [showMenuStock, setShowMenuStock] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
-  const [activeOrder, setActiveOrder] = useState<ActiveOrderInfo | null>(() => {
-    try {
-      const saved = JSON.parse(safeStorage.getItem('yemunnai_active_order') || 'null');
-      return saved && typeof saved.token === 'string' && /^\d{3}$/.test(saved.token)
-        && typeof saved.vendor === 'string' && typeof saved.status === 'string'
-        && typeof saved.orderId === 'string' && /^[a-f0-9-]{36}$/i.test(saved.orderId) ? saved : null;
-    } catch { return null; }
-  });
-  useEffect(() => {
-    if (activeOrder) safeStorage.setItem('yemunnai_active_order', JSON.stringify(activeOrder));
-    else safeStorage.removeItem('yemunnai_active_order');
-  }, [activeOrder]);
-  // Professional launch splash: the logo animation plays on load, then the app opens by itself.
-  const [showLaunchSplash, setShowLaunchSplash] = useState(true);
+  const buyerOrders = useBuyerOrders(activePortal === 'consumer');
+  const [showLaunchSplash, setShowLaunchSplash] = useState(() => safeStorage.getItem('yemunnai-intro-seen') !== 'true');
   useEffect(() => {
     setShowMenuStock(false);
     setIsAddEditOpen(false);
@@ -117,42 +107,11 @@ export function App() {
     toast(msg);
   };
 
-  // Real-time synchronization: listen for vendor status updates on student's active order
-  useEffect(() => {
-    if (!activeOrder?.orderId) return;
-
-    const unsubscribe = subscribeOrderStatus(activeOrder.orderId, (newStatus) => {
-      if (newStatus === 'accepted') {
-        playTapSound();
-        setActiveOrder((prev) =>
-          prev ? { ...prev, status: 'Preparing your order', stage: 'preparing' } : null
-        );
-        showToast(`🍳 ${activeOrder.vendor} accepted your order! Preparing now.`);
-      } else if (newStatus === 'completed') {
-        playSuccessChime();
-        fireOrderConfetti();
-        setActiveOrder((prev) =>
-          prev ? { ...prev, status: 'Ready for pickup', stage: 'ready' } : null
-        );
-        showToast(`🔥 Order #${activeOrder.token} is READY for pickup at ${activeOrder.vendor}!`);
-      } else if (newStatus === 'declined') {
-        setActiveOrder((prev) =>
-          prev ? { ...prev, status: 'Declined by shop', stage: 'declined' } : null
-        );
-        showToast(`❌ ${activeOrder.vendor} was unable to accept your order.`);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [activeOrder?.orderId, activeOrder?.vendor, activeOrder?.token]);
-
   // Splash first: a clean brand animation, then straight into the app (no buttons needed).
   if (showLaunchSplash) {
     return (
       <div className="min-h-screen bg-white">
-        <BrandIntroSplash onStart={() => setShowLaunchSplash(false)} />
+        <BrandIntroSplash onStart={() => { safeStorage.setItem('yemunnai-intro-seen', 'true'); setShowLaunchSplash(false); }} />
       </div>
     );
   }
@@ -165,16 +124,14 @@ export function App() {
       <main id="main-content" tabIndex={-1} className="w-full flex justify-center py-0 sm:py-6">
         {/* 1. CONSUMER APP SCREEN */}
         {activePortal === 'consumer' && (
-          <MobileDeviceShell
-            activeOrder={activeOrder}
-            onClearActiveOrder={() => {
-              playTapSound();
-              setActiveOrder(null);
-            }}
-          >
+          <MobileDeviceShell>
             <Suspense fallback={<ScreenFallback />}>
-              <div className="relative">
-                {consumerFlow === 'location' ? (
+              <div className="relative everyday-consumer">
+                <div className="flex items-center justify-between gap-3 bg-[#E8ECEF] px-4 py-2">
+                  <span className="text-sm font-bold">{t('Pickup ? Pay at pickup', '????????? ? ??????????????? ???????????')}</span>
+                  <label className="text-sm">{t('Language', '???')}<select aria-label={t('Language', '???')} value={lang} onChange={e => setLanguage(e.target.value as 'en' | 'te')} className="ml-2 min-h-11"><option value="en">English</option><option value="te">??????</option></select></label>
+                </div>
+                {buyerTab === 'orders' ? <OrdersScreen {...buyerOrders} onReorder={item => { setSelectedOrderQty(1); setSelectedOrderFood(item); }} /> : consumerFlow === 'location' ? (
                   <div className="relative">
                     <LocationPermissionScreen
                       onAllow={() => {
@@ -197,15 +154,16 @@ export function App() {
                       setSelectedWalkInFood(selectedDetailFood);
                       setSelectedDetailFood(null);
                     }}
-                    onOrder={(qty) => {
+                    onOrder={(qty, current) => {
                       setSelectedOrderQty(qty);
-                      setSelectedOrderFood(selectedDetailFood);
+                      setSelectedOrderFood(current ?? selectedDetailFood);
                       setSelectedDetailFood(null);
                     }}
                   />
                 ) : (
                   <HomeDiscoveryScreen
-                    cartCount={cartCount}
+                    savedOnly={buyerTab === 'saved'}
+                    cartCount={buyerOrders.orders.filter(o => ['pending','preparing','ready'].includes(o.status)).length}
                     onBusinessPortal={() => {
                       playTapSound();
                       setActivePortal('business');
@@ -223,17 +181,7 @@ export function App() {
                       playTapSound();
                       setSelectedReviewFood(item);
                     }}
-                    onCartClick={() => {
-                      playTapSound();
-                      if (selectedOrderFood) {
-                        // Already has order modal open
-                      } else if (cartCount > 0) {
-                        setSelectedOrderQty(cartCount);
-                        setSelectedOrderFood(DEFAULT_ORDER_ITEM);
-                      } else {
-                        showToast('Your cart is empty — tap + ORDER on any canteen item!');
-                      }
-                    }}
+                    onCartClick={() => setBuyerTab('orders')}
                     onSelectShop={(name) => {
                       playTapSound();
                       showToast(`Filtered by ${name}`);
@@ -245,23 +193,16 @@ export function App() {
                   />
                 )}
 
+                <nav aria-label={t('Buyer navigation', '???????????? ?????????')} className="pickup-nav">
+                  {([['discover','Discover','?????????'],['saved','Saved','???????????'],['orders','Orders','????????']] as const).map(([tab,en,te]) => <button key={tab} type="button" aria-current={buyerTab === tab ? 'page' : undefined} onClick={() => { setBuyerTab(tab); setSelectedDetailFood(null); setConsumerFlow('discovery'); }}>{t(en,te)}</button>)}
+                </nav>
                 {/* Quick Order Modal — sits stably on top of screen with synced quantity */}
                 {selectedOrderFood && <QuickOrderModal
                   isOpen={!!selectedOrderFood}
                   item={selectedOrderFood}
                   initialQty={selectedOrderQty}
                   onClose={() => setSelectedOrderFood(null)}
-                  onSuccess={(orderData) => {
-                    setCartCount(c => c + selectedOrderQty);
-                    setActiveOrder({
-                      token: orderData.token,
-                      orderId: orderData.orderId,
-                      vendor: orderData.vendor,
-                      status: 'Sent to shop',
-                      stage: 'sent'
-                    });
-                    showToast(`Token #${orderData.token} pinned. Check the live status above.`);
-                  }}
+                  onSuccess={() => { buyerOrders.retry(); }}
                 />}
 
                 {/* Walk-in Map Modal */}
@@ -288,6 +229,7 @@ export function App() {
         {/* 2. BUSINESS PORTAL SCREEN — reachable via ?portal=business (vendor login) */}
         {activePortal === 'business' && (
           <MobileDeviceShell>
+            <button type="button" className="pickup-link" onClick={() => setActivePortal('consumer')}>{t('Back to Discover', '??????? ?????? ?????? ????????')}</button>
             <Suspense fallback={<ScreenFallback />}>
               <div className="relative">
                 {vendor && showMenuStock ? (
@@ -708,44 +650,6 @@ export function App() {
         )}
       </main>
 
-      {/* Floating Global Portal Navigation Switcher Bar */}
-      <nav aria-label="Portal Navigation" className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 bg-[#14221A]/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-emerald-500/30 shadow-2xl flex items-center gap-1 text-[11px] font-extrabold text-white">
-        <button
-          type="button"
-          onClick={() => { playTapSound(); setActivePortal('consumer'); }}
-          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'consumer' ? 'bg-[#F06A05] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
-        >
-          🍽️ App
-        </button>
-        <button
-          type="button"
-          onClick={() => { playTapSound(); setActivePortal('business'); }}
-          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'business' ? 'bg-[#F06A05] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
-        >
-          💼 Canteen
-        </button>
-        <button
-          type="button"
-          onClick={() => { playTapSound(); setActivePortal('gallery'); }}
-          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'gallery' ? 'bg-[#F06A05] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
-        >
-          📱 Screens
-        </button>
-        <button
-          type="button"
-          onClick={() => { playTapSound(); setActivePortal('components'); }}
-          className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'components' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
-        >
-          🧩 Components
-        </button>
-        <button
-          type="button"
-          onClick={() => { playTapSound(); setActivePortal('artifacts'); }}
-          className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${activePortal === 'artifacts' ? 'bg-[#F06A05] text-white shadow-xs' : 'text-slate-300 hover:text-white'}`}
-        >
-          🎨 SVGs
-        </button>
-      </nav>
 
       {/* PWA install sheet — appears when the browser offers install */}
       <InstallPrompt />
