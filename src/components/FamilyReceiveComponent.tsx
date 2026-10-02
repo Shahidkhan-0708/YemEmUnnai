@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Fingerprint, Check, X } from 'lucide-react';
+import { Fingerprint, Check, X, AlertCircle } from 'lucide-react';
 import { playTapSound, playSuccessChime } from '../lib/celebration';
+import { toast } from './ui/sonner';
 
 export interface FamilyReceiveComponentProps {
   triggerLabel?: string;
@@ -11,7 +12,7 @@ export interface FamilyReceiveComponentProps {
   confirmLabel?: string;
   cancelLabel?: string;
   icon?: React.ReactNode;
-  onConfirm?: () => void;
+  onConfirm?: () => Promise<void> | void;
   onCancel?: () => void;
   className?: string;
   variant?: 'primary' | 'orange' | 'neumorphic';
@@ -33,13 +34,14 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
 
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isOpen && !isProcessing) {
         handleClose();
       }
     };
@@ -48,30 +50,42 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
       confirmBtnRef.current?.focus();
     }
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, isProcessing]);
 
   const handleOpen = () => {
-    if (disabled) return;
+    if (disabled || isProcessing) return;
+    setErrorMsg(null);
     playTapSound();
     setIsOpen(true);
   };
 
   const handleClose = () => {
+    if (isProcessing) return; // Prevent closing mid-mutation
     playTapSound();
     setIsOpen(false);
+    setErrorMsg(null);
     onCancel?.();
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (isProcessing) return;
     setIsProcessing(true);
+    setErrorMsg(null);
     playTapSound();
 
-    setTimeout(() => {
+    try {
+      if (onConfirm) {
+        await Promise.resolve(onConfirm());
+      }
       playSuccessChime();
-      setIsProcessing(false);
       setIsOpen(false);
-      onConfirm?.();
-    }, 450);
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to update order status. Please try again.';
+      setErrorMsg(msg);
+      toast.error(msg);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -83,7 +97,7 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
         disabled={disabled}
         className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-150 active:scale-97 cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed ${
           variant === 'primary' || variant === 'orange'
-            ? 'bg-[#F06A05] text-white hover:bg-[#E05D00] btn-orange-shadow'
+            ? 'bg-[#F06A05] text-white hover:bg-[#D85800] btn-orange-shadow'
             : 'bg-[#E8ECEF] text-[#1F140A] border border-[#D6DCE2] tactile-card hover:bg-[#DDE2E8]'
         } ${className}`}
       >
@@ -108,9 +122,9 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
           aria-modal="true"
           aria-labelledby="family-receive-title"
           aria-describedby="family-receive-desc"
-          className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
           onClick={(e) => {
-            if (e.target === e.currentTarget) handleClose();
+            if (e.target === e.currentTarget && !isProcessing) handleClose();
           }}
         >
           <div
@@ -118,18 +132,20 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
             className="w-full max-w-sm rounded-[32px] bg-[#E8ECEF] p-6 shadow-2xl border border-white/60 tactile-modal transform animate-in zoom-in-95 duration-200 relative overflow-hidden"
           >
             {/* Top Close Button */}
-            <button
-              type="button"
-              onClick={handleClose}
-              aria-label="Close"
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#E8ECEF] border border-[#D6DCE2] flex items-center justify-center text-[#7A6658] hover:text-[#1F140A] active:scale-90 transition-transform cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            {!isProcessing && (
+              <button
+                type="button"
+                onClick={handleClose}
+                aria-label="Close"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#E8ECEF] border border-[#D6DCE2] flex items-center justify-center text-[#7A6658] hover:text-[#1F140A] active:scale-90 transition-transform cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
 
             {/* Central Illuminated Icon */}
             <div className="flex flex-col items-center text-center mt-2">
-              <div className="relative w-20 h-20 rounded-full bg-linear-to-b from-orange-100 to-amber-50 border-2 border-[#F06A05]/40 flex items-center justify-center text-[#F06A05] shadow-[0_10px_25px_rgba(254,114,0,0.25)] mb-4">
+              <div className="relative w-20 h-20 rounded-full bg-linear-to-b from-orange-100 to-amber-50 border-2 border-[#F06A05]/40 flex items-center justify-center text-[#F06A05] shadow-[0_10px_25px_rgba(240,106,5,0.25)] mb-4">
                 <div className="absolute inset-0 rounded-full animate-ping bg-[#F06A05]/15 pointer-events-none" />
                 {icon ? icon : <Fingerprint size={36} className="text-[#F06A05]" />}
               </div>
@@ -147,6 +163,14 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
               >
                 {description}
               </p>
+
+              {/* Error Banner if update fails */}
+              {errorMsg && (
+                <div className="mt-3 w-full p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-2 text-left">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -156,12 +180,12 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
                 type="button"
                 onClick={handleConfirm}
                 disabled={isProcessing}
-                className="w-full h-12 rounded-xl bg-[#F06A05] hover:bg-[#E05D00] text-white font-extrabold text-sm flex items-center justify-center gap-2 btn-orange-shadow cursor-pointer transition-all active:scale-98 disabled:opacity-60"
+                className="w-full h-12 rounded-xl bg-[#F06A05] hover:bg-[#D85800] text-white font-extrabold text-sm flex items-center justify-center gap-2 btn-orange-shadow cursor-pointer transition-all active:scale-98 disabled:opacity-70"
               >
                 {isProcessing ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Processing…</span>
+                    <span>Confirming with Server…</span>
                   </>
                 ) : (
                   <>
@@ -175,7 +199,7 @@ export const FamilyReceiveComponent: React.FC<FamilyReceiveComponentProps> = ({
                 type="button"
                 onClick={handleClose}
                 disabled={isProcessing}
-                className="w-full h-10 rounded-xl bg-[#E8ECEF] border border-[#D6DCE2] text-[#7A6658] hover:text-[#1F140A] font-bold text-xs flex items-center justify-center transition-colors cursor-pointer active:scale-98"
+                className="w-full h-10 rounded-xl bg-[#E8ECEF] border border-[#D6DCE2] text-[#7A6658] hover:text-[#1F140A] font-bold text-xs flex items-center justify-center transition-colors cursor-pointer active:scale-98 disabled:opacity-50"
               >
                 {cancelLabel}
               </button>

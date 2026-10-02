@@ -9,7 +9,8 @@ import { playTapSound, playSuccessChime, fireOrderConfetti } from './lib/celebra
 import { subscribeOrderStatus } from './lib/api';
 import { useVendorSession } from './lib/hooks';
 import { safeStorage } from './lib/storage';
-import { Sparkles, Download, ExternalLink, Eye } from 'lucide-react';
+import { Download, ExternalLink, Eye } from 'lucide-react';
+import { Toaster, toast } from './components/ui/sonner';
 
 // Lazy-loaded modal & non-critical routes for fast initial bundle & 300+ user scalability
 const FeedbackModal = lazy(() => import('./components/FeedbackModal').then(m => ({ default: m.FeedbackModal })));
@@ -105,7 +106,6 @@ export function App() {
     if (activeOrder) safeStorage.setItem('yemunnai_active_order', JSON.stringify(activeOrder));
     else safeStorage.removeItem('yemunnai_active_order');
   }, [activeOrder]);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   // Professional launch splash: the logo animation plays on load, then the app opens by itself.
   const [showLaunchSplash, setShowLaunchSplash] = useState(true);
   useEffect(() => {
@@ -114,8 +114,7 @@ export function App() {
   }, [vendor?.vendorId]);
 
   const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    toast(msg);
   };
 
   // Real-time synchronization: listen for vendor status updates on student's active order
@@ -160,21 +159,10 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      <Toaster />
       {/* Main Content Area */}
       <a className="skip-content" href="#main-content">Skip to menu</a>
       <main id="main-content" tabIndex={-1} className="w-full flex justify-center py-0 sm:py-6">
-        {/* Toast Notification */}
-        <div role="status" aria-live="polite" className="sr-only">{toastMessage || ''}</div>
-        {toastMessage && (
-          <div
-            aria-hidden="true"
-            className="fixed bottom-6 max-w-[calc(100%-32px)] z-50 bg-[#1E293B] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-2xl border border-white/20 flex items-center gap-2"
-          >
-            <Sparkles className="w-4 h-4 text-amber-400" aria-hidden="true" />
-            <span>{toastMessage}</span>
-          </div>
-        )}
-
         {/* 1. CONSUMER APP SCREEN */}
         {activePortal === 'consumer' && (
           <MobileDeviceShell

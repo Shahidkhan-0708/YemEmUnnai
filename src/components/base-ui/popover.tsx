@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 interface PopoverContextType {
   open: boolean;
   setOpen: (open: boolean) => void;
+  triggerRef: React.RefObject<HTMLElement | null>;
 }
 
 const PopoverContext = React.createContext<PopoverContextType | undefined>(undefined);
@@ -22,6 +23,7 @@ export const Popover: React.FC<PopoverProps> = ({
   children,
 }) => {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen);
+  const triggerRef = React.useRef<HTMLElement | null>(null);
 
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : uncontrolledOpen;
@@ -37,7 +39,7 @@ export const Popover: React.FC<PopoverProps> = ({
   );
 
   return (
-    <PopoverContext.Provider value={{ open, setOpen }}>
+    <PopoverContext.Provider value={{ open, setOpen, triggerRef }}>
       <div className="relative inline-block">{children}</div>
     </PopoverContext.Provider>
   );
@@ -48,7 +50,7 @@ export interface PopoverTriggerProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 export const PopoverTrigger = React.forwardRef<HTMLElement, PopoverTriggerProps>(
-  ({ asChild = false, children, ...props }, ref) => {
+  ({ asChild = false, children, ...props }, forwardedRef) => {
     const context = React.useContext(PopoverContext);
     if (!context) throw new Error('PopoverTrigger must be used within Popover');
 
@@ -57,8 +59,20 @@ export const PopoverTrigger = React.forwardRef<HTMLElement, PopoverTriggerProps>
       context.setOpen(!context.open);
     };
 
+    const setRef = (node: HTMLElement | null) => {
+      (context.triggerRef as React.MutableRefObject<HTMLElement | null>).current = node;
+      if (typeof forwardedRef === 'function') {
+        forwardedRef(node);
+      } else if (forwardedRef) {
+        (forwardedRef as React.MutableRefObject<HTMLElement | null>).current = node;
+      }
+    };
+
     if (asChild && React.isValidElement(children)) {
       return React.cloneElement(children as React.ReactElement<any>, {
+        ref: setRef,
+        'aria-expanded': context.open,
+        'aria-haspopup': 'dialog',
         onClick: (e: React.MouseEvent) => {
           handleClick(e);
           (children as any).props?.onClick?.(e);
@@ -68,7 +82,14 @@ export const PopoverTrigger = React.forwardRef<HTMLElement, PopoverTriggerProps>
     }
 
     return (
-      <button ref={ref as any} type="button" onClick={handleClick} {...props}>
+      <button
+        ref={setRef as any}
+        type="button"
+        aria-expanded={context.open}
+        aria-haspopup="dialog"
+        onClick={handleClick}
+        {...props}
+      >
         {children}
       </button>
     );
@@ -91,13 +112,44 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
       if (!context?.open) return;
 
       const handleMouseDown = (e: MouseEvent) => {
-        if (contentRef.current && !contentRef.current.contains(e.target as Node)) {
+        if (
+          contentRef.current &&
+          !contentRef.current.contains(e.target as Node) &&
+          !context.triggerRef.current?.contains(e.target as Node)
+        ) {
           context.setOpen(false);
+          context.triggerRef.current?.focus();
+        }
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          context.setOpen(false);
+          context.triggerRef.current?.focus();
         }
       };
 
       document.addEventListener('mousedown', handleMouseDown);
-      return () => document.removeEventListener('mousedown', handleMouseDown);
+      window.addEventListener('keydown', handleKeyDown);
+
+      // Viewport collision adjustment
+      if (contentRef.current) {
+        const rect = contentRef.current.getBoundingClientRect();
+        if (rect.right > window.innerWidth - 8) {
+          contentRef.current.style.right = '0';
+          contentRef.current.style.left = 'auto';
+          contentRef.current.style.transform = 'none';
+        } else if (rect.left < 8) {
+          contentRef.current.style.left = '0';
+          contentRef.current.style.right = 'auto';
+          contentRef.current.style.transform = 'none';
+        }
+      }
+
+      return () => {
+        document.removeEventListener('mousedown', handleMouseDown);
+        window.removeEventListener('keydown', handleKeyDown);
+      };
     }, [context]);
 
     if (!context?.open) return null;
@@ -111,8 +163,10 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
     return (
       <div
         ref={contentRef}
+        role="dialog"
+        tabIndex={-1}
         className={cn(
-          'absolute top-full z-50 mt-2 shadow-2xl rounded-2xl border border-[#D6DCE2] bg-white p-5 animate-in fade-in zoom-in-95 duration-150',
+          'absolute top-full z-50 mt-2 shadow-2xl rounded-2xl border border-[#D6DCE2] bg-white p-5 animate-in fade-in zoom-in-95 duration-150 font-sans outline-none',
           alignClasses[align],
           className
         )}

@@ -296,7 +296,12 @@ export const BusinessDashboardScreen: React.FC<BusinessDashboardScreenProps> = (
 
         {/* Vendor Messages & Notification Alert */}
         <div className="mx-4 mt-5">
-          <Alert3 />
+          <Alert3
+            ordersCount={orders.length}
+            pendingOrdersCount={orders.filter(o => o.status === 'pending').length}
+            error={ordersError}
+            isOnline={isOnline}
+          />
         </div>
 
         {/* INCOMING ORDERS PANEL — x=16 y=368 w=343 h=242 rx=21 */}

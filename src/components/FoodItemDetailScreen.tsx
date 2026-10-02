@@ -4,6 +4,7 @@ import { MorphingButton } from './MorphingButton';
 import { SaveToggle } from './SaveToggle';
 import { Stepper } from './Stepper';
 import type { FoodItem } from '../lib/types';
+import { toast } from './ui/sonner';
 
 interface FoodItemDetailScreenProps {
   item: FoodItem | null;
@@ -269,7 +270,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
             <MorphingButton
               buttonText="Notify Restock"
               onSubmit={(email) => {
-                alert(`You will be notified at ${email} when ${item.name} is back in stock!`);
+                toast.success(`You will be notified at ${email} when ${item.name} is back in stock! 🔔`);
               }}
             />
           </div>
@@ -278,7 +279,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
             <MorphingButton
               buttonText="Alert Me"
               onSubmit={(email) => {
-                alert(`You will be alerted at ${email} when this canteen comes online!`);
+                toast.success(`You will be alerted at ${email} when this canteen comes online! 🔔`);
               }}
             />
           </div>

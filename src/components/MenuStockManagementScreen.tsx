@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Plus, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { fetchVendorItems, setItemStock, setVendorAllStock, subscribeCatalogUpdates } from '../lib/api';
 import { useVendorSession } from '../lib/hooks';
 import {
@@ -11,6 +11,15 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { InlineDisclosureMenu } from "./original";
 import type { FoodItem } from '../lib/types';
+import { toast } from './ui/sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from './ui/dialog';
 
 interface MenuStockManagementScreenProps {
   onBack?: () => void;
@@ -27,6 +36,7 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
+  const [itemToDelete, setItemToDelete] = useState<FoodItem | null>(null);
   const lock = useRef(false);
 
   useEffect(() => {
@@ -141,21 +151,21 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
                         icon: <HugeiconsIcon icon={PencilEdit02Icon} />,
                         label: 'Edit',
                         onClick: () => {
-                          alert(`Opening editor for ${item.name}`);
+                          toast.info(`Opening editor for ${item.name}`);
                         }
                       },
                       {
                         icon: <HugeiconsIcon icon={Copy01Icon} />,
                         label: 'Duplicate',
                         onClick: () => {
-                          alert(`Duplicated ${item.name} as a new draft`);
+                          toast.success(`Duplicated ${item.name} as a new draft ✨`);
                         }
                       },
                       {
                         icon: <HugeiconsIcon icon={FavouriteIcon} />,
                         label: 'Special',
                         onClick: () => {
-                          alert(`Marked ${item.name} as Today's Campus Special!`);
+                          toast.success(`Marked ${item.name} as Today's Campus Special! ⭐`);
                         }
                       },
                       {
@@ -163,24 +173,62 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
                         label: 'Share',
                         onClick: () => {
                           navigator.clipboard?.writeText(window.location.origin + '?item=' + item.id);
-                          alert(`Share link for ${item.name} copied to clipboard!`);
+                          toast.success(`Share link for ${item.name} copied to clipboard! 📋`);
                         }
                       }
                     ]}
                     showDelete
                     deleteLabel="Delete"
                     onDelete={() => {
-                      if (window.confirm(`Delete ${item.name} from your cafe menu?`)) {
-                        setItems(curr => curr.filter(i => i.id !== item.id));
-                      }
+                      setItemToDelete(item);
                     }}
                   />
                 </div>
               </article>
             ))}
           </div>}
-        <button type="button" onClick={onAddNewItem} className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#F26A00] px-4 py-3 text-sm font-extrabold text-white"><Plus className="size-5" />Add New Dish</button>
+        <button type="button" onClick={onAddNewItem} className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#F06A05] hover:bg-[#D85800] btn-orange-shadow px-4 py-3 text-sm font-extrabold text-white cursor-pointer active:scale-98 transition-all"><Plus className="size-5" />Add New Dish</button>
       </>}
+
+      {/* Branded Delete Confirmation Dialog */}
+      <Dialog open={Boolean(itemToDelete)} onOpenChange={(open) => !open && setItemToDelete(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-2 border border-rose-200">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <DialogTitle className="text-center">Delete Menu Item</DialogTitle>
+            <DialogDescription className="text-center mt-2">
+              Are you sure you want to remove <span className="font-bold text-[#1F140A]">&quot;{itemToDelete?.name}&quot;</span> from your cafe menu? Customers won&apos;t be able to view or order it.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="mt-6 flex flex-col sm:flex-row gap-2">
+            <button
+              type="button"
+              onClick={() => setItemToDelete(null)}
+              className="flex-1 h-10 rounded-xl bg-[#E8ECEF] border border-[#D6DCE2] text-xs font-bold text-[#7A6658] hover:text-[#1F140A] cursor-pointer active:scale-98 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (itemToDelete) {
+                  const deletedName = itemToDelete.name;
+                  setItems(curr => curr.filter(i => i.id !== itemToDelete.id));
+                  toast.success(`Removed "${deletedName}" from menu`);
+                  setItemToDelete(null);
+                }
+              }}
+              className="flex-1 h-10 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-bold text-white cursor-pointer active:scale-98 transition-all shadow-md flex items-center justify-center gap-1.5"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Delete Item</span>
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
