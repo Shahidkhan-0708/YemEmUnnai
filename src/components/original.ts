@@ -4,3 +4,4 @@ export { RunActionButton } from './RunActionButton';
 export { FamilyReceiveComponent } from './FamilyReceiveComponent';
 export { Stepper } from './Stepper';
 export { InlineDisclosureMenu } from './InlineDisclosureMenu';
+export { ViewOnMap } from './ViewOnMap';

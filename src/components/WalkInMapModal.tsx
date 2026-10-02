@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Footprints, ArrowRight, Navigation, MapPin, Compass } from 'lucide-react';
+import { X, Footprints, Navigation, MapPin, Compass } from 'lucide-react';
 import { useModalA11y } from '../lib/useModalA11y';
+import { ViewOnMap } from './ViewOnMap';
 import type { FoodItem } from '../lib/types';
 
 interface WalkInMapModalProps {
@@ -358,25 +359,18 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
           </div>
         )}
 
-        {/* Footnotes */}
-        <div className="space-y-0.5 mb-3 px-1">
-          <p className="text-[11px] font-bold text-[#1F140A]">
-            Destination: {buildingName} ({computedMeters}m walk)
-          </p>
-          <p className="text-[10px] font-medium text-[#7A6658]">
-            Tap below for turn-by-turn walking navigation on Google Maps.
-          </p>
+        {/* Destination Location Card with ViewOnMap */}
+        <div className="my-2.5 flex justify-center w-full">
+          <ViewOnMap
+            locationName={item.vendor || buildingName}
+            address={item.locationLandmark ? `${item.locationLandmark}, MITS Campus, Madanapalle` : `${buildingName}, MITS Campus, Madanapalle, AP 517325`}
+            distance={`${computedMeters}m`}
+            walkTime={displayWalkTime}
+            coordinates={item.latitude && item.longitude ? { lat: item.latitude, lng: item.longitude } : undefined}
+            onNavigate={openGoogleMaps}
+            className="w-full max-w-none"
+          />
         </div>
-
-        {/* CTA Button */}
-        <button
-          type="button"
-          onClick={openGoogleMaps}
-          className="w-full h-11.75 rounded-[13px] bg-[#FE7200] text-white text-[13px] font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#E05D00] btn-orange-shadow tactile-press transition-all"
-        >
-          <ArrowRight className="w-4 h-4" strokeWidth={2.2} />
-          <span>Open in Google Maps</span>
-        </button>
       </div>
     </div>
   );
