@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { playSuccessChime, playTapSound } from '../lib/celebration';
 
 interface BrandIntroSplashProps {
@@ -9,22 +9,26 @@ interface BrandIntroSplashProps {
 
 /**
  * Brand Intro Splash Screen — Zomato & Swiggy inspired minimalist brand splash.
- * Guided by Founder & Designer: Only the iconic steaming logo, perfectly centered,
- * pure brand presence, zero visual clutter.
+ * Featuring the custom YEMUNNAI mascot logo animation.
  */
 export const BrandIntroSplash: React.FC<BrandIntroSplashProps> = ({
   onStart,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     // Smooth scale-in entrance
     const enterTimer = setTimeout(() => setIsLoaded(true), 60);
 
-    // Auto-advance to food discovery after 2.4s (standard Swiggy / Zomato splash duration)
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+
+    // Auto-advance fallback after video finishes (~5.6s)
     const autoAdvanceTimer = setTimeout(() => {
       onStart();
-    }, 2400);
+    }, 5600);
 
     return () => {
       clearTimeout(enterTimer);
@@ -81,7 +85,7 @@ export const BrandIntroSplash: React.FC<BrandIntroSplashProps> = ({
         </svg>
       </div>
 
-      {/* Iconic Centered Brand Logo */}
+      {/* Iconic Centered Brand Logo Animation */}
       <div
         className={`relative z-10 flex flex-col items-center justify-center transition-all duration-700 ease-out ${
           isLoaded
@@ -89,13 +93,23 @@ export const BrandIntroSplash: React.FC<BrandIntroSplashProps> = ({
             : 'opacity-0 scale-90 translate-y-4'
         }`}
       >
-        <div className="w-65 h-65 rounded-[36px] overflow-hidden p-2 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_40px_rgba(254,114,0,0.35)] border border-[#FE7200]/30 bg-[#FE7200]/20 backdrop-blur-md">
-          <img
-            src="/images/NewLogo.svg"
-            alt="YEMUNNAI"
-            className="w-full h-full object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
+        <div className="w-68 h-68 sm:w-72 sm:h-72 rounded-[36px] overflow-hidden p-1 flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_40px_rgba(254,114,0,0.35)] border-2 border-[#FE7200]/30 bg-[#F06A05] relative">
+          <video
+            ref={videoRef}
+            src="/videos/yemunnai_intro_clean.mp4"
+            autoPlay
+            muted
+            playsInline
+            onEnded={handleEnter}
+            poster="/images/NewLogo.svg"
+            className="w-full h-full object-cover object-center rounded-[30px]"
           />
         </div>
+
+        {/* Subtle tap-to-skip prompt */}
+        <span className="text-[10px] font-bold text-white/50 hover:text-white/80 transition-colors mt-4 tracking-wider uppercase">
+          Tap anywhere to skip →
+        </span>
       </div>
     </div>
   );
