@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, MapPin, ShoppingCart } from 'lucide-react';
 import { MorphingButton } from './MorphingButton';
 import { SaveToggle } from './SaveToggle';
 import { Stepper } from './Stepper';
@@ -101,12 +101,16 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
         style={{ boxShadow: '-6px -6px 12px rgba(255,255,255,0.85), 6px 6px 12px rgba(163,174,187,0.45)' }}
       >
         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-        {/* Fresh batch pill — (14,14) 180×28 rx=12 */}
+        {/* Fresh batch pill / Service Mode Pill */}
         <div
-          className="absolute left-3.5 top-3.5 px-3 h-7 rounded-xl bg-[#FE7200] flex items-center justify-center"
+          className={`absolute left-3.5 top-3.5 px-3 h-7 rounded-xl flex items-center justify-center ${
+            item.actionType === 'walkin' ? 'bg-emerald-700' : 'bg-[#FE7200]'
+          }`}
           style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
         >
-          <span className="text-[11px] font-extrabold text-white">{item.freshnessTag ?? (isDrink ? '☕ Fresh Brew' : isPacked ? '📦 Sealed Pack' : '🔥 In Stock')}</span>
+          <span className="text-[11px] font-extrabold text-white">
+            {item.actionType === 'walkin' ? '📍 Walk-In Item' : (item.freshnessTag ?? (isDrink ? '☕ Fresh Brew' : isPacked ? '📦 Sealed Pack' : '🔥 In Stock'))}
+          </span>
         </div>
         {/* Stock pill — hidden when the shop publishes no live count */}
         {item.stockLeft != null && (
@@ -134,7 +138,7 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
               {item.name}
             </h1>
           </div>
-          <span className={`font-extrabold ${item.price > 0 ? 'text-[22px] text-[#FE7200]' : 'text-[14px] text-[#D96C37] bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/25'}`}>
+          <span className={`font-extrabold ${item.price > 0 ? (item.actionType === 'walkin' ? 'text-[22px] text-emerald-700' : 'text-[22px] text-[#FE7200]') : 'text-[14px] text-[#D96C37] bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/25'}`}>
             {item.price > 0 ? `₹${item.price}` : 'Coming Soon'}
           </span>
         </div>
@@ -168,9 +172,13 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
           <button
             type="button"
             onClick={onMap}
-            className="absolute left-65 top-3.75 w-15.5 h-6 rounded-xl bg-[#D6DCE2] flex items-center justify-center cursor-pointer hover:bg-[#C9DEd2] transition-colors"
+            className={`absolute left-65 top-3.75 w-15.5 h-6 rounded-xl flex items-center justify-center cursor-pointer transition-colors ${
+              item.actionType === 'walkin'
+                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 shadow-xs'
+                : 'bg-[#D6DCE2] text-[#FE7200] hover:bg-[#C9DEd2]'
+            }`}
           >
-            <span className="text-[10px] font-bold text-[#FE7200]">Map 📍</span>
+            <span className="text-[10px] font-bold">Map 📍</span>
           </button>
         </div>
 
@@ -274,17 +282,29 @@ export const FoodItemDetailScreen: React.FC<FoodItemDetailScreenProps> = ({
               }}
             />
           </div>
+        ) : item.actionType === 'walkin' ? (
+          <button
+            type="button"
+            onClick={onMap}
+            className="absolute left-34.5 top-3 w-54.25 h-12 rounded-xl text-white text-[14px] font-extrabold cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 btn-green-shadow"
+            style={{
+              background: 'linear-gradient(180deg, #059669 0%, #047857 100%)',
+            }}
+          >
+            <MapPin className="w-4 h-4 fill-white/20" />
+            <span>Walk-In (Maps) 📍</span>
+          </button>
         ) : (
           <button
             type="button"
             onClick={() => onOrder?.(qty)}
-            className="absolute left-34.5 top-3 w-54.25 h-12 rounded-xl text-white text-[14px] font-extrabold cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all"
+            className="absolute left-34.5 top-3 w-54.25 h-12 rounded-xl text-white text-[14px] font-extrabold cursor-pointer hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 btn-orange-shadow"
             style={{
               background: 'linear-gradient(180deg, #FE7200 0%, #E05D00 100%)',
-              boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)'
             }}
           >
-            Quick Order{total > 0 ? ` • ₹${total}` : ' (Coming Soon)'}
+            <ShoppingCart className="w-4 h-4 fill-white/20" />
+            <span>Quick Order{total > 0 ? ` • ₹${total}` : ' (Coming Soon)'}</span>
           </button>
         )}
       </div>

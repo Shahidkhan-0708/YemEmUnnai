@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/utils';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'green' | 'orange';
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'green' | 'orange' | 'walkin' | 'order';
   size?: 'default' | 'sm' | 'lg' | 'icon' | 'xs';
 }
 
@@ -12,7 +12,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants: Record<string, string> = {
       default: 'bg-[#FE7200] text-white hover:bg-[#E05D00] btn-orange-shadow',
-      green: 'bg-gradient-to-r from-[#FE7200] to-[#E05D00] text-white hover:brightness-105 btn-orange-shadow',
+      green: 'bg-emerald-600 text-white hover:bg-emerald-700 btn-green-shadow',
+      walkin: 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white hover:from-emerald-500 hover:to-teal-600 btn-green-shadow',
+      order: 'bg-gradient-to-r from-[#FF8A2A] to-[#FE7200] text-white hover:brightness-105 btn-orange-shadow',
       orange: 'bg-gradient-to-r from-[#FF8A2A] to-[#FE7200] text-white hover:brightness-105 btn-orange-shadow',
       secondary: 'bg-[#DDE2E8] text-[#1F140A] hover:bg-[#D4DCE4]',
       outline: 'border border-[#D6DCE2] bg-[#E8ECEF] text-[#1F140A] hover:bg-[#DDE2E8]',

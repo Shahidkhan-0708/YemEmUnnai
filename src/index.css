@@ -114,7 +114,7 @@
 .btn-green-shadow {
   box-shadow:
     -3px -3px 7px rgba(255, 255, 255, 0.8),
-    4px 4px 10px rgba(254, 114, 0, 0.42),
+    4px 4px 10px rgba(5, 150, 105, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -123,14 +123,14 @@
   transform: translateY(-1px);
   box-shadow:
     -4px -4px 8px rgba(255, 255, 255, 0.85),
-    6px 6px 14px rgba(254, 114, 0, 0.5),
+    6px 6px 14px rgba(5, 150, 105, 0.52),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .btn-green-shadow:active {
   transform: translateY(1px) scale(0.98);
   box-shadow:
-    inset 2px 2px 5px rgba(217, 95, 0, 0.6),
+    inset 2px 2px 5px rgba(4, 120, 87, 0.6),
     0 1px 2px rgba(0, 0, 0, 0.2);
 }
 

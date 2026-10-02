@@ -106,8 +106,17 @@ export function MenuStockManagementScreen({ onBack, onAddNewItem, onToggleStock 
                   <img src={item.image} alt="" className="size-16 shrink-0 rounded-xl object-cover" />
                   <div className="min-w-0 flex-1">
                     <h2 className="break-words text-sm font-extrabold">{item.name}</h2>
-                    <p className="mt-1 font-bold">₹{item.price}</p>
-                    <p className="mt-1 text-xs text-[#7A6658]">{item.inStock ? 'In stock' : 'Sold out'}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="font-bold">₹{item.price}</p>
+                      <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${
+                        item.actionType === 'walkin'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          : 'bg-orange-100 text-[#FE7200] border border-orange-200'
+                      }`}>
+                        {item.actionType === 'walkin' ? '📍 Walk-In' : '🛒 Order In'}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-[#7A6658]">{item.inStock ? 'In stock' : 'Sold out'}</p>
                   </div>
                   <button
                     type="button"

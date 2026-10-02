@@ -141,7 +141,8 @@ export const WalkInMapModal: React.FC<WalkInMapModalProps> = ({ isOpen, item, on
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-black uppercase tracking-wider text-[#FE7200]">
+              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-700 flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                 Walk-In Map
               </span>
               <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${

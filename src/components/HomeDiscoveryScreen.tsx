@@ -170,6 +170,21 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
             <MapPin className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
             <span className="max-w-20 truncate">{item.locationLandmark || item.walkTime}</span>
           </div>
+
+          {/* Service Mode Badge: Walk-In (Emerald) vs Order In (Orange) */}
+          <div className="absolute bottom-1.5 left-1.5 z-10 flex items-center gap-1">
+            {item.actionType === 'walkin' ? (
+              <span className="bg-emerald-700/95 backdrop-blur-xs text-white text-[8px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-xs border border-emerald-400/40">
+                <MapPin className="w-2.5 h-2.5 text-emerald-200" />
+                <span>WALK-IN</span>
+              </span>
+            ) : (
+              <span className="bg-[#FE7200]/95 backdrop-blur-xs text-white text-[8px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-xs border border-orange-300/40">
+                <ShoppingCart className="w-2.5 h-2.5 text-white" />
+                <span>ORDER IN</span>
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Title & Info with Indian Veg/Non-veg indicator */}
@@ -200,7 +215,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
               {item.price > 0 ? (
                 <>
                   <span className={`text-[15px] font-black ${
-                    item.actionType === 'order' ? 'text-[#FE7200]' : 'text-[#FE7200]'
+                    item.actionType === 'walkin' ? 'text-emerald-700' : 'text-[#FE7200]'
                   }`}>
                     ₹{item.price}
                   </span>
@@ -249,7 +264,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
           </button>
         </div>
 
-        {/* Action Button: Unified 10px Rounded Rectangle with Consistent Intention */}
+        {/* Action Button: Unified 10px Rounded Rectangle with Distinct Color Intentions */}
         <div className="mt-2.5">
           {!item.inStock ? (
             <Button
@@ -272,7 +287,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
           ) : item.actionType === 'walkin' ? (
             <Button
               onClick={() => onWalkIn?.(item)}
-              variant="default"
+              variant="walkin"
               size="sm"
               className="w-full rounded-[10px] text-[11px] font-extrabold h-9 flex items-center justify-center gap-1.5 tracking-wide btn-green-shadow tactile-press cursor-pointer"
             >
@@ -282,7 +297,7 @@ export const HomeDiscoveryScreen: React.FC<HomeDiscoveryScreenProps> = ({
           ) : (
             <Button
               onClick={() => onOrderNow?.(item)}
-              variant="orange"
+              variant="order"
               size="sm"
               className="w-full rounded-[10px] text-[11px] font-black h-9 flex items-center justify-center gap-1.5 tracking-wide btn-orange-shadow tactile-press cursor-pointer"
             >

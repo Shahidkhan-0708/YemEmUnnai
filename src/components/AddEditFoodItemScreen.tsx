@@ -250,8 +250,8 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                   <span className="block text-[13px] font-bold leading-4.25 text-[#1F140A]">
                     Service Mode
                   </span>
-                  <span className="text-[10px] font-semibold text-[#7A6658]">
-                    {actionType === 'order' ? 'Students send an order to your cafe' : 'Students walk in with the live map'}
+                  <span className={`text-[10px] font-extrabold ${actionType === 'walkin' ? 'text-emerald-700' : 'text-[#FE7200]'}`}>
+                    {actionType === 'order' ? '🛒 Students send an order to your cafe' : '📍 Students walk in with the live map'}
                   </span>
                 </div>
                 <div
@@ -264,8 +264,8 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                     aria-pressed={actionType === 'walkin'}
                     className={`flex-1 h-full rounded-[18px] text-[12px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       actionType === 'walkin'
-                        ? 'bg-[#FE7200] text-white shadow-sm'
-                        : 'text-[#1F140A]/70 hover:text-[#1F140A]'
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md btn-green-shadow'
+                        : 'text-[#1F140A]/70 hover:text-emerald-800'
                     }`}
                   >
                     <MapPin className="w-3.5 h-3.5" />
@@ -278,12 +278,12 @@ export const AddEditFoodItemScreen: React.FC<AddEditFoodItemScreenProps> = ({
                     aria-pressed={actionType === 'order'}
                     className={`flex-1 h-full rounded-[18px] text-[12px] font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       actionType === 'order'
-                        ? 'bg-[#F26A00] text-white shadow-sm'
-                        : 'text-[#1F140A]/70 hover:text-[#1F140A]'
+                        ? 'bg-gradient-to-r from-[#FF8A2A] to-[#FE7200] text-white shadow-md btn-orange-shadow'
+                        : 'text-[#1F140A]/70 hover:text-[#FE7200]'
                     }`}
                   >
                     <ShoppingCart className="w-3.5 h-3.5" />
-                    <span>Order</span>
+                    <span>Order In</span>
                   </button>
                 </div>
               </div>
