@@ -104,15 +104,21 @@ export const Stepper: React.FC<StepperProps> = ({
   const progressPercent = Math.min(100, Math.max(0, ((currentValue - min) / (max - min || 1)) * 100));
 
   const sizeClasses = {
-    sm: 'h-8 px-1.5 text-xs',
-    md: 'h-10 px-2 text-sm',
-    lg: 'h-12 px-3 text-base',
+    sm: 'h-8 px-1.5 text-xs gap-1',
+    md: 'h-10 px-2 text-sm gap-1.5',
+    lg: 'h-12 px-3 text-base gap-2',
   };
 
   const buttonSizes = {
-    sm: 'w-6 h-6',
-    md: 'w-7.5 h-7.5',
-    lg: 'w-9 h-9',
+    sm: 'w-6 h-6 shrink-0',
+    md: 'w-7.5 h-7.5 shrink-0',
+    lg: 'w-9 h-9 shrink-0',
+  };
+
+  const centerSizes = {
+    sm: 'px-1 min-w-6',
+    md: 'px-2 min-w-10',
+    lg: 'px-3 min-w-14',
   };
 
   return (
@@ -150,7 +156,7 @@ export const Stepper: React.FC<StepperProps> = ({
       </button>
 
       {/* Center value display / inline edit */}
-      <div className="relative z-10 px-3 flex items-center justify-center min-w-16">
+      <div className={`relative z-10 flex items-center justify-center shrink-0 ${centerSizes[size]}`}>
         {isEditing ? (
           <input
             ref={inputRef}
@@ -161,7 +167,7 @@ export const Stepper: React.FC<StepperProps> = ({
             onChange={(e) => setInputValue(e.target.value)}
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
-            className="w-14 text-center font-black text-[#1F140A] bg-transparent outline-none border-b-2 border-[#F06A05]"
+            className="w-8 text-center font-black text-[#1F140A] bg-transparent outline-none border-b-2 border-[#F06A05]"
           />
         ) : (
           <div
@@ -184,7 +190,7 @@ export const Stepper: React.FC<StepperProps> = ({
         disabled={disabled || currentValue >= max}
         onClick={handleIncrement}
         aria-label="Increase value"
-        className={`relative z-10 rounded-xl bg-[#F06A05] text-white flex items-center justify-center hover:bg-[#E05D00] active:scale-90 transition-all shadow-xs cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+        className={`relative z-10 rounded-xl bg-[#F06A05] text-white flex items-center justify-center hover:bg-[#D85800] active:scale-90 transition-all shadow-xs cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
           buttonSizes[size]
         }`}
       >

@@ -130,22 +130,21 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
 
   return (
     <div
-      className="absolute inset-0 z-50 backdrop-blur-[1px] transition-opacity"
-      style={{ background: 'rgba(3, 42, 21, 0.43)' }}
+      className="absolute inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-xs select-none animate-in fade-in duration-200"
       onClick={() => {
         playTapSound();
         close();
       }}
     >
-      {/* Bottom sheet — x=13 y=272 w=349 h=414 rx=27 */}
+      {/* Bottom sheet container with smooth height and scrolling */}
       <div
         ref={sheetRef}
         role="dialog"
         aria-modal="true"
         aria-label={`Quick order — ${item.name}`}
-        className="absolute left-3.25 right-3.25 top-65 h-106.5 rounded-[27px] bg-[#E8ECEF] border border-white/60 overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
+        className="w-full max-h-[92%] flex flex-col rounded-t-[32px] bg-[#E8ECEF] border-t border-x border-white/70 shadow-2xl animate-in slide-in-from-bottom duration-200 overflow-hidden font-sans relative"
         style={{
-          boxShadow: '-6px -6px 12px rgba(255,255,255,0.85), 6px 6px 12px rgba(163,174,187,0.45)',
+          boxShadow: '0 -10px 30px rgba(0,0,0,0.3), -4px -4px 10px rgba(255,255,255,0.7)',
           transform: dragY > 0 ? `translateY(${dragY}px)` : undefined,
           transition: dragY === 0 ? 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)' : 'none'
         }}
@@ -153,166 +152,177 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
       >
         {submitted ? (
           /* Celebratory token confirmation */
-          <div className="h-full flex flex-col items-center justify-center text-center px-4.5 animate-in zoom-in-95 duration-200">
+          <div className="py-12 flex flex-col items-center justify-center text-center px-6 animate-in zoom-in-95 duration-200">
             <div className="relative">
               <CheckCircle className="w-16 h-16 text-[#F06A05] animate-bounce" />
               <Sparkles className="w-6 h-6 text-amber-500 absolute -top-1 -right-2 animate-spin" />
             </div>
-            <div className="mt-3 inline-block px-3 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-[11px] font-bold font-mono tracking-wider shadow-sm">
+            <div className="mt-4 inline-block px-4 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold font-mono tracking-wider shadow-xs">
               PICKUP TOKEN #{confirmedToken}
             </div>
-            <h3 className="text-[18px] font-extrabold text-[#1F140A] mt-2">Order Confirmed!</h3>
-            <p className="text-[11px] font-semibold text-[#7A6658] mt-1 max-w-60">
+            <h3 className="text-xl font-extrabold text-[#1F140A] mt-3">Order Confirmed!</h3>
+            <p className="text-xs font-semibold text-[#7A6658] mt-1.5 max-w-64 leading-relaxed">
               {item.vendor} received your order for {qty}× {item.name}{total > 0 ? ` · ₹${total}` : ''}
             </p>
-            <p className="text-[10px] font-medium text-emerald-700 mt-2 bg-white/70 px-3 py-0.5 rounded-full">
+            <p className="text-[11px] font-bold text-emerald-700 mt-3 bg-white/80 px-3.5 py-1 rounded-full shadow-xs">
               Live status pinned to Dynamic Island ⬆
             </p>
           </div>
         ) : (
-          <form onSubmit={handleConfirm} className="h-full">
-            {/* Grab handle with touch-drag dismiss */}
-            <div
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              className="pt-2.25 pb-1 cursor-grab active:cursor-grabbing"
-              title="Swipe down to dismiss"
-            >
-              <div className="mx-auto w-11.25 h-1 rounded-xs bg-[#D6DCE2] hover:bg-[#8EA699] transition-colors" />
-            </div>
+          <form onSubmit={handleConfirm} className="flex flex-col max-h-full min-h-0">
+            {/* Header: drag bar + close button + titles */}
+            <div className="px-5 pt-3 pb-2 border-b border-[#D6DCE2]/60 shrink-0 relative">
+              {/* Grab handle with touch-drag dismiss */}
+              <div
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                className="py-1 cursor-grab active:cursor-grabbing flex justify-center"
+                title="Swipe down to dismiss"
+              >
+                <div className="w-12 h-1.5 rounded-full bg-[#CBD5E1] hover:bg-[#94A3B8] transition-colors" />
+              </div>
 
-            {/* Close X — 18px icon, center 24.5px from right edge, 34px from sheet top */}
-            <button
-              type="button"
-              onClick={close}
-              aria-label="Close"
-              className="absolute top-4.75 right-2.5 w-6 h-6 flex items-center justify-center cursor-pointer"
-            >
-              <X className="w-4.75 h-4.75 text-[#6A8174]" strokeWidth={1.9} />
-            </button>
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={close}
+                aria-label="Close"
+                className="absolute top-3 right-4 w-8 h-8 rounded-full bg-white/80 hover:bg-white border border-[#D6DCE2] flex items-center justify-center text-[#7A6658] hover:text-[#1F140A] active:scale-90 transition-all cursor-pointer shadow-xs"
+              >
+                <X className="w-4 h-4 stroke-[2.2]" />
+              </button>
 
-            <div className="px-4.5">
-              {/* Title — 17px w800, baseline 38px from sheet top */}
-              <h2 className="mt-3 text-[17px] font-extrabold leading-5.5 text-[#1F140A]">
+              <h2 className="mt-2 text-lg font-extrabold text-[#1F140A] tracking-tight">
                 Delivery Details
               </h2>
-
-              {/* Subtitle — 11px w600, baseline 55px from sheet top */}
-              <p className="mt-px text-[11px] font-semibold leading-3.5 text-[#7A6658]">
+              <p className="text-xs font-semibold text-[#7A6658] mt-0.5">
                 Instant Campus Checkout • No Account Needed
               </p>
+            </div>
 
-              {/* Divider — y=336 (64px from sheet top), #D6DCE2, 18px insets */}
-              <div className="mt-1.75 h-px bg-[#D6DCE2]" />
-
-              {/* Order Details row — baselines y=352 / y=376 */}
-              <div className="mt-2 flex items-baseline justify-between">
-                <span className="text-[13px] font-extrabold text-[#1F140A]">Order Details</span>
-                <span className="text-[12px] font-bold text-[#1F140A]">Total</span>
-              </div>
-              <div className="mt-1.5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {/* Quantity Stepper */}
+            {/* Scrollable Body: Order details + Inputs */}
+            <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4 space-y-4 min-h-0">
+              {/* Order item & Stepper card */}
+              <div className="p-3.5 rounded-2xl bg-white/80 border border-[#D6DCE2] flex items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <Stepper
                     min={1}
                     max={20}
                     value={qty}
                     onChange={setQty}
                     size="sm"
-                    className="w-24"
+                    className="w-24 shrink-0"
                   />
-                  <span className="text-[11px] font-semibold text-[#7A6658] truncate max-w-42.5">
-                    {item.name} · {item.vendor}
+                  <div className="min-w-0">
+                    <p className="text-xs font-extrabold text-[#1F140A] truncate">
+                      {item.name}
+                    </p>
+                    <p className="text-[11px] font-semibold text-[#7A6658] truncate">
+                      {item.vendor}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-[#7A6658]">
+                    Total
+                  </span>
+                  <span className="text-base font-black text-[#F06A05] tabular-nums">
+                    {total > 0 ? `₹${total}` : 'Free'}
                   </span>
                 </div>
-                <span className="text-[15px] font-extrabold text-[#1F140A] tabular-nums">
-                  {total > 0 ? `₹${total}` : 'Coming Soon'}
-                </span>
               </div>
 
-              {/* Divider — y=392 (120px from sheet top), #C4D2CB */}
-              <div className="mt-2.25 h-px bg-[#C4D2CB]" />
-
-              {/* Mobile Number — label baseline y=420, input y=431 h=43 rx=21 */}
-              <label
-                htmlFor="quick-order-mobile"
-                className="block mt-4.75 text-[13px] font-bold leading-4.25 text-[#1F140A]"
-              >
-                Mobile Number
-              </label>
-              <div
-                className="relative mt-1.25 h-10.75 rounded-[21px] bg-[#E8ECEF] border border-[#D6DCE2]"
-                style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
-              >
-                <Phone
-                  className="absolute left-3.25 top-1/2 -translate-y-1/2 w-4.75 h-4.75 text-[#466957]"
-                  strokeWidth={1.9}
-                />
-                <input
-                  id="quick-order-mobile"
-                  type="tel"
-                  required
-                  value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                  placeholder="Mobile number"
-                  aria-describedby="quick-order-error"
-                  className="w-full h-full bg-transparent rounded-[21px] pl-10 pr-3.5 text-[12px] font-medium text-[#1F140A] placeholder:text-[#6B8075] focus:outline-none"
-                />
+              {/* Mobile Number Field */}
+              <div>
+                <label
+                  htmlFor="quick-order-mobile"
+                  className="block text-xs font-bold text-[#1F140A] mb-1.5"
+                >
+                  Mobile Number
+                </label>
+                <div
+                  className="relative h-11 rounded-2xl bg-[#E8ECEF] border border-[#D6DCE2] flex items-center shadow-inner"
+                  style={{ boxShadow: 'inset 2px 2px 5px rgba(154,166,179,0.45), inset -2px -2px 5px rgba(255,255,255,0.85)' }}
+                >
+                  <Phone
+                    className="absolute left-3.5 w-4 h-4 text-[#7A6658]"
+                    strokeWidth={2}
+                  />
+                  <input
+                    id="quick-order-mobile"
+                    type="tel"
+                    required
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    placeholder="Enter your mobile number"
+                    aria-describedby="quick-order-error"
+                    className="w-full h-full bg-transparent pl-10 pr-3.5 text-xs font-semibold text-[#1F140A] placeholder:text-[#94A3B8] focus:outline-none"
+                  />
+                </div>
               </div>
 
-              {/* Delivery Address — label baseline y=502, input y=513 h=43 rx=21 */}
-              <label
-                htmlFor="quick-order-address"
-                className="block mt-4.75 text-[13px] font-bold leading-4.25 text-[#1F140A]"
-              >
-                Delivery Address
-              </label>
-              <div
-                className="relative mt-1.25 h-10.75 rounded-[21px] bg-[#E8ECEF] border border-[#D6DCE2]"
-                style={{ boxShadow: 'inset 3px 3px 6px rgba(154,166,179,0.5), inset -3px -3px 6px rgba(255,255,255,0.85)' }}
-              >
-                <MapPin
-                  className="absolute left-3.25 top-1/2 -translate-y-1/2 w-4.75 h-4.75 text-[#466957]"
-                  strokeWidth={1.9}
-                />
-                <input
-                  id="quick-order-address"
-                  type="text"
-                  required
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  placeholder="Block, room or campus landmark"
-                  className="w-full h-full bg-transparent rounded-[21px] pl-10 pr-3.5 text-[12px] font-medium text-[#1F140A] placeholder:text-[#6B8075] focus:outline-none"
-                />
+              {/* Delivery Address Field */}
+              <div>
+                <label
+                  htmlFor="quick-order-address"
+                  className="block text-xs font-bold text-[#1F140A] mb-1.5"
+                >
+                  Delivery Address / Landmark
+                </label>
+                <div
+                  className="relative h-11 rounded-2xl bg-[#E8ECEF] border border-[#D6DCE2] flex items-center shadow-inner"
+                  style={{ boxShadow: 'inset 2px 2px 5px rgba(154,166,179,0.45), inset -2px -2px 5px rgba(255,255,255,0.85)' }}
+                >
+                  <MapPin
+                    className="absolute left-3.5 w-4 h-4 text-[#7A6658]"
+                    strokeWidth={2}
+                  />
+                  <input
+                    id="quick-order-address"
+                    type="text"
+                    required
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    placeholder="Block, room or campus landmark"
+                    className="w-full h-full bg-transparent pl-10 pr-3.5 text-xs font-semibold text-[#1F140A] placeholder:text-[#94A3B8] focus:outline-none"
+                  />
+                </div>
               </div>
 
-              {/* Error line (only on failure — sits in the 49px gap above the CTA) */}
+              {/* Error line */}
               {submitError && (
                 <div
                   id="quick-order-error"
                   role="alert"
-                  className="mt-2.5 flex items-center gap-1.5 text-[10px] font-bold text-red-600"
+                  className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-2"
                 >
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{submitError}</span>
                 </div>
               )}
+            </div>
 
-              {/* Confirm Order Button */}
+            {/* Sticky Footer: Confirm Order Button (Never cut off) */}
+            <div className="p-4 pt-3 pb-5 bg-[#E8ECEF] border-t border-[#D6DCE2]/60 shrink-0">
               <button
                 type="submit"
                 disabled={submitting || !item.inStock || item.isShopOnline === false}
-                className="absolute left-4 right-4 bottom-8.5 h-11.75 rounded-xl bg-[#F06A05] text-white text-[14px] font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#E05D00] active:scale-[0.98] transition-all"
-                style={{ boxShadow: '-3px -3px 7px rgba(255,255,255,0.8), 4px 4px 8px rgba(163,174,187,0.4)' }}
+                className="w-full h-12 rounded-xl bg-[#F06A05] hover:bg-[#D85800] text-white text-sm font-extrabold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed btn-orange-shadow active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                {submitting
-                  ? 'Sending to vendor…'
-                  : !item.inStock
-                  ? 'Item Sold Out'
-                  : item.isShopOnline === false
-                  ? 'Canteen Offline'
-                  : 'Confirm Order'}
+                {submitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Sending to kitchen…</span>
+                  </>
+                ) : !item.inStock ? (
+                  'Item Sold Out'
+                ) : item.isShopOnline === false ? (
+                  'Canteen Offline'
+                ) : (
+                  `Confirm Order • ₹${total}`
+                )}
               </button>
             </div>
           </form>
@@ -321,3 +331,5 @@ export const QuickOrderModal: React.FC<QuickOrderModalProps> = ({
     </div>
   );
 };
+
+export default QuickOrderModal;
